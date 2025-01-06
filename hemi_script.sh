@@ -1,288 +1,132 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Цвета текста
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-CYAN='\033[0;36m'
-NC='\033[0m' # Нет цвета (сброс цвета)
+# Цветовые настройки
+COLORS=(
+    '\033[1;31m'  # RED
+    '\033[1;32m'  # GREEN
+    '\033[1;33m'  # YELLOW
+    '\033[1;34m'  # BLUE
+    '\033[1;35m'  # PURPLE
+    '\033[1;36m'  # CYAN
+    '\033[0m'     # RESET
+)
+RED="${COLORS[0]}"
+GREEN="${COLORS[1]}"
+YELLOW="${COLORS[2]}"
+BLUE="${COLORS[3]}"
+PURPLE="${COLORS[4]}"
+CYAN="${COLORS[5]}"
+NC="${COLORS[6]}"
 
-# Проверка наличия curl и установка, если не установлен
-if ! command -v curl &> /dev/null; then
-    sudo apt update
-    sudo apt install curl -y
-fi
-sleep 1
+# Проверка необходимых утилит
+function check_dependencies() {
+    echo -e "${YELLOW}Проверка необходимых утилит...${NC}"
+    for tool in curl tar systemctl; do
+        if ! command -v "$tool" &> /dev/null; then
+            echo -e "${RED}Утилита ${tool} не найдена. Устанавливаем...${NC}"
+            sudo apt-get update
+            sudo apt-get install -y "$tool"
+        fi
+    done
+}
 
-# Отображаем логотип
-curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
+# Логотип
+function display_logo() {
+    echo -e "${GREEN}===============================${NC}"
+    echo -e "${CYAN}  Добро пожаловать в скрипт установки Hemi  ${NC}"
+    echo -e "${GREEN}===============================${NC}"
+    curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
+}
 
-# Меню
-echo -e "${YELLOW}Выберите действие:${NC}"
-echo -e "${CYAN}1) Установка ноды${NC}"
-echo -e "${CYAN}2) Обновление ноды${NC}"
-echo -e "${CYAN}3) Изменение комиссии${NC}"
-echo -e "${CYAN}4) Удаление ноды${NC}"
-echo -e "${CYAN}5) Проверка логов (выход из логов CTRL+C)${NC}"
+# Основное меню
+function display_menu() {
+    echo -e "${YELLOW}Выберите действие:${NC}"
+    echo -e "${CYAN}1) Установить ноду${NC}"
+    echo -e "${CYAN}2) Обновить ноду${NC}"
+    echo -e "${CYAN}3) Изменить комиссию${NC}"
+    echo -e "${CYAN}4) Удалить ноду${NC}"
+    echo -e "${CYAN}5) Проверить логи ноды${NC}"
+    echo -e "${YELLOW}Ваш выбор:${NC}"
+}
 
-echo -e "${YELLOW}Введите номер:${NC} "
-read choice
+function install_node() {
+    echo -e "${BLUE}Начинаем установку Hemi...${NC}"
+    sudo apt update && sudo apt upgrade -y
+    curl -L -O https://github.com/hemilabs/heminetwork/releases/download/v0.8.0/heminetwork_v0.8.0_linux_amd64.tar.gz
+    mkdir -p hemi
+    tar --strip-components=1 -xzvf heminetwork_v0.8.0_linux_amd64.tar.gz -C hemi
+    cd hemi || exit
+    echo -e "${GREEN}Hemi установлена!${NC}"
+    echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
+    echo -e "${GREEN}PROFIT NODES — лови иксы на нодах${NC}"
+    echo -e "${CYAN}Основной канал: https://t.me/ProfiT_Mafia${NC}"
+    sleep 1
+}
+
+# Обновление ноды
+function update_node() {
+    echo -e "${BLUE}Обновление Hemi...${NC}"
+    rm -rf *hemi*
+    install_node
+    echo -e "${GREEN}Hemi обновлена!${NC}"
+    echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
+    echo -e "${GREEN}PROFIT NODES — лови иксы на нодах${NC}"
+    echo -e "${CYAN}Основной канал: https://t.me/ProfiT_Mafia${NC}"
+    sleep 1
+}
+
+# Изменение комиссии
+function change_fee() {
+    echo -e "${YELLOW}Введите новый размер комиссии (не меньше 50):${NC}"
+    read -r new_fee
+    if [[ $new_fee -ge 50 ]]; then
+        echo "POPM_STATIC_FEE=$new_fee" > "$HOME/hemi/popmd.env"
+        sudo systemctl restart hemi
+        echo -e "${GREEN}Комиссия обновлена!${NC}"
+    else
+        echo -e "${RED}Ошибка: Комиссия должна быть не менее 50!${NC}"
+    fi
+    # Завершающий вывод
+    echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
+    echo -e "${GREEN}PROFIT NODES — лови иксы на нодах${NC}"
+    echo -e "${CYAN}Основной канал: https://t.me/ProfiT_Mafia${NC}"
+    sleep 1 
+}
+
+# Удаление ноды
+function delete_node() {
+    echo -e "${RED}Удаляем Hemi...${NC}"
+    sudo systemctl stop hemi
+    sudo systemctl disable hemi
+    rm -rf /etc/systemd/system/hemi.service
+    rm -rf hemi*
+    sudo systemctl daemon-reload
+    echo -e "${GREEN}Hemi удалена!${NC}"
+    # Завершающий вывод
+    echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
+    echo -e "${GREEN}PROFIT NODES — лови иксы на нодах${NC}"
+    echo -e "${CYAN}Основной канал: https://t.me/ProfiT_Mafia${NC}"
+    sleep 1 
+}
+
+# Проверка логов
+function check_logs() {
+    echo -e "${CYAN}Проверяем логи Hemi...${NC}"
+    sudo journalctl -u hemi -f
+}
+
+# Основной блок
+check_dependencies
+display_logo
+display_menu
+
+read -r choice
 
 case $choice in
-    1)
-        echo -e "${BLUE}Устанавливаем ноду Hemi...${NC}"
-
-        # Обновляем и устанавливаем необходимые пакеты
-        sudo apt update && sudo apt upgrade -y
-        sleep 1
-
-        # Проверка и установка tar, если его нет
-        if ! command -v tar &> /dev/null; then
-            sudo apt install tar -y
-        fi
-
-        # Установка бинарника
-        echo -e "${BLUE}Загружаем бинарник Hemi...${NC}"
-        curl -L -O https://github.com/hemilabs/heminetwork/releases/download/v0.8.0/heminetwork_v0.8.0_linux_amd64.tar.gz
-
-        # Создание директории и извлечение бинарника
-        mkdir -p hemi
-        tar --strip-components=1 -xzvf heminetwork_v0.8.0_linux_amd64.tar.gz -C hemi
-        cd hemi
-
-        # Создание tBTC кошелька
-        ./keygen -secp256k1 -json -net="testnet" > ~/popm-address.json
-
-        # Вывод содержимого файла popm-address.json
-        echo -e "${RED}Сохраните эти данные в надежное место:${NC}"
-        cat ~/popm-address.json
-        echo -e "${PURPLE}Ваш pubkey_hash — это ваш tBTC адрес, на который нужно запросить тестовые токены в Discord проекта.${NC}"
-
-        echo -e "${YELLOW}Введите ваш приватный ключ от кошелька:${NC} "
-        read PRIV_KEY
-        echo -e "${YELLOW}Укажите желаемый размер комиссии (минимум 50):${NC} "
-        read FEE
-
-        echo "POPM_BTC_PRIVKEY=$PRIV_KEY" > popmd.env
-        echo "POPM_STATIC_FEE=$FEE" >> popmd.env
-        echo "POPM_BFG_URL=wss://testnet.rpc.hemi.network/v1/ws/public" >> popmd.env
-        sleep 1
-
-        # Определяем имя текущего пользователя и его домашнюю директорию
-USERNAME=$(whoami)
-
-if [ "$USERNAME" == "root" ]; then
-    HOME_DIR="/root"
-else
-    HOME_DIR="/home/$USERNAME"
-fi
-
-# Создаем или обновляем файл сервиса с использованием определенного имени пользователя и домашней директории
-cat <<EOT | sudo tee /etc/systemd/system/hemi.service > /dev/null
-[Unit]
-Description=PopMD Service
-After=network.target
-
-[Service]
-User=$USERNAME
-EnvironmentFile=$HOME_DIR/hemi/popmd.env
-ExecStart=$HOME_DIR/hemi/popmd
-WorkingDirectory=$HOME_DIR/hemi/
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target
-EOT
-
-        # Обновление сервисов и включение hemi
-        sudo systemctl daemon-reload
-        sudo systemctl restart systemd-journald
-        sudo systemctl enable hemi
-        sleep 1
-
-        # Запуск ноды
-        sudo systemctl start hemi
-
-        # Заключительный вывод
-        echo -e "${GREEN}Установка завершена и нода запущена!${NC}"
-
-        # Завершающий вывод
-        echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
-        echo -e "${YELLOW}Команда для проверки логов:${NC}" 
-        echo "sudo journalctl -u hemi -f"
-        echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
-        echo -e "${GREEN}PROFIT NODES — лови иксы на нодах${NC}"
-        echo -e "${CYAN}Основной канал: https://t.me/ProfiT_Mafia ${NC}"
-        ;;
-    2)
-        echo -e "${BLUE}Обновляем ноду Hemi...${NC}"
-
-        # Находим все сессии screen, содержащие "hemi"
-        SESSION_IDS=$(screen -ls | grep "hemi" | awk '{print $1}' | cut -d '.' -f 1)
-
-        # Если сессии найдены, удаляем их
-        if [ -n "$SESSION_IDS" ]; then
-            echo -e "${BLUE}Завершение сессий screen с идентификаторами: $SESSION_IDS${NC}"
-            for SESSION_ID in $SESSION_IDS; do
-                screen -S "$SESSION_ID" -X quit
-            done
-        else
-            echo -e "${BLUE}Сессии screen для ноды Hemi не найдены, начинаем обновление${NC}"
-        fi
-
-        # Проверка существования сервиса
-        if systemctl list-units --type=service | grep -q "hemi.service"; then
-            sudo systemctl stop hemi.service
-            sudo systemctl disable hemi.service
-            sudo rm /etc/systemd/system/hemi.service
-            sudo systemctl daemon-reload
-        else
-            echo -e "${BLUE}Сервис hemi.service не найден, продолжаем обновление.${NC}"
-        fi
-        sleep 1
-
-        # Удаление папки с бинарниками, содержащими "hemi" в названии
-        echo -e "${BLUE}Удаляем старые файлы ноды...${NC}"
-        rm -rf *hemi*
-        
-        # Обновляем и устанавливаем необходимые пакеты
-        sudo apt update && sudo apt upgrade -y
-
-        # Установка бинарника
-        echo -e "${BLUE}Загружаем бинарник Hemi...${NC}"
-        curl -L -O https://github.com/hemilabs/heminetwork/releases/download/v0.8.0/heminetwork_v0.8.0_linux_amd64.tar.gz
-
-        # Создание директории и извлечение бинарника
-        mkdir -p hemi
-        tar --strip-components=1 -xzvf heminetwork_v0.8.0_linux_amd64.tar.gz -C hemi
-        cd hemi
-
-        # Запрос приватного ключа и комиссии
-        echo -e "${YELLOW}Введите ваш приватный ключ от кошелька:${NC} "
-        read PRIV_KEY
-        echo -e "${YELLOW}Укажите желаемый размер комиссии (минимум 50):${NC} "
-        read FEE
-
-        # Создание файла popmd.env
-        echo "POPM_BTC_PRIVKEY=$PRIV_KEY" > popmd.env
-        echo "POPM_STATIC_FEE=$FEE" >> popmd.env
-        echo "POPM_BFG_URL=wss://testnet.rpc.hemi.network/v1/ws/public" >> popmd.env
-        sleep 1
-
-        # Определяем имя текущего пользователя и его домашнюю директорию
-USERNAME=$(whoami)
-
-if [ "$USERNAME" == "root" ]; then
-    HOME_DIR="/root"
-else
-    HOME_DIR="/home/$USERNAME"
-fi
-
-# Создаем или обновляем файл сервиса с использованием определенного имени пользователя и домашней директории
-cat <<EOT | sudo tee /etc/systemd/system/hemi.service > /dev/null
-[Unit]
-Description=PopMD Service
-After=network.target
-
-[Service]
-User=$USERNAME
-EnvironmentFile=$HOME_DIR/hemi/popmd.env
-ExecStart=$HOME_DIR/hemi/popmd
-WorkingDirectory=$HOME_DIR/hemi/
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target
-EOT
-
-        # Обновление сервисов и включение hemi
-        sudo systemctl daemon-reload
-        sudo systemctl restart systemd-journald
-        sudo systemctl enable hemi
-        sleep 1
-
-        # Запуск ноды
-        sudo systemctl start hemi
-
-        # Заключительный вывод
-        echo -e "${GREEN}Нода обновлена и запущена!${NC}"
-
-        # Завершающий вывод
-        echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
-        echo -e "${YELLOW}Команда для проверки логов:${NC}" 
-        echo "sudo journalctl -u hemi -f"
-        echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
-        echo -e "${GREEN}PROFIT NODES — лови иксы на нодах${NC}"
-        echo -e "${CYAN}Основной канал: https://t.me/ProfiT_Mafia ${NC}"
-        ;;
-    3)
-        echo -e "${YELLOW}Укажите новое значение комиссии (минимум 50):${NC}"
-        read NEW_FEE
-
-        # Проверка, что введенное значение не меньше 50
-        if [ "$NEW_FEE" -ge 50 ]; then
-            # Обновляем значение комиссии в файле popmd.env
-            sed -i "s/^POPM_STATIC_FEE=.*/POPM_STATIC_FEE=$NEW_FEE/" $HOME/hemi/popmd.env
-            sleep 1
-
-            # Перезапуск сервиса Hemi
-            sudo systemctl restart hemi
-
-            echo -e "${GREEN}Значение комиссии успешно изменено!${NC}"
-
-            # Завершающий вывод
-            echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
-            echo -e "${YELLOW}Команда для проверки логов:${NC}" 
-            echo "sudo journalctl -u hemi -f"
-            echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
-            echo -e "${GREEN}PROFIT NODES — лови иксы на нодах${NC}"
-        echo -e "${CYAN}Основной канал: https://t.me/ProfiT_Mafia ${NC}"
-        else
-            echo -e "${RED}Ошибка: комиссия должна быть не меньше 50!${NC}"
-        fi
-        ;;
-
-    4)
-        echo -e "${BLUE}Удаление ноды Hemi...${NC}"
-
-        # Находим все сессии screen, содержащие "hemi"
-        SESSION_IDS=$(screen -ls | grep "hemi" | awk '{print $1}' | cut -d '.' -f 1)
-
-        # Если сессии найдены, удаляем их
-        if [ -n "$SESSION_IDS" ]; then
-            echo -e "${BLUE}Завершение сессий screen с идентификаторами: $SESSION_IDS${NC}"
-            for SESSION_ID in $SESSION_IDS; do
-                screen -S "$SESSION_ID" -X quit
-            done
-        else
-            echo -e "${BLUE}Сессии screen для ноды Hemi не найдены, продолжаем удаление${NC}"
-        fi
-
-        # Остановка и удаление сервиса Hemi
-        sudo systemctl stop hemi.service
-        sudo systemctl disable hemi.service
-        sudo rm /etc/systemd/system/hemi.service
-        sudo systemctl daemon-reload
-        sleep 1
-
-        # Удаление папки с названием, содержащим "hemi"
-        echo -e "${BLUE}Удаляем файлы ноды Hemi...${NC}"
-        rm -rf *hemi*
-        
-        echo -e "${GREEN}Нода Hemi успешно удалена!${NC}"
-
-        # Завершающий вывод
-        echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
-        echo -e "${YELLOW}Команда для проверки логов:${NC}" 
-        echo "sudo journalctl -u hemi -f"
-        echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
-        echo -e "${GREEN}PROFIT NODES — лови иксы на нодах${NC}"
-        echo -e "${CYAN}Основной канал: https://t.me/ProfiT_Mafia ${NC}"
-        ;;
-    5)
-        sudo journalctl -u hemi -f
-        ;;
-        
+    1) install_node ;;
+    2) update_node ;;
+    3) change_fee ;;
+    4) delete_node ;;
+    5) check_logs ;;
+    *) echo -e "${RED}Неверный выбор!${NC}" ;;
 esac
