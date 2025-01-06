@@ -93,13 +93,14 @@ function change_fee() {
     echo -e "${YELLOW}Укажите новое значение комиссии (минимум 50):${NC}"
     read -r NEW_FEE
     if [ "$NEW_FEE" -ge 50 ]; then
-        sed -i "s/^POPM_STATIC_FEE=.*/POPM_STATIC_FEE=$NEW_FEE/" "$HOME_DIR/hemi/popmd.env"
+        sed -i "s/^POPM_STATIC_FEE=.*/POPM_STATIC_FEE=$NEW_FEE/" "$HOME/hemi/popmd.env"
         sudo systemctl restart hemi
         echo -e "${GREEN}Комиссия успешно изменена!${NC}"
     else
         echo -e "${RED}Ошибка: комиссия должна быть не меньше 50!${NC}"
     fi
 }
+
 
 # Удаление ноды
 function remove_node() {
@@ -111,6 +112,12 @@ function remove_node() {
     echo -e "${GREEN}Нода успешно удалена!${NC}"
 }
 
+# Просмотр логов
+function check_logs() {
+    echo -e "${BLUE}Логи ноды Hemi...${NC}"
+    sudo journalctl -u hemi -f
+}
+
 # Меню
 function show_menu() {
     show_logo
@@ -118,7 +125,8 @@ function show_menu() {
     echo -e "${CYAN}2) Обновить ноду${NC}"
     echo -e "${CYAN}3) Изменить комиссию${NC}"
     echo -e "${CYAN}4) Удалить ноду${NC}"
-    echo -e "${CYAN}5) Выйти${NC}"
+    echo -e "${CYAN}5) Проверка логов${NC}"
+    echo -e "${CYAN}6) Выйти${NC}"
 
     echo -e "${YELLOW}Выберите действие:${NC}"
     read -r choice
@@ -127,7 +135,8 @@ function show_menu() {
         2) update_node ;;
         3) change_fee ;;
         4) remove_node ;;
-        5) echo -e "${GREEN}Выход...${NC}" ;;
+        5) check_logs ;;
+        6) echo -e "${GREEN}Выход...${NC}" ;;
         *) echo -e "${RED}Неверный выбор!${NC}" ;;
     esac
 }
