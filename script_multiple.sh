@@ -86,8 +86,8 @@ case $choice in
         echo -e "${YELLOW}Команда для проверки статуса ноды:${NC}"
         echo "cd ~/multipleforlinux && ./multiple-cli status"
         echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
-        echo -e "${GREEN}CRYPTO FORTOCHKA — вся крипта в одном месте!${NC}"
-        echo -e "${CYAN}Наш Telegram https://t.me/cryptoforto${NC}"
+        echo -e "${GREEN}PROFIT NODES — лови иксы на нодах${NC}"
+        echo -e "${CYAN}Основной канал: https://t.me/ProfiT_Mafia ${NC}"
         sleep 2
         cd ~/multipleforlinux && ./multiple-cli status
         ;;
@@ -112,8 +112,8 @@ case $choice in
 
         # Завершающий вывод
         echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
-        echo -e "${GREEN}CRYPTO FORTOCHKA — вся крипта в одном месте!${NC}"
-        echo -e "${CYAN}Наш Telegram https://t.me/cryptoforto${NC}"
+        echo -e "${GREEN}PROFIT NODES — лови иксы на нодах${NC}"
+        echo -e "${CYAN}Основной канал: https://t.me/ProfiT_Mafia${NC}"
         sleep 1
         ;;
         
