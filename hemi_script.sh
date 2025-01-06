@@ -121,12 +121,13 @@ function check_logs() {
 # Меню
 function show_menu() {
     show_logo
-    echo -e "${CYAN}1) 🚀 Установить ноду${NC}"
-    echo -e "${CYAN}2) 🔄 Обновить ноду${NC}"
-    echo -e "${CYAN}3) ⚙️ Изменить комиссию${NC}"
-    echo -e "${CYAN}4) 🗑️ Удалить ноду${NC}"
-    echo -e "${CYAN}5) 💻 Проверка логов${NC}"
-    echo -e "${CYAN}6) ❌ Выйти${NC}"
+    echo -e "${CYAN}1)${NC} 🚀${CYAN} Установить ноду${NC}"
+    echo -e "${CYAN}2)${NC} 🔄${CYAN} Обновить ноду${NC}"
+    echo -e "${CYAN}3)${NC} ⚙️ ${CYAN} Изменить комиссию${NC}"
+    echo -e "${CYAN}4)${NC} 🗑️ ${CYAN} Удалить ноду${NC}"
+    echo -e "${CYAN}5)${NC} 💻${CYAN} Проверка логов${NC}"
+    echo -e "${CYAN}6)${NC} ❌${CYAN} Выйти${NC}"
+
 
 
     echo -e "${YELLOW}Выберите действие:${NC}"
