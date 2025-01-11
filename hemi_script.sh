@@ -82,7 +82,7 @@ EOT
 function update_node() {
     echo -e "${BLUE}Обновляем ноду Hemi...${NC}"
     sudo systemctl stop hemi
-    sudo rm -rf hemi heminetwork_v0.8.0_linux_amd64.tar.gz /etc/systemd/system/hemi.service
+    sudo rm -rf hemi heminetwork_v0.10.0_linux_amd64.tar.gz /etc/systemd/system/hemi.service
 
     install_node
     echo -e "${GREEN}Нода успешно обновлена!${NC}"
@@ -107,7 +107,7 @@ function remove_node() {
     echo -e "${BLUE}Удаляем ноду Hemi...${NC}"
     sudo systemctl stop hemi
     sudo systemctl disable hemi
-    sudo rm -rf hemi heminetwork_v0.8.0_linux_amd64.tar.gz /etc/systemd/system/hemi.service
+    sudo rm -rf hemi heminetwork_v0.10.0_linux_amd64.tar.gz /etc/systemd/system/hemi.service
     sudo systemctl daemon-reload
     echo -e "${GREEN}Нода успешно удалена!${NC}"
 }
