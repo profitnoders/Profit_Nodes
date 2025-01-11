@@ -28,9 +28,9 @@ function install_dependencies() {
 function install_node() {
     echo -e "${BLUE}Начинаем установку Hemi...${NC}"
     install_dependencies
-    curl -L -O https://github.com/hemilabs/heminetwork/releases/download/v0.8.0/heminetwork_v0.8.0_linux_amd64.tar.gz
+    curl -L -O https://github.com/hemilabs/heminetwork/releases/download/v0.10.0/heminetwork_v0.10.0_linux_amd64.tar.gz
     mkdir -p hemi
-    tar --strip-components=1 -xzvf heminetwork_v0.8.0_linux_amd64.tar.gz -C hemi
+    tar --strip-components=1 -xzvf heminetwork_v0.10.0_linux_amd64.tar.gz -C hemi
     cd hemi || exit
 
     echo -e "${YELLOW}Создаем tBTC кошелек...${NC}"
