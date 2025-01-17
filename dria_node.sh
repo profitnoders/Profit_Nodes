@@ -1,32 +1,32 @@
 #!/bin/bash
 
-# Цветовые коды для отображения текста
+# Р¦РІРµС‚РѕРІС‹Рµ РєРѕРґС‹ РґР»СЏ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ С‚РµРєСЃС‚Р°
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
-NC='\033[0m' # Сброс цвета
+NC='\033[0m' # РЎР±СЂРѕСЃ С†РІРµС‚Р°
 
-# Функция для отображения логотипа
+# Р¤СѓРЅРєС†РёСЏ РґР»СЏ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ Р»РѕРіРѕС‚РёРїР°
 function show_logo() {
     echo -e "${GREEN}===============================${NC}"
-    echo -e "${CYAN} Добро пожаловать в скрипт установки ноды Dria ${NC}"
+    echo -e "${CYAN} Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ РІ СЃРєСЂРёРїС‚ СѓСЃС‚Р°РЅРѕРІРєРё РЅРѕРґС‹ Dria ${NC}"
     echo -e "${GREEN}===============================${NC}"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
-# Функция для установки зависимостей
+# Р¤СѓРЅРєС†РёСЏ РґР»СЏ СѓСЃС‚Р°РЅРѕРІРєРё Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№
 function install_dependencies() {
-    echo -e "${YELLOW}Обновляем систему и устанавливаем необходимые пакеты...${NC}"
+    echo -e "${YELLOW}РћР±РЅРѕРІР»СЏРµРј СЃРёСЃС‚РµРјСѓ Рё СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅРµРѕР±С…РѕРґРёРјС‹Рµ РїР°РєРµС‚С‹...${NC}"
     sudo apt update && sudo apt upgrade -y
     sudo apt install -y git make jq build-essential gcc unzip wget lz4 aria2 curl
 }
 
-# Установка ноды
+# РЈСЃС‚Р°РЅРѕРІРєР° РЅРѕРґС‹
 function install_node() {
-    echo -e "${BLUE}Начинаем установку ноды Dria...${NC}"
+    echo -e "${BLUE}РќР°С‡РёРЅР°РµРј СѓСЃС‚Р°РЅРѕРІРєСѓ РЅРѕРґС‹ Dria...${NC}"
     install_dependencies
 
     ARCH=$(uname -m)
@@ -35,19 +35,19 @@ function install_node() {
     elif [[ "$ARCH" == "x86_64" ]]; then
         DOWNLOAD_URL="https://github.com/firstbatchxyz/dkn-compute-launcher/releases/latest/download/dkn-compute-launcher-linux-amd64.zip"
     else
-        echo -e "${RED}Неизвестная архитектура системы: $ARCH. Установка невозможна.${NC}"
+        echo -e "${RED}РќРµРёР·РІРµСЃС‚РЅР°СЏ Р°СЂС…РёС‚РµРєС‚СѓСЂР° СЃРёСЃС‚РµРјС‹: $ARCH. РЈСЃС‚Р°РЅРѕРІРєР° РЅРµРІРѕР·РјРѕР¶РЅР°.${NC}"
         exit 1
     fi
 
     curl -L -o dkn-compute-node.zip $DOWNLOAD_URL
     unzip dkn-compute-node.zip -d dkn-compute-node
-    cd dkn-compute-node || { echo -e "${RED}Не удалось войти в директорию установки. Прерывание.${NC}"; exit 1; }
+    cd dkn-compute-node || { echo -e "${RED}РќРµ СѓРґР°Р»РѕСЃСЊ РІРѕР№С‚Рё РІ РґРёСЂРµРєС‚РѕСЂРёСЋ СѓСЃС‚Р°РЅРѕРІРєРё. РџСЂРµСЂС‹РІР°РЅРёРµ.${NC}"; exit 1; }
     ./dkn-compute-launcher
 }
 
-# Создание и запуск сервиса
+# РЎРѕР·РґР°РЅРёРµ Рё Р·Р°РїСѓСЃРє СЃРµСЂРІРёСЃР°
 function create_and_start_service() {
-    echo -e "${BLUE}Настраиваем системный сервис для ноды Dria...${NC}"
+    echo -e "${BLUE}РќР°СЃС‚СЂР°РёРІР°РµРј СЃРёСЃС‚РµРјРЅС‹Р№ СЃРµСЂРІРёСЃ РґР»СЏ РЅРѕРґС‹ Dria...${NC}"
     USERNAME=$(whoami)
     HOME_DIR=$(eval echo "~$USERNAME")
 
@@ -70,56 +70,56 @@ EOT"
     sudo systemctl daemon-reload
     sudo systemctl enable dria
     sudo systemctl start dria
-    echo -e "${GREEN}Сервис Dria запущен!${NC}"
+    echo -e "${GREEN}РЎРµСЂРІРёСЃ Dria Р·Р°РїСѓС‰РµРЅ!${NC}"
 }
 
-# Обновление ноды
+# РћР±РЅРѕРІР»РµРЅРёРµ РЅРѕРґС‹
 function update_node() {
-    echo -e "${BLUE}Обновление ноды до последней версии...${NC}"
+    echo -e "${BLUE}РћР±РЅРѕРІР»РµРЅРёРµ РЅРѕРґС‹ РґРѕ РїРѕСЃР»РµРґРЅРµР№ РІРµСЂСЃРёРё...${NC}"
     sudo systemctl stop dria
     rm -rf $HOME/dkn-compute-node
     install_node
     create_and_start_service
-    echo -e "${GREEN}Нода обновлена!${NC}"
+    echo -e "${GREEN}РќРѕРґР° РѕР±РЅРѕРІР»РµРЅР°!${NC}"
 }
 
-# Изменение порта
+# РР·РјРµРЅРµРЅРёРµ РїРѕСЂС‚Р°
 function change_port() {
-    echo -e "${YELLOW}Введите новый порт для ноды Dria:${NC}"
+    echo -e "${YELLOW}Р’РІРµРґРёС‚Рµ РЅРѕРІС‹Р№ РїРѕСЂС‚ РґР»СЏ РЅРѕРґС‹ Dria:${NC}"
     read -r NEW_PORT
     sed -i "s|DKN_P2P_LISTEN_ADDR=/ip4/0.0.0.0/tcp/[0-9]*|DKN_P2P_LISTEN_ADDR=/ip4/0.0.0.0/tcp/$NEW_PORT|" "$HOME/dkn-compute-node/.env"
     sudo systemctl restart dria
-    echo -e "${GREEN}Порт успешно изменен на $NEW_PORT.${NC}"
+    echo -e "${GREEN}РџРѕСЂС‚ СѓСЃРїРµС€РЅРѕ РёР·РјРµРЅРµРЅ РЅР° $NEW_PORT.${NC}"
 }
 
-# Проверка логов
+# РџСЂРѕРІРµСЂРєР° Р»РѕРіРѕРІ
 function check_logs() {
-    echo -e "${BLUE}Просмотр логов ноды Dria...${NC}"
+    echo -e "${BLUE}РџСЂРѕСЃРјРѕС‚СЂ Р»РѕРіРѕРІ РЅРѕРґС‹ Dria...${NC}"
     sudo journalctl -u dria -f --no-hostname -o cat
 }
 
-# Удаление ноды
+# РЈРґР°Р»РµРЅРёРµ РЅРѕРґС‹
 function remove_node() {
-    echo -e "${BLUE}Удаление ноды Dria...${NC}"
+    echo -e "${BLUE}РЈРґР°Р»РµРЅРёРµ РЅРѕРґС‹ Dria...${NC}"
     sudo systemctl stop dria
     sudo systemctl disable dria
     sudo rm /etc/systemd/system/dria.service
     rm -rf $HOME/dkn-compute-node
     sudo systemctl daemon-reload
-    echo -e "${GREEN}Нода успешно удалена.${NC}"
+    echo -e "${GREEN}РќРѕРґР° СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅР°.${NC}"
 }
 
-# Меню выбора действий
+# РњРµРЅСЋ РІС‹Р±РѕСЂР° РґРµР№СЃС‚РІРёР№
 function show_menu() {
     show_logo
-    echo -e "${CYAN}1) ?? Установить ноду${NC}"
-    echo -e "${CYAN}2) ?? Запустить ноду${NC}"
-    echo -e "${CYAN}3) ??  Обновить ноду${NC}"
-    echo -e "${CYAN}4) ??  Изменить порт${NC}"
-    echo -e "${CYAN}5) ?? Просмотр логов${NC}"
-    echo -e "${CYAN}6) ???  Удалить ноду${NC}"
-    echo -e "${CYAN}7) ? Выйти${NC}"
-    echo -e "${YELLOW}Введите номер:${NC}"
+    echo -e "${CYAN}1) рџљЂ РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РЅРѕРґСѓ${NC}"
+    echo -e "${CYAN}2) вњ… Р—Р°РїСѓСЃС‚РёС‚СЊ РЅРѕРґСѓ${NC}"
+    echo -e "${CYAN}3) рџ”„ РћР±РЅРѕРІРёС‚СЊ РЅРѕРґСѓ${NC}"
+    echo -e "${CYAN}4) рџ”§ РР·РјРµРЅРёС‚СЊ РїРѕСЂС‚${NC}"
+    echo -e "${CYAN}5) рџ“њ РџСЂРѕСЃРјРѕС‚СЂ Р»РѕРіРѕРІ${NC}"
+    echo -e "${CYAN}6) рџ—‘пёЏ РЈРґР°Р»РёС‚СЊ РЅРѕРґСѓ${NC}"
+    echo -e "${CYAN}7) вќЊ Р’С‹Р№С‚Рё${NC}"
+    echo -e "${YELLOW}Р’РІРµРґРёС‚Рµ РЅРѕРјРµСЂ:${NC}"
     read -r choice
 
     case $choice in
@@ -129,10 +129,10 @@ function show_menu() {
         4) change_port ;;
         5) check_logs ;;
         6) remove_node ;;
-        7) echo -e "${GREEN}Выход...${NC}" ;;
-        *) echo -e "${RED}Неверный выбор. Попробуйте снова.${NC}" ;;
+        7) echo -e "${GREEN}Р’С‹С…РѕРґ...${NC}" ;;
+        *) echo -e "${RED}РќРµРІРµСЂРЅС‹Р№ РІС‹Р±РѕСЂ. РџРѕРїСЂРѕР±СѓР№С‚Рµ СЃРЅРѕРІР°.${NC}" ;;
     esac
 }
 
-# Запуск меню
+# Р—Р°РїСѓСЃРє РјРµРЅСЋ
 show_menu
