@@ -112,13 +112,13 @@ function remove_node() {
 # Меню выбора действий
 function show_menu() {
     show_logo
-    echo -e "${CYAN}1) 🚀 Установить ноду${NC}"
-    echo -e "${CYAN}2) ✅ Запустить ноду${NC}"
-    echo -e "${CYAN}3) 🔄 Обновить ноду${NC}"
-    echo -e "${CYAN}4) 🔧 Изменить порт${NC}"
-    echo -e "${CYAN}5) 📜 Просмотр логов${NC}"
-    echo -e "${CYAN}6) 🗑️ Удалить ноду${NC}"
-    echo -e "${CYAN}7) ❌ Выйти${NC}"
+    echo -e "${CYAN}1) ${GREEN} 🚀 ${NC}${CYAN}Установить ноду${NC}"
+    echo -e "${CYAN}2) ${GREEN} ✅ ${NC}${CYAN}Запустить ноду${NC}"
+    echo -e "${CYAN}3) ${BLUE} 🔄 ${NC}${CYAN}Обновить ноду${NC}"
+    echo -e "${CYAN}4) ${BLUE} 🔧 ${NC}${CYAN}Изменить порт${NC}"
+    echo -e "${CYAN}5) ${BLUE} 📜${NC}${CYAN} Просмотр логов${NC}"
+    echo -e "${CYAN}6) ${RED} 🗑️ ${NC}${CYAN}Удалить ноду${NC}"
+    echo -e "${CYAN}7) ${RED} ❌ ${NC}${CYAN}Выйти${NC}"
     echo -e "${YELLOW}Введите номер:${NC}"
     read -r choice
 
