@@ -29,6 +29,13 @@ function install_node() {
     echo -e "${BLUE}Начинаем установку ноды Dria...${NC}"
     install_dependencies
 
+    echo -e "${BLUE}Устанавливаем ноду Dria...${NC}"
+
+    # Обновление и установка зависимостей
+    sudo apt update && sudo apt-get upgrade -y
+    sudo apt install git make jq build-essential gcc unzip wget lz4 aria2 -y
+
+    # Проверка архитектуры системы
     ARCH=$(uname -m)
     if [[ "$ARCH" == "aarch64" ]]; then
         curl -L -o dkn-compute-node.zip https://github.com/firstbatchxyz/dkn-compute-launcher/releases/latest/download/dkn-compute-launcher-linux-arm64.zip
@@ -39,21 +46,11 @@ function install_node() {
         exit 1
     fi
 
-   # Распаковываем ZIP-файл
-    unzip -o dkn-compute-node.zip -d dkn-compute-node
-    cd dkn-compute-node || { echo -e "${RED}Не удалось перейти в папку dkn-compute-node. Выход.${NC}"; exit 1; }
+    # Распаковываем ZIP-файл и переходим в папку
+    unzip dkn-compute-node.zip
+    cd dkn-compute-node
 
-    # Проверяем наличие запускаемого файла
-    if [[ ! -f "./dkn-compute-launcher" ]]; then
-        echo -e "${RED}Файл dkn-compute-launcher не найден после распаковки. Проверьте архив.${NC}"
-        exit 1
-    fi
-
-    # Делаем файл исполняемым
-    chmod +x ./dkn-compute-launcher
-
-    # Запуск приложения
-    echo -e "${BLUE}Запускаем приложение для настройки...${NC}"
+    # Запускаем приложение для ввода данных
     ./dkn-compute-launcher
 }
 
