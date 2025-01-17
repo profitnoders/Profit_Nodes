@@ -31,17 +31,29 @@ function install_node() {
 
     ARCH=$(uname -m)
     if [[ "$ARCH" == "aarch64" ]]; then
-        DOWNLOAD_URL="https://github.com/firstbatchxyz/dkn-compute-launcher/releases/latest/download/dkn-compute-launcher-linux-arm64.zip"
+        curl -L -o dkn-compute-node.zip https://github.com/firstbatchxyz/dkn-compute-launcher/releases/latest/download/dkn-compute-launcher-linux-arm64.zip
     elif [[ "$ARCH" == "x86_64" ]]; then
-        DOWNLOAD_URL="https://github.com/firstbatchxyz/dkn-compute-launcher/releases/latest/download/dkn-compute-launcher-linux-amd64.zip"
+        curl -L -o dkn-compute-node.zip https://github.com/firstbatchxyz/dkn-compute-launcher/releases/latest/download/dkn-compute-launcher-linux-amd64.zip
     else
-        echo -e "${RED}Неизвестная архитектура системы: $ARCH. Установка невозможна.${NC}"
+        echo -e "${RED}Не поддерживаемая архитектура системы: $ARCH${NC}"
         exit 1
     fi
 
-    curl -L -o dkn-compute-node.zip $DOWNLOAD_URL
-    unzip dkn-compute-node.zip -d dkn-compute-node
-    cd dkn-compute-node || { echo -e "${RED}Не удалось войти в директорию установки. Прерывание.${NC}"; exit 1; }
+   # Распаковываем ZIP-файл
+    unzip -o dkn-compute-node.zip -d dkn-compute-node
+    cd dkn-compute-node || { echo -e "${RED}Не удалось перейти в папку dkn-compute-node. Выход.${NC}"; exit 1; }
+
+    # Проверяем наличие запускаемого файла
+    if [[ ! -f "./dkn-compute-launcher" ]]; then
+        echo -e "${RED}Файл dkn-compute-launcher не найден после распаковки. Проверьте архив.${NC}"
+        exit 1
+    fi
+
+    # Делаем файл исполняемым
+    chmod +x ./dkn-compute-launcher
+
+    # Запуск приложения
+    echo -e "${BLUE}Запускаем приложение для настройки...${NC}"
     ./dkn-compute-launcher
 }
 
