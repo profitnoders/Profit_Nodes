@@ -29,8 +29,6 @@ function install_node() {
     echo -e "${BLUE}Начинаем установку ноды Dria...${NC}"
     install_dependencies
 
-    echo -e "${BLUE}Устанавливаем ноду Dria...${NC}"
-
     # Обновление и установка зависимостей
     sudo apt update && sudo apt-get upgrade -y
     sudo apt install git make jq build-essential gcc unzip wget lz4 aria2 -y
