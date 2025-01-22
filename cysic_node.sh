@@ -12,8 +12,8 @@ function show_logo() {
     echo -e "${GREEN}==========================================================${NC}"
     echo -e "${CYAN}     Добро пожаловать в скрипт установки ноды Cysic     ${NC}"
     echo -e "${GREEN}==========================================================${NC}"
-    curl -s https://raw.githubusercontent.com/AntonProfiT/profit_nodes/refs/heads/main/logo_new.sh?token=GHSAT0AAAAAAC5RIEEMAUZPTD6NN3IT55Y6Z4M3JGA | bash
-}
+    curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
+    }
 
 show_logo
 
