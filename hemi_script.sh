@@ -38,9 +38,9 @@ function install_node() {
     cat ~/popm-address.json
     echo -e "${RED}Сохраните данные в надёжное место!${NC}"
 
-    echo -e "${YELLOW}Введите приватный ключ от кошелька:${NC}"
+    echo -e "${YELLOW}Вставьте ваш приватный ключ от кошелька:${NC}"
     read -r PRIV_KEY
-    echo -e "${YELLOW}Укажите размер комиссии (минимум 50):${NC}"
+    echo -e "${YELLOW}Укажите размер комиссии (в среднем ≈ 3000):${NC}"
     read -r FEE
 
     echo "POPM_BTC_PRIVKEY=$PRIV_KEY" > popmd.env
