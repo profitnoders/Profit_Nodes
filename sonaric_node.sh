@@ -19,7 +19,6 @@ function show_logo() {
 
 # Функция проверки и установки зависимостей
 function install_dependencies() {
-    echo -e "${BLUE}Проверяем и устанавливаем необходимые зависимости...${NC}"
     sudo apt update -y
     sudo apt upgrade -y
     sudo apt install -y git jq build-essential gcc unzip wget lz4 bc
@@ -33,7 +32,7 @@ function check_ubuntu_version() {
     REQUIRED_VERSION=22.04
 
     if (( $(echo "$UBUNTU_VERSION < $REQUIRED_VERSION" | bc -l) )); then
-        echo -e "${RED}Переустановите Ubuntu на версию 22.04.${NC}"
+        echo -e "${RED}Версия Ubuntu должна быть 22.04 либо 24.04${NC}"
         exit 1
     fi
 }
@@ -56,13 +55,12 @@ function install_node() {
 # Обновление ноды
 function update_node() {
     sh -c "$(curl -fsSL http://get.sonaric.xyz/scripts/install.sh)"
-    echo -e "${GREEN}Обновление завершено!${NC}"
+    echo -e "${GREEN}Обновлено!${NC}"
     sonaric node-info
 }
 
 # Проверка работы ноды
 function check_node_status() {
-    echo -e "${BLUE}Логи ноды...${NC}"
     sonaric node-info
 }
 
