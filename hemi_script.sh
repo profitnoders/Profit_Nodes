@@ -90,7 +90,7 @@ function update_node() {
 
 # Изменение комиссии
 function change_fee() {
-    echo -e "${YELLOW}Укажите новое значение комиссии (минимум 50):${NC}"
+    echo -e "${YELLOW}Укажите желаемый размер комиссии:${NC}"
     read -r NEW_FEE
     if [ "$NEW_FEE" -ge 50 ]; then
         sed -i "s/^POPM_STATIC_FEE=.*/POPM_STATIC_FEE=$NEW_FEE/" "$HOME/hemi/popmd.env"
