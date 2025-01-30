@@ -92,7 +92,7 @@ function remove_node() {
 function show_menu() {
     show_logo
     echo -e "${CLR_CYN}1) 🚀 Установить ноду${CLR_RST}"
-    echo -e "${CLR_CYN}2) 🔄 Перезапустить ноду${CLR_RST}"
+    echo -e "${CLR_CYN}2) 🔄 запустить ноду${CLR_RST}"
     echo -e "${CLR_CYN}3) 📜 Просмотреть логи${CLR_RST}"
     echo -e "${CLR_CYN}4) 🗑️ Удалить ноду${CLR_RST}"
     echo -e "${CLR_CYN}5) ❌ Выйти${CLR_RST}"
