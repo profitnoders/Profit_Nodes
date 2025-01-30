@@ -69,7 +69,7 @@ function install_node() {
 
 #Функция перезапуска ноды и контейнера
 function restart_node() {
-    echo -e "${CLR_BLU} Перезапуск контейнера ноды ${CLR_BLUE}"
+    echo -e "${CLR_BLU} Перезапуск контейнера ноды ${CLR_RST}"
     docker restart /privanetix-node
 }
 
