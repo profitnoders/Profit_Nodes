@@ -48,7 +48,7 @@ function install_node() {
     tar -xzvf executor-linux-${LATEST_VERSION}.tar.gz
     rm -rf executor-linux-${LATEST_VERSION}.tar.gz
 
-    echo -e "${YELLOW}Введите ваш приватный ключ для ноды:${NC}"
+    echo -e "${YELLOW}Введите ваш приватный ключ от кошелька для ноды:${NC}"
     read -r PRIVATE_KEY
 
     CONFIG_FILE="$HOME/executor/executor/bin/.t3rn"
@@ -91,16 +91,38 @@ EOT"
 # Обновление ноды t3rn
 function update_node() {
     echo -e "${BLUE}Обновляем ноду t3rn до последней версии...${NC}"
+    
     sudo systemctl stop t3rn
-    rm -rf $HOME/executor/
-
+    cd
+    rm -rf executor/
+    # Скачиваем новый бинарник
     LATEST_VERSION=$(curl -s https://api.github.com/repos/t3rn/executor-release/releases/latest | grep 'tag_name' | cut -d\" -f4)
     EXECUTOR_URL="https://github.com/t3rn/executor-release/releases/download/${LATEST_VERSION}/executor-linux-${LATEST_VERSION}.tar.gz"
     curl -L -o executor-linux-${LATEST_VERSION}.tar.gz $EXECUTOR_URL
     tar -xzvf executor-linux-${LATEST_VERSION}.tar.gz
     rm -rf executor-linux-${LATEST_VERSION}.tar.gz
 
+    USERNAME=$(whoami)
+    HOME_DIR=$(eval echo ~$USERNAME)
+        
+    CONFIG_FILE="$HOME_DIR/executor/executor/bin/.t3rn"
+    echo "NODE_ENV=testnet" > $CONFIG_FILE
+    echo "LOG_LEVEL=debug" >> $CONFIG_FILE
+    echo "LOG_PRETTY=false" >> $CONFIG_FILE
+    echo "EXECUTOR_PROCESS_ORDERS=true" >> $CONFIG_FILE
+    echo "EXECUTOR_PROCESS_CLAIMS=true" >> $CONFIG_FILE
+    echo "PRIVATE_KEY_LOCAL=" >> $CONFIG_FILE
+    echo "ENABLED_NETWORKS='arbitrum-sepolia,base-sepolia,optimism-sepolia,l1rn'" >> $CONFIG_FILE
+    echo "RPC_ENDPOINTS_BSSP='https://base-sepolia-rpc.publicnode.com'" >> $CONFIG_FILE
+
+    echo -e "${YELLOW}Введите ваш приватный ключ от кошелька для ноды:${NC}"
+    read PRIVATE_KEY
+    sed -i "s|PRIVATE_KEY_LOCAL=|PRIVATE_KEY_LOCAL=$PRIVATE_KEY|" $CONFIG_FILE
+    sudo systemctl daemon-reload
+    sudo systemctl restart systemd-journald
     sudo systemctl start t3rn
+    sleep 1
+
     echo -e "${GREEN}Обновление завершено!${NC}"
 }
 
