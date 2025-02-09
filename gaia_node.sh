@@ -20,15 +20,23 @@ function install_node() {
     echo -e "${CLR_INFO}▶ Обновляем систему...${CLR_RESET}"
     sudo apt update -y
     sudo apt-get update -y
+    sleep 2
 
     echo -e "${CLR_INFO}▶ Устанавливаем ноду Gaianet...${CLR_RESET}"
     curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
+    sleep 3
 
     echo -e "${CLR_INFO}▶ Обновляем конфигурацию...${CLR_RESET}"
+    echo "export PATH=\$PATH:$HOME/gaianet/bin" >> $HOME/.bashrc
+    sleep 5
     source ~/.bashrc
+    sleep 9
 
     echo -e "${CLR_INFO}▶ Инициализируем узел с конфигурацией...${CLR_RESET}"
     gaianet init --config https://raw.githubusercontent.com/GaiaNet-AI/node-configs/main/qwen2-0.5b-instruct/config.json
+    sleep 3
+
+    #sed -i 's/"llamaedge_port": "8080"/"llamaedge_port": "8781"/g' ~/gaianet/config.json
 
     echo -e "${CLR_SUCCESS}✅ Установка ноды завершена!${CLR_RESET}"
 }
@@ -50,15 +58,16 @@ function get_node_info() {
 function setup_bot() {
     echo -e "${CLR_INFO}▶ Устанавливаем необходимые пакеты...${CLR_RESET}"
     sudo apt update -y
-    sudo apt install python3-pip -y
+    sudo apt install -y python3-pip python3-dev python3-venv curl git
     sudo apt install nano -y
     sudo apt install screen -y
+    pip3 install aiohttp
 
     echo -e "${CLR_INFO}▶ Устанавливаем библиотеки Python...${CLR_RESET}"
     pip install requests faker
 
     echo -e "${CLR_INFO}▶ Получаем Node ID для подстановки в бота...${CLR_RESET}"
-    NODE_ID=$(gaianet info | grep "Node ID" | awk '{print $NF}')
+    NODE_ID=$(gaianet info | awk -F': ' '/Node ID/{print $2}' | tr -d '[:space:]' | sed 's/\x1B\[[0-9;]*[mK]//g')
 
     if [[ -z "$NODE_ID" ]]; then
         echo -e "${CLR_ERROR}❌ Не удалось получить Node ID. Проверьте работу ноды!${CLR_RESET}"
