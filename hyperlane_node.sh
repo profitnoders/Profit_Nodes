@@ -42,6 +42,8 @@ function install_node() {
     read -r VALIDATOR_NAME
     echo -e "${YELLOW}Введите приватный ключ вашего EVM кошелька (начиная с 0x):${NC}"
     read -r PRIVATE_KEY
+    echo -e "${YELLOW}Введите вашу RPC для сети Base Sepolia:${NC}"
+    read -r SEPOLIA_RPC
 
     # Создание рабочей директории
     mkdir -p $HOME/hyperlane_db_base && chmod -R 777 $HOME/hyperlane_db_base
@@ -61,7 +63,7 @@ function install_node() {
         --checkpointSyncer.path /hyperlane_db_base/base_checkpoints \
         --validator.key "$PRIVATE_KEY" \
         --chains.base.signer.key "$PRIVATE_KEY" \
-        --chains.base.customRpcUrls https://base.llamarpc.com
+        --chains.base.customRpcUrls "$SEPOLIA_RPC,https://base-sepolia-rpc.publicnode.com,http://rpc-base-node-url.com"
 
     echo -e "${GREEN}Нода Hyperlane успешно установлена и запущена!${NC}"
 }
