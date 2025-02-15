@@ -190,6 +190,7 @@ function remove_node() {
     echo -e "${CLR_WARNING}⚠ Удаляем ноду Gaianet...${CLR_RESET}"
     gaianet stop
     rm -rf ~/.gaianet
+    rm -rf gaianet random_chat_with_faker.py gaia_node.sh
 
     echo -e "${CLR_SUCCESS}✅ Нода удалена!${CLR_RESET}"
 }
