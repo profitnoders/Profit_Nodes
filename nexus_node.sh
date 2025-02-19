@@ -41,10 +41,17 @@ function install_dependencies() {
 function install_node() {
     echo -e "${CLR_INFO}🚀 Запускаем процесс установки Nexus Node...${CLR_RESET}"
     
-    # Создание и запуск screen-сессии с выполнением команды установки
-    screen -dmS nexus bash -c 'curl https://cli.nexus.xyz/ | sh'
+    # Проверяем, существует ли уже screen-сессия
+    if screen -list | grep -q "nexus"; then
+        echo -e "${CLR_WARNING}⚠️  Screen-сессия 'nexus' уже существует. Удаляем перед повторной установкой...${CLR_RESET}"
+        screen -S nexus -X quit
+    fi
+
+    # Запуск screen-сессии с выполнением установки
+    screen -S nexus -dm bash -c 'bash -i -c "curl https://cli.nexus.xyz/ | sh"'
 
     echo -e "${CLR_SUCCESS}✅ Установка завершена! Узел запущен в screen-сессии 'nexus'.${CLR_RESET}"
+    echo -e "${CLR_INFO}ℹ️  Для входа в screen-сессию используйте команду: ${CLR_SUCCESS}screen -r nexus${CLR_RESET}"
 }
 
 # Функция просмотра логов ноды
