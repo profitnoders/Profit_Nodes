@@ -41,13 +41,10 @@ function install_dependencies() {
 function install_node() {
     echo -e "${CLR_INFO}🚀 Запускаем процесс установки Nexus Node...${CLR_RESET}"
     
-    # Создание и запуск screen-сессии
-    screen -dmS nexus
+    # Создание и запуск screen-сессии с выполнением команды установки
+    screen -dmS nexus bash -c 'curl https://cli.nexus.xyz/ | sh'
 
-    # Запуск официального скрипта установки Nexus
-    curl https://cli.nexus.xyz/ | sh
-
-    echo -e "${CLR_SUCCESS}✅ Установка завершена! Узел успешно запущен.${CLR_RESET}"
+    echo -e "${CLR_SUCCESS}✅ Установка завершена! Узел запущен в screen-сессии 'nexus'.${CLR_RESET}"
 }
 
 # Функция просмотра логов ноды
@@ -70,6 +67,7 @@ function remove_node() {
     echo -e "${CLR_ERROR}⚠️ ВНИМАНИЕ: Удаление ноды Nexus!${CLR_RESET}"
     screen -S nexus -X quit
     rm -rf $HOME/.nexus
+    rm -rf nexus_node.sh
     echo -e "${CLR_SUCCESS}✅ Нода успешно удалена!${CLR_RESET}"
 }
 
@@ -79,8 +77,8 @@ function show_menu() {
     echo -e "${CLR_WARNING}📌 Выберите нужное действие:${CLR_RESET}"
     echo -e "${CLR_INFO}1) 🚀 Установить ноду${CLR_RESET}"
     echo -e "${CLR_INFO}2) 🔄 Перезапустить ноду${CLR_RESET}"
-    echo -e "${CLR_INFO}3) 📜 Просмотреть логи${CLR_RESET}"
-    echo -e "${CLR_INFO}4) 🗑️  Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_INFO}3) 📜 Открыть Screen сессию Nexus${CLR_RESET}"
+    echo -e "${CLR_INFO}4) 🗑️ Удалить ноду${CLR_RESET}"
     echo -e "${CLR_INFO}5) ❌ Выйти${CLR_RESET}"
     read -p "Введите номер действия: " choice
 
