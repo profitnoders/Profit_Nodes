@@ -85,7 +85,7 @@ function show_menu() {
     echo -e "${CLR_INFO}1) 🚀 Установить ноду${CLR_RESET}"
     echo -e "${CLR_INFO}2) 🔄 Перезапустить ноду${CLR_RESET}"
     echo -e "${CLR_INFO}3) 📜 Открыть Screen сессию Nexus${CLR_RESET}"
-    echo -e "${CLR_INFO}4) 🗑️ Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_INFO}4) 🗑️  Удалить ноду${CLR_RESET}"
     echo -e "${CLR_INFO}5) ❌ Выйти${CLR_RESET}"
     read -p "Введите номер действия: " choice
 
