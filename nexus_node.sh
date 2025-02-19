@@ -10,7 +10,7 @@ CLR_RESET='\033[0m'  # Сброс форматирования
 # Функция для отображения приветственного баннера
 function show_logo() {
     echo -e "${CLR_SUCCESS}**********************************************************${CLR_RESET}"
-    echo -e "${CLR_INFO}          Установочный скрипт для Nexus Network            ${CLR_RESET}"
+    echo -e "${CLR_INFO}          Установочный скрипт для Nexus Node              ${CLR_RESET}"
     echo -e "${CLR_SUCCESS}**********************************************************${CLR_RESET}"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
@@ -18,88 +18,78 @@ function show_logo() {
 # Функция подготовки окружения: установка пакетов и зависимостей
 function install_dependencies() {
     echo -e "${CLR_WARNING}🔄 Проверяем и устанавливаем необходимые зависимости...${CLR_RESET}"
-    sudo apt update -y
+    sudo apt update && sudo apt upgrade -y
     sudo apt install -y build-essential pkg-config libssl-dev git-all protobuf-compiler cargo screen unzip
-    sudo systemctl enable docker
-    sudo systemctl start docker
+    sudo apt install -y curl
+
+    # Установка Rust
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    source $HOME/.cargo/env
+    echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc
+    source ~/.bashrc
+    rustup update
+
+    # Обновление protobuf
+    sudo apt remove -y protobuf-compiler
+    curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v25.2/protoc-25.2-linux-x86_64.zip
+    unzip protoc-25.2-linux-x86_64.zip -d $HOME/.local
+    export PATH="$HOME/.local/bin:$PATH"
+    protoc --version
 }
 
-# Функция развертывания узла Nexus
+# Функция установки ноды Nexus
 function install_node() {
-    echo -e "${CLR_INFO}🚀 Запускаем процесс установки Nexus Network...${CLR_RESET}"
+    echo -e "${CLR_INFO}🚀 Запускаем процесс установки Nexus Node...${CLR_RESET}"
     
-    INSTALL_DIR="$HOME/nexus-network"
-    CONFIG_FILE="$INSTALL_DIR/nexus.env"
-    
-    mkdir -p "$INSTALL_DIR"
-    cd "$INSTALL_DIR" || exit
-    
-    echo -e "${CLR_WARNING}🔑 Введите ваш идентификационный код Nexus:${CLR_RESET}"
-    read -r IDENTITY_CODE
-    
-    echo "NEXUS_IDENTITY_CODE=$IDENTITY_CODE" > "$CONFIG_FILE"
-    
-    docker pull nexus/nexus-edge
-    docker run --name nexus --network=host -d -v ~/.nexusedge:/root/.nexusedge --env-file "$CONFIG_FILE" nexus/nexus-edge
-    
+    # Создание и запуск screen-сессии
+    screen -dmS nexus
+
+    # Запуск официального скрипта установки Nexus
+    curl https://cli.nexus.xyz/ | sh
+
     echo -e "${CLR_SUCCESS}✅ Установка завершена! Узел успешно запущен.${CLR_RESET}"
 }
 
-# Функция обновления ПО узла Nexus
-function update_node() {
-    echo -e "${CLR_INFO}🔄 Обновление ноды Nexus Network...${CLR_RESET}"
-    
-    docker stop nexus
-    docker rm nexus
-    docker pull nexus/nexus-edge
-    docker run --name nexus --network=host -d -v ~/.nexusedge:/root/.nexusedge --env-file "$HOME/nexus-network/nexus.env" nexus/nexus-edge
-    
-    echo -e "${CLR_SUCCESS}✅ Обновление завершено!${CLR_RESET}"
-}
-
-# Функция просмотра журнала работы узла
+# Функция просмотра логов ноды
 function view_logs() {
-    echo -e "${CLR_INFO}📜 Отображение логов узла...${CLR_RESET}"
-    docker logs -f nexus
+    echo -e "${CLR_INFO}📜 Отображение логов ноды...${CLR_RESET}"
+    screen -r nexus
 }
 
-# Функция перезапуска сервиса ноды
+# Функция перезапуска ноды
 function restart_node() {
     echo -e "${CLR_WARNING}🔄 Перезапускаем ноду Nexus...${CLR_RESET}"
-    docker restart nexus
-    sleep 2
-    docker logs -f nexus
+    screen -S nexus -X quit
+    screen -dmS nexus
+    curl https://cli.nexus.xyz/ | sh
+    echo -e "${CLR_SUCCESS}✅ Нода перезапущена!${CLR_RESET}"
 }
 
-# Функция удаления узла и всех связанных данных
+# Функция удаления ноды
 function remove_node() {
-    echo -e "${CLR_ERROR}⚠️ ВНИМАНИЕ: Удаление узла Nexus Network!${CLR_RESET}"
-    docker stop nexus
-    docker rm nexus
-    docker rmi nexus/nexus-edge
-    rm -rf "$HOME/nexus-network"
-    echo -e "${CLR_SUCCESS}✅ Узел успешно удален!${CLR_RESET}"
+    echo -e "${CLR_ERROR}⚠️ ВНИМАНИЕ: Удаление ноды Nexus!${CLR_RESET}"
+    screen -S nexus -X quit
+    rm -rf $HOME/.nexus
+    echo -e "${CLR_SUCCESS}✅ Нода успешно удалена!${CLR_RESET}"
 }
 
-# Функция отображения меню действий для пользователя
+# Функция отображения меню
 function show_menu() {
     show_logo
     echo -e "${CLR_WARNING}📌 Выберите нужное действие:${CLR_RESET}"
-    echo -e "${CLR_INFO}1) 🚀 Установить ноду Nexus${CLR_RESET}"
-    echo -e "${CLR_INFO}2) 🔄 Перезапустить ноду Nexus${CLR_RESET}"
-    echo -e "${CLR_INFO}3) 🔄 Обновить ноду Nexus${CLR_RESET}"
-    echo -e "${CLR_INFO}4) 📜 Просмотреть логи ноды Nexus${CLR_RESET}"
-    echo -e "${CLR_INFO}5) 🗑️  Удалить ноду Nexus${CLR_RESET}"
-    echo -e "${CLR_INFO}6) ❌ Выйти${CLR_RESET}"
+    echo -e "${CLR_INFO}1) 🚀 Установить ноду${CLR_RESET}"
+    echo -e "${CLR_INFO}2) 🔄 Перезапустить ноду${CLR_RESET}"
+    echo -e "${CLR_INFO}3) 📜 Просмотреть логи${CLR_RESET}"
+    echo -e "${CLR_INFO}4) 🗑️  Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_INFO}5) ❌ Выйти${CLR_RESET}"
     read -p "Введите номер действия: " choice
-    
+
     case $choice in
         1) install_dependencies; install_node ;;
         2) restart_node ;;
-        3) update_node ;;
-        4) view_logs ;;
-        5) remove_node ;;
-        6) exit 0 ;;
+        3) view_logs ;;
+        4) remove_node ;;
+        5) exit 0 ;;
         *) echo -e "${CLR_ERROR}❌ Ошибка: Некорректный выбор! Попробуйте снова.${CLR_RESET}" ;;
     esac
 }
