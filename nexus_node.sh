@@ -19,7 +19,7 @@ function show_logo() {
 function install_dependencies() {
     echo -e "${CLR_WARNING}🔄 Проверяем и устанавливаем необходимые зависимости...${CLR_RESET}"
     sudo apt update -y
-    sudo apt install -y curl git jq lz4 build-essential unzip docker.io
+    sudo apt install -y build-essential pkg-config libssl-dev git-all protobuf-compiler cargo screen unzip
     sudo systemctl enable docker
     sudo systemctl start docker
 }
