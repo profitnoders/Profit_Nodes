@@ -28,7 +28,7 @@ function install_dependencies() {
 function install_node() {
     echo -e "${BLUE}Начинаем установку Hemi...${NC}"
     install_dependencies
-    curl -L -O https://github.com/hemilabs/heminetwork/releases/download/v0.11.4/heminetwork_v0.11.5_linux_amd64.tar.gz
+    curl -L -O https://github.com/hemilabs/heminetwork/releases/download/v0.11.5/heminetwork_v0.11.5_linux_amd64.tar.gz
     mkdir -p hemi
     tar --strip-components=1 -xzvf heminetwork_v0.11.5_linux_amd64.tar.gz -C hemi
     cd hemi || exit
