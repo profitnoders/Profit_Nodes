@@ -24,7 +24,7 @@ function install_dependencies() {
     sudo apt install -y curl tar wget
 }
 
-# Установка ноды Multiple
+# Функция установки ноды Multiple
 function install_node() {
     echo -e "${BLUE}🚀 Начинаем установку ноды Multiple...${NC}"
     install_dependencies
@@ -43,7 +43,7 @@ function install_node() {
         exit 1
     fi
     
-    # Скачиваем клиент
+    # Скачиваем архив
     echo -e "${BLUE}🌍 Скачиваем клиент с $CLIENT_URL...${NC}"
     wget -O /root/MultipleForLinux.tar "$CLIENT_URL"
     
@@ -53,7 +53,7 @@ function install_node() {
     # Распаковываем архив
     echo -e "${BLUE}📦 Распаковываем файлы в $INSTALL_DIR...${NC}"
     mkdir -p "$INSTALL_DIR"
-    tar -xvf /root/MultipleForLinux.tar -C /root/
+    tar -xvf /root/MultipleForLinux.tar -C "$INSTALL_DIR" --strip-components=1
     
     # Проверяем, создалась ли папка
     if [[ ! -d "$INSTALL_DIR" ]]; then
@@ -77,20 +77,19 @@ function install_node() {
     # Запускаем ноду
     echo -e "${BLUE}🚀 Запускаем Multiple Node...${NC}"
     nohup "$INSTALL_DIR/multiple-node" > output.log 2>&1 &
-    
+
     # Привязка аккаунта
     echo -e "${YELLOW}🔗 Вставьте ваш Account ID из страницы Setup:${NC}"
     read -r IDENTIFIER
     echo -e "${YELLOW}🔑 Введите PIN для ноды:${NC}"
     read -r PIN
-    
-    "$INSTALL_DIR/multiple-cli" bind --bandwidth-download 100 --identifier "$IDENTIFIER" --pin "$PIN" --storage 200 --bandwidth-upload 100
 
+    "$INSTALL_DIR/multiple-cli" bind --bandwidth-download 100 --identifier "$IDENTIFIER" --pin "$PIN" --storage 200 --bandwidth-upload 100
 
     echo -e "${GREEN}✅ Нода Multiple успешно установлена!${NC}"
     echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
     echo -e "${YELLOW}📌 Команда для проверки статуса ноды:${NC}"
-    echo -e "${PURPLE}cd ~/multipleforlinux && ./multiple-cli status${NC}"
+    echo -e "${PURPLE}cd $INSTALL_DIR && ./multiple-cli status${NC}"
     echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
     echo -e "${GREEN}🚀 PROFIT NODES — лови иксы на нодах${NC}"
     echo -e "${CYAN}🔗 Основной канал: https://t.me/ProfiT_Mafia${NC}"
