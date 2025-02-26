@@ -73,7 +73,7 @@ function install_node() {
 
     # Выполняем привязку аккаунта
     echo -e "${BLUE}🔗 Привязываем аккаунт...${NC}"
-    ./multiple-cli bind --bandwidth-download 100 --identifier "$IDENTIFIER" --pin "$PIN" --storage 200 --bandwidth-upload 100
+    multiple-cli bind --bandwidth-download 100 --identifier "$IDENTIFIER" --pin "$PIN" --storage 200 --bandwidth-upload 100
 
     echo -e "${GREEN}✅ Нода Multiple успешно установлена и запущена!${NC}"
     echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
@@ -84,7 +84,7 @@ function install_node() {
     echo -e "${CYAN}🔗 Основной канал: https://t.me/ProfiT_Mafia${NC}"
 
     # Проверяем статус ноды
-    ./multiple-cli status
+    multiple-cli status
 }
 
 
