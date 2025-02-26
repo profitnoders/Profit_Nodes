@@ -26,76 +26,79 @@ function install_dependencies() {
 
 # Функция установки ноды Multiple
 function install_node() {
-    echo -e "${BLUE}🚀 Начинаем установку ноды Multiple...${NC}"
+    echo -e "${BLUE}🚀 Запуск установки ноды Multiple...${NC}"
     install_dependencies
 
-    # Указываем директорию установки
-    INSTALL_DIR="/root/MultipleForLinux"
-    
     # Определяем архитектуру системы
+    echo -e "${BLUE}🔍 Определение архитектуры системы...${NC}"
     ARCH=$(uname -m)
     if [[ "$ARCH" == "x86_64" ]]; then
         CLIENT_URL="https://mdeck-download.s3.us-east-1.amazonaws.com/client/linux/MultipleForLinux.tar"
     elif [[ "$ARCH" == "aarch64" ]]; then
         CLIENT_URL="https://mdeck-download.s3.us-east-1.amazonaws.com/client/linux/MultipleForLinux.tar"
     else
-        echo -e "${RED}❌ Архитектура системы не поддерживается: $ARCH${NC}"
+        echo -e "${RED}❌ Ошибка: Архитектура $ARCH не поддерживается!${NC}"
         exit 1
     fi
-    
-    # Скачиваем архив
-    echo -e "${BLUE}🌍 Скачиваем клиент с $CLIENT_URL...${NC}"
+
+    # Скачиваем архив с клиентом
+    echo -e "${BLUE}🌍 Загружаем установочный файл...${NC}"
     wget -O /root/MultipleForLinux.tar "$CLIENT_URL"
-    
-    # Удаляем предыдущую папку, если она была
-    rm -rf "$INSTALL_DIR"
-    
-    # Распаковываем архив
-    echo -e "${BLUE}📦 Распаковываем файлы в $INSTALL_DIR...${NC}"
-    mkdir -p "$INSTALL_DIR"
-    tar -xvf /root/MultipleForLinux.tar -C "$INSTALL_DIR" --strip-components=1
-    
-    # Проверяем, создалась ли папка
+
+    # Распаковываем в нужную директорию
+    echo -e "${BLUE}📦 Извлечение файлов...${NC}"
+    tar -xvf /root/MultipleForLinux.tar -C /root/
+
+    # Проверяем, создана ли папка
+    INSTALL_DIR="/root/MultipleForLinux"
     if [[ ! -d "$INSTALL_DIR" ]]; then
-        echo -e "${RED}❌ Ошибка: Папка MultipleForLinux не была создана!${NC}"
+        echo -e "${RED}❌ Ошибка: Папка $INSTALL_DIR не была создана!${NC}"
         exit 1
     fi
-    
+
+    # Переходим в директорию клиента
     cd "$INSTALL_DIR" || exit
-    
-    # Проверяем наличие бинарных файлов
-    if [[ ! -f "$INSTALL_DIR/multiple-cli" ]] || [[ ! -f "$INSTALL_DIR/multiple-node" ]]; then
-        echo -e "${RED}❌ Ошибка: Файлы multiple-cli или multiple-node отсутствуют!${NC}"
-        ls -lah "$INSTALL_DIR"  # Показываем содержимое папки для диагностики
+
+    # Проверяем наличие файлов
+    if [[ ! -f "./multiple-cli" ]] || [[ ! -f "./multiple-node" ]]; then
+        echo -e "${RED}❌ Ошибка: Не найдены файлы multiple-cli или multiple-node!${NC}"
+        ls -lah "$INSTALL_DIR"  # Показываем содержимое для диагностики
         exit 1
     fi
-    
-    # Даем файлам права на выполнение
-    chmod +x "$INSTALL_DIR/multiple-cli"
-    chmod +x "$INSTALL_DIR/multiple-node"
-    
-    # Запускаем ноду
-    echo -e "${BLUE}🚀 Запускаем Multiple Node...${NC}"
-    nohup "$INSTALL_DIR/multiple-node" > output.log 2>&1 &
+
+    # Назначаем права на выполнение
+    echo -e "${BLUE}🔑 Устанавливаем разрешения на выполнение...${NC}"
+    chmod +x ./multiple-cli
+    chmod +x ./multiple-node
+
+    # Добавляем путь к переменным окружения
+    echo -e "${BLUE}🔗 Добавляем директорию в PATH...${NC}"
+    echo "export PATH=\$PATH:$INSTALL_DIR" >> ~/.bash_profile
+    source ~/.bash_profile
+
+    # Запуск ноды
+    echo -e "${BLUE}🚀 Запуск ноды Multiple...${NC}"
+    nohup ./multiple-node > output.log 2>&1 &
 
     # Привязка аккаунта
-    echo -e "${YELLOW}🔗 Вставьте ваш Account ID из страницы Setup:${NC}"
+    echo -e "${YELLOW}🔹 Введите ваш Account ID:${NC}"
     read -r IDENTIFIER
-    echo -e "${YELLOW}🔑 Введите PIN для ноды:${NC}"
+    echo -e "${YELLOW}🔑 Введите PIN-код:${NC}"
     read -r PIN
 
-    "$INSTALL_DIR/multiple-cli" bind --bandwidth-download 100 --identifier "$IDENTIFIER" --pin "$PIN" --storage 200 --bandwidth-upload 100
+    echo -e "${BLUE}🔗 Привязываем аккаунт...${NC}"
+    ./multiple-cli bind --bandwidth-download 100 --identifier "$IDENTIFIER" --pin "$PIN" --storage 200 --bandwidth-upload 100
 
-    echo -e "${GREEN}✅ Нода Multiple успешно установлена!${NC}"
-    echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
-    echo -e "${YELLOW}📌 Команда для проверки статуса ноды:${NC}"
+    echo -e "${GREEN}✅ Установка завершена! Нода успешно запущена.${NC}"
+    echo -e "${PURPLE}-------------------------------------------------${NC}"
+    echo -e "${YELLOW}📌 Проверить статус ноды можно командой:${NC}"
     echo -e "${PURPLE}cd $INSTALL_DIR && ./multiple-cli status${NC}"
-    echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
-    echo -e "${GREEN}🚀 PROFIT NODES — лови иксы на нодах${NC}"
-    echo -e "${CYAN}🔗 Основной канал: https://t.me/ProfiT_Mafia${NC}"
+    echo -e "${PURPLE}-------------------------------------------------${NC}"
+    echo -e "${GREEN}🚀 PROFIT NODES — забирай дропы первыми!${NC}"
+    echo -e "${CYAN}🔗 Подключайся к каналу: https://t.me/ProfiT_Mafia${NC}"
 
-    # Проверяем статус ноды
-    "$INSTALL_DIR/multiple-cli" status
+    # Проверка статуса ноды
+    ./multiple-cli status
 }
 
 # Обновление ноды
