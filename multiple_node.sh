@@ -58,7 +58,7 @@ function install_node() {
 
     # Назначаем права для папки
     echo -e "${BLUE}🛠️ Назначаем права для папки...${NC}"
-    chmod -R 777 multipleforlinux
+    chmod -R 777 MultipleForLinux
 
     # Запускаем ноду
     echo -e "${BLUE}🚀 Запускаем Multiple Node...${NC}"
