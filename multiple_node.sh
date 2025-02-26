@@ -36,15 +36,30 @@ function install_node() {
     elif [[ "$ARCH" == "aarch64" ]]; then
         CLIENT_URL="https://cdn.app.multiple.cc/client/linux/arm64/multipleforlinux.tar"
     else
-        echo -e "${RED}Архитектуры системы не поддерживаются: $ARCH${NC}"
+        echo -e "${RED}Архитектура системы не поддерживается: $ARCH${NC}"
         exit 1
     fi
 
-    # Скачиваем клиент и распаковываем
+    # Скачиваем клиент и распаковываем в правильную папку
     echo -e "${BLUE}Скачиваем клиент с $CLIENT_URL...${NC}"
     wget $CLIENT_URL -O multipleforlinux.tar
-    tar -xvf multipleforlinux.tar
-    cd multipleforlinux
+    mkdir -p ~/multipleforlinux
+    tar -xvf multipleforlinux.tar -C ~/multipleforlinux
+
+    # Проверяем, распаковалась ли папка
+    if [ ! -d "~/multipleforlinux" ]; then
+        echo -e "${RED}Ошибка: Папка multipleforlinux не была создана!${NC}"
+        exit 1
+    fi
+
+    cd ~/multipleforlinux || exit
+
+    # Проверяем, существуют ли файлы
+    if [ ! -f "./multiple-cli" ] || [ ! -f "./multiple-node" ]; then
+        echo -e "${RED}Ошибка: Файлы multiple-cli или multiple-node отсутствуют!${NC}"
+        exit 1
+    fi
+
     chmod +x ./multiple-cli
     chmod +x ./multiple-node
 
