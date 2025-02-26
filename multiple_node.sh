@@ -29,7 +29,10 @@ function install_node() {
     echo -e "${BLUE}🚀 Начинаем установку ноды Multiple...${NC}"
     install_dependencies
 
-    # Проверяем архитектуру системы
+    # Указываем директорию установки
+    INSTALL_DIR="/root/MultipleForLinux"
+    
+    # Определяем архитектуру системы
     ARCH=$(uname -m)
     if [[ "$ARCH" == "x86_64" ]]; then
         CLIENT_URL="https://mdeck-download.s3.us-east-1.amazonaws.com/client/linux/MultipleForLinux.tar"
@@ -39,76 +42,50 @@ function install_node() {
         echo -e "${RED}❌ Архитектура системы не поддерживается: $ARCH${NC}"
         exit 1
     fi
-
-    # Определяем путь установки
-    INSTALL_DIR="$HOME/multipleforlinux"
-
-    # Удаляем старую папку, если она есть, чтобы избежать проблем с дубликатами
-    if [[ -d "$INSTALL_DIR" ]]; then
-        echo -e "${YELLOW}⚠️ Найдена старая установка, удаляем...${NC}"
-        rm -rf "$INSTALL_DIR"
-    fi
-
-    # Скачиваем клиент в корневую папку пользователя
-    echo -e "${BLUE}📥 Скачиваем клиент с $CLIENT_URL...${NC}"
-    wget --header="User-Agent: Mozilla/5.0" -O "$HOME/MultipleForLinux.tar" "$CLIENT_URL" || {
-        echo -e "${RED}❌ Ошибка: Не удалось скачать файл. Проверьте URL.${NC}"
-        exit 1
-    }
-
-    # Создаем папку multipleforlinux перед разархивацией
+    
+    # Скачиваем клиент
+    echo -e "${BLUE}🌍 Скачиваем клиент с $CLIENT_URL...${NC}"
+    wget -O /root/MultipleForLinux.tar "$CLIENT_URL"
+    
+    # Удаляем предыдущую папку, если она была
+    rm -rf "$INSTALL_DIR"
+    
+    # Распаковываем архив
+    echo -e "${BLUE}📦 Распаковываем файлы в $INSTALL_DIR...${NC}"
     mkdir -p "$INSTALL_DIR"
-
-    # Распаковываем архив в папку multipleforlinux
-    echo -e "${BLUE}📦 Распаковываем файлы в папку multipleforlinux...${NC}"
-    tar -xvf "$HOME/MultipleForLinux.tar" --strip-components=1 -C "$INSTALL_DIR" || {
-        echo -e "${RED}❌ Ошибка: Файл не является архивом или поврежден.${NC}"
-        exit 1
-    }
-
-    # Проверяем, создалась ли папка multipleforlinux
+    tar -xvf /root/MultipleForLinux.tar -C /root/
+    
+    # Проверяем, создалась ли папка
     if [[ ! -d "$INSTALL_DIR" ]]; then
-        echo -e "${RED}❌ Ошибка: Папка multipleforlinux не была создана!${NC}"
+        echo -e "${RED}❌ Ошибка: Папка MultipleForLinux не была создана!${NC}"
         exit 1
-    fi
-
-    cd "$INSTALL_DIR" || {
-        echo -e "${RED}❌ Ошибка: Не удалось перейти в директорию multipleforlinux!${NC}"
-        exit 1
-    }
-
-    # Проверяем, существуют ли файлы multiple-cli и multiple-node
-    # Проверяем, где находятся файлы
-    if [[ -d "$INSTALL_DIR/multiple-cli" ]]; then
-        echo -e "${YELLOW}⚠️ Файлы находятся во вложенной папке. Перемещаем...${NC}"
-        mv "$INSTALL_DIR/multiple-cli/"* "$INSTALL_DIR/"
-        mv "$INSTALL_DIR/multiple-node/"* "$INSTALL_DIR/"
-        rm -rf "$INSTALL_DIR/multiple-cli" "$INSTALL_DIR/multiple-node"
     fi
     
-    # Повторная проверка наличия файлов
+    cd "$INSTALL_DIR" || exit
+    
+    # Проверяем наличие бинарных файлов
     if [[ ! -f "$INSTALL_DIR/multiple-cli" ]] || [[ ! -f "$INSTALL_DIR/multiple-node" ]]; then
         echo -e "${RED}❌ Ошибка: Файлы multiple-cli или multiple-node отсутствуют!${NC}"
-        ls -lah "$INSTALL_DIR"  # Выводим содержимое папки для диагностики
+        ls -lah "$INSTALL_DIR"  # Показываем содержимое папки для диагностики
         exit 1
     fi
-
-
+    
     # Даем файлам права на выполнение
     chmod +x "$INSTALL_DIR/multiple-cli"
     chmod +x "$INSTALL_DIR/multiple-node"
-
+    
     # Запускаем ноду
-    echo -e "${BLUE}🚀 Запускаем Multiple...${NC}"
-    nohup "$INSTALL_DIR/multiple-node" > "$INSTALL_DIR/output.log" 2>&1 &
-
+    echo -e "${BLUE}🚀 Запускаем Multiple Node...${NC}"
+    nohup "$INSTALL_DIR/multiple-node" > output.log 2>&1 &
+    
     # Привязка аккаунта
     echo -e "${YELLOW}🔗 Вставьте ваш Account ID из страницы Setup:${NC}"
     read -r IDENTIFIER
     echo -e "${YELLOW}🔑 Введите PIN для ноды:${NC}"
     read -r PIN
-
+    
     "$INSTALL_DIR/multiple-cli" bind --bandwidth-download 100 --identifier "$IDENTIFIER" --pin "$PIN" --storage 200 --bandwidth-upload 100
+
 
     echo -e "${GREEN}✅ Нода Multiple успешно установлена!${NC}"
     echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
