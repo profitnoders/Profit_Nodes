@@ -107,6 +107,7 @@ function remove_node() {
     echo -e "${BLUE}Удаляем ноду Hemi...${NC}"
     sudo systemctl stop hemi
     sudo systemctl disable hemi
+    sudo rm -rf hemi heminetwork_v0.11.4_linux_amd64.tar.gz /etc/systemd/system/hemi.service
     sudo rm -rf hemi heminetwork_v0.11.5_linux_amd64.tar.gz /etc/systemd/system/hemi.service
     sudo systemctl daemon-reload
     sudo rm -rf hemi_script.sh
