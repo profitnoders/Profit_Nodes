@@ -1,11 +1,9 @@
 #!/bin/bash
 
-# Оформление текста: цвета и фоны
-CLR_INFO='\033[1;97;44m'  # Белый текст на голубом фоне
-CLR_SUCCESS='\033[0;32;40m'  # Зеленый текст на черном фоне
-CLR_WARNING='\033[1;37;41m'  # Белый текст на красном фоне
-CLR_ERROR='\033[1;31;40m'  # Красный текст на черном фоне
-CYAN='\033[1;33;44m'  # Желтый текст на голубом фоне
+CLR_INFO='\033[1;97;44m'  # Белый текст на синем фоне
+CLR_SUCCESS='\033[1;97;42m'  # Белый текст на зеленом фоне
+CLR_WARNING='\033[1;30;103m'  # Черный текст на желтом фоне
+CLR_ERROR='\033[1;97;41m'  # Белый текст на красном фоне
 CLR_RESET='\033[0m'  # Сброс форматирования
 
 # Логотип
@@ -59,12 +57,12 @@ function install_node() {
     source ./start.sh
 
     # Привязка аккаунта
-    echo -e "${CYAN}🔗 Введите ваш Account ID:${CLR_RESET}"
+    echo -e "${CLR_WARNING}🔗 Введите ваш Account ID:${CLR_RESET}"
     read -r IDENTIFIER
-    echo -e "${CYAN}🔑 Введите ваш PIN:${CLR_RESET}"
+    echo -e "${CLR_WARNING}🔑 Введите ваш PIN:${CLR_RESET}"
     read -r PIN
 
-    echo -e "${CYAN}🔗 Привязываем аккаунт...${CLR_RESET}"
+    echo -e "${CLR_WARNING}🔗 Привязываем аккаунт...${CLR_RESET}"
     multiple-cli bind --bandwidth-download 100 --identifier "$IDENTIFIER" --pin "$PIN" --storage 200 --bandwidth-upload 100
 
     echo -e "${CLR_SUCCESS}✅ Нода Multiple успешно установлена и запущена!${CLR_RESET}"
@@ -73,7 +71,7 @@ function install_node() {
 
 # Обновление ноды
 function reinstal_node() {
-    echo -e "${CYAN}Обновляем ноду Multiple...${CLR_RESET}"
+    echo -e "${CLR_WARNING}Обновляем ноду Multiple...${CLR_RESET}"
     pkill -f multiple-node
     sudo rm -rf ~/multipleforlinux multipleforlinux.tar
     sleep 5
@@ -84,7 +82,7 @@ function reinstal_node() {
 
 # Удаление ноды
 function remove_node() {
-    echo -e "${CLR_WARNING}Удаляем ноду Multiple...${CLR_RESET}"
+    echo -e "${CLR_ERROR}Удаляем ноду Multiple...${CLR_RESET}"
     pkill -f multiple-node
     sudo rm -rf ~/MultipleForLinux multipleforlinux.tar
     rm -rf multiple_node.sh
@@ -104,13 +102,13 @@ function check_status() {
 # Меню
 function show_menu() {
     show_logo
-    echo -e "${CYAN}1)${NC} 🚀${CYAN} Установить ноду${CLR_RESET}"
-    echo -e "${CYAN}2)${NC} 🔄${CYAN} Переустановить ноду${CLR_RESET}"
-    echo -e "${CYAN}3)${NC} 🗑️ ${CYAN} Удалить ноду${CLR_RESET}"
-    echo -e "${CYAN}4)${NC} 💻${CYAN} Проверка статуса${CLR_RESET}"
-    echo -e "${CYAN}5)${NC} ❌${CYAN} Выйти${CLR_RESET}"
+    echo -e "${CLR_WARNING}1) 🚀 Установить ноду${CLR_RESET}"
+    echo -e "${CLR_WARNING}2) 🔄 Переустановить ноду${CLR_RESET}"
+    echo -e "${CLR_WARNING}3) 🗑️ Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_WARNING}4) 💻 Проверка статуса${CLR_RESET}"
+    echo -e "${CLR_WARNING}5) ❌ Выйти${CLR_RESET}"
 
-    echo -e "${YELLOW}Выберите действие:${CLR_RESET}"
+    echo -e "${CLR_WARNING}Выберите действие:${CLR_RESET}"
     read -r choice
     case $choice in
         1) install_node ;;
@@ -118,7 +116,7 @@ function show_menu() {
         3) remove_node ;;
         4) check_status ;;
         5) echo -e "${CLR_SUCCESS}Выход...${CLR_RESET}" ;;
-        *) echo -e "${CLR_WARNING}Неверный выбор! Пожалуйста, выберите от 1 до 5.${CLR_RESET}" ;;
+        *) echo -e "${CLR_ERROR}Неверный выбор! Пожалуйста, выберите от 1 до 5.${CLR_RESET}" ;;
     esac
 }
 
