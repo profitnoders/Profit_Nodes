@@ -4,13 +4,14 @@ CLR_INFO='\033[1;97;44m'  # Белый текст на синем фоне
 CLR_SUCCESS='\033[1;97;42m'  # Белый текст на зеленом фоне
 CLR_WARNING='\033[1;30;103m'  # Черный текст на желтом фоне
 CLR_ERROR='\033[1;97;41m'  # Белый текст на красном фоне
+CLR_GREEN='\033[0;32m'
 CLR_RESET='\033[0m'  # Сброс форматирования
 
 # Логотип
 function show_logo() {
-    echo -e "${CLR_SUCCESS}========================================================${CLR_RESET}"
-    echo -e "${CLR_SUCCESS}    Добро пожаловать в скрипт установки ноды Multiple   ${CLR_RESET}"
-    echo -e "${CLR_SUCCESS}========================================================${CLR_RESET}"
+    echo -e "${CLR_GREEN}========================================================${CLR_RESET}"
+    echo -e "${CLR_GREEN}    Добро пожаловать в скрипт установки ноды Multiple   ${CLR_RESET}"
+    echo -e "${CLR_GREEN}========================================================${CLR_RESET}"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
@@ -102,11 +103,11 @@ function check_status() {
 # Меню
 function show_menu() {
     show_logo
-    echo -e "${CLR_WARNING}1) 🚀 Установить ноду${CLR_RESET}"
-    echo -e "${CLR_WARNING}2) 🔄 Переустановить ноду${CLR_RESET}"
-    echo -e "${CLR_WARNING}3) 🗑️ Удалить ноду${CLR_RESET}"
-    echo -e "${CLR_WARNING}4) 💻 Проверка статуса${CLR_RESET}"
-    echo -e "${CLR_WARNING}5) ❌ Выйти${CLR_RESET}"
+    echo -e "${CLR_GREEN}1) 🚀 Установить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}2) 🔄 Переустановить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}3) 🗑️ Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}4) 💻 Проверка статуса${CLR_RESET}"
+    echo -e "${CLR_GREEN}5) ❌ Выйти${CLR_RESET}"
 
     echo -e "${CLR_WARNING}Выберите действие:${CLR_RESET}"
     read -r choice
