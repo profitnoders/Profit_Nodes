@@ -73,22 +73,22 @@ function install_node() {
 
 # Обновление ноды
 function reinstal_node() {
-    echo -e "${CYAN}Обновляем ноду Multiple...${NC}"
+    echo -e "${CYAN}Обновляем ноду Multiple...${CLR_RESET}"
     pkill -f multiple-node
     sudo rm -rf ~/multipleforlinux multipleforlinux.tar
     sleep 5
     
     install_node
-    echo -e "${CLR_SUCCESS}Нода Multiple успешно обновлена!${NC}"
+    echo -e "${CLR_SUCCESS}Нода Multiple успешно обновлена!${CLR_RESET}"
 }
 
 # Удаление ноды
 function remove_node() {
-    echo -e "${CLR_WARNING}Удаляем ноду Multiple...${NC}"
+    echo -e "${CLR_WARNING}Удаляем ноду Multiple...${CLR_RESET}"
     pkill -f multiple-node
     sudo rm -rf ~/MultipleForLinux multipleforlinux.tar
     rm -rf multiple_node.sh
-    echo -e "${CLR_SUCCESS}Нода Multiple успешно удалена!${NC}"
+    echo -e "${CLR_SUCCESS}Нода Multiple успешно удалена!${CLR_RESET}"
 }
 
 # Просмотр статуса
@@ -97,28 +97,28 @@ function check_status() {
         cd ~/multipleforlinux || exit
         ./multiple-cli status
     else
-        echo -e "${CLR_WARNING}Нода не найдена! Убедитесь, что она установлена.${NC}"
+        echo -e "${CLR_WARNING}Нода не найдена! Убедитесь, что она установлена.${CLR_RESET}"
     fi
 }
 
 # Меню
 function show_menu() {
     show_logo
-    echo -e "${CYAN}1)${NC} 🚀${CYAN} Установить ноду${NC}"
-    echo -e "${CYAN}2)${NC} 🔄${CYAN} Переустановить ноду${NC}"
-    echo -e "${CYAN}3)${NC} 🗑️ ${CYAN} Удалить ноду${NC}"
-    echo -e "${CYAN}4)${NC} 💻${CYAN} Проверка статуса${NC}"
-    echo -e "${CYAN}5)${NC} ❌${CYAN} Выйти${NC}"
+    echo -e "${CYAN}1)${NC} 🚀${CYAN} Установить ноду${CLR_RESET}"
+    echo -e "${CYAN}2)${NC} 🔄${CYAN} Переустановить ноду${CLR_RESET}"
+    echo -e "${CYAN}3)${NC} 🗑️ ${CYAN} Удалить ноду${CLR_RESET}"
+    echo -e "${CYAN}4)${NC} 💻${CYAN} Проверка статуса${CLR_RESET}"
+    echo -e "${CYAN}5)${NC} ❌${CYAN} Выйти${CLR_RESET}"
 
-    echo -e "${YELLOW}Выберите действие:${NC}"
+    echo -e "${YELLOW}Выберите действие:${CLR_RESET}"
     read -r choice
     case $choice in
         1) install_node ;;
         2) reinstal_node ;;
         3) remove_node ;;
         4) check_status ;;
-        5) echo -e "${CLR_SUCCESS}Выход...${NC}" ;;
-        *) echo -e "${CLR_WARNING}Неверный выбор! Пожалуйста, выберите от 1 до 5.${NC}" ;;
+        5) echo -e "${CLR_SUCCESS}Выход...${CLR_RESET}" ;;
+        *) echo -e "${CLR_WARNING}Неверный выбор! Пожалуйста, выберите от 1 до 5.${CLR_RESET}" ;;
     esac
 }
 
