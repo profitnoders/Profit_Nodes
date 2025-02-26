@@ -47,8 +47,9 @@ function install_node() {
 
     # Выдача разрешений на выполнение
     echo -e "${BLUE}🔑 Выдаем права на выполнение...${NC}"
-    chmod +x ./multiple-cli
-    chmod +x ./multiple-node
+    chmod +x MultipleForLinux/multiple-cli
+    chmod +x MultipleForLinux/multiple-node
+
 
     # Настраиваем PATH, чтобы команды работали глобально
     echo -e "${BLUE}🔧 Настраиваем окружение...${NC}"
