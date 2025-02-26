@@ -101,7 +101,7 @@ function reinstal_node() {
 function remove_node() {
     echo -e "${BLUE}Удаляем ноду Multiple...${NC}"
     pkill -f multiple-node
-    sudo rm -rf ~/multipleforlinux multipleforlinux.tar
+    sudo rm -rf ~/MultipleForLinux multipleforlinux.tar
     rm -rf multiple_node.sh
     echo -e "${GREEN}Нода Multiple успешно удалена!${NC}"
 }
