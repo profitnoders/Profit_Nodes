@@ -24,7 +24,7 @@ function install_dependencies() {
     sudo apt install -y curl tar wget
 }
 
-# Установка ноды
+# Установка ноды Multiple
 function install_node() {
     echo -e "${BLUE}🚀 Начинаем установку ноды Multiple...${NC}"
     install_dependencies
@@ -40,27 +40,32 @@ function install_node() {
         exit 1
     fi
 
-    # Создаем папку перед скачиванием
+    # Определяем путь установки
     INSTALL_DIR="$HOME/multipleforlinux"
-    mkdir -p "$INSTALL_DIR"
+    
+    # Удаляем старую папку, если она есть, чтобы избежать проблем с дубликатами
+    if [[ -d "$INSTALL_DIR" ]]; then
+        echo -e "${YELLOW}⚠️ Найдена старая установка, удаляем...${NC}"
+        rm -rf "$INSTALL_DIR"
+    fi
 
-    # Скачиваем клиент в указанную папку
+    # Скачиваем клиент в корневую папку пользователя
     echo -e "${BLUE}📥 Скачиваем клиент с $CLIENT_URL...${NC}"
-    wget --header="User-Agent: Mozilla/5.0" -O "$INSTALL_DIR/MultipleForLinux.tar" "$CLIENT_URL" || {
+    wget --header="User-Agent: Mozilla/5.0" -O "$HOME/MultipleForLinux.tar" "$CLIENT_URL" || {
         echo -e "${RED}❌ Ошибка: Не удалось скачать файл. Проверьте URL.${NC}"
         exit 1
     }
 
-    # Распаковываем клиент
+    # Распаковываем архив прямо в $HOME, чтобы папка multipleforlinux появилась в /root
     echo -e "${BLUE}📦 Распаковываем файлы...${NC}"
-    tar -xvf "$INSTALL_DIR/MultipleForLinux.tar" -C "$INSTALL_DIR" || {
+    tar -xvf "$HOME/MultipleForLinux.tar" -C "$HOME" || {
         echo -e "${RED}❌ Ошибка: Файл не является архивом или поврежден.${NC}"
         exit 1
     }
 
-    # Проверяем, распаковалась ли папка
-    if [[ ! -d "$INSTALL_DIR" || -z "$(ls -A $INSTALL_DIR)" ]]; then
-        echo -e "${RED}❌ Ошибка: Папка multipleforlinux не была создана или пуста!${NC}"
+    # Проверяем, создалась ли папка multipleforlinux
+    if [[ ! -d "$INSTALL_DIR" ]]; then
+        echo -e "${RED}❌ Ошибка: Папка multipleforlinux не была создана!${NC}"
         exit 1
     fi
 
@@ -69,12 +74,13 @@ function install_node() {
         exit 1
     }
 
-    # Проверяем, существуют ли файлы
+    # Проверяем, существуют ли файлы multiple-cli и multiple-node
     if [[ ! -f "$INSTALL_DIR/multiple-cli" ]] || [[ ! -f "$INSTALL_DIR/multiple-node" ]]; then
         echo -e "${RED}❌ Ошибка: Файлы multiple-cli или multiple-node отсутствуют!${NC}"
         exit 1
     fi
 
+    # Даем файлам права на выполнение
     chmod +x "$INSTALL_DIR/multiple-cli"
     chmod +x "$INSTALL_DIR/multiple-node"
 
@@ -101,6 +107,7 @@ function install_node() {
     # Проверяем статус ноды
     "$INSTALL_DIR/multiple-cli" status
 }
+
 
 
 # Обновление ноды
