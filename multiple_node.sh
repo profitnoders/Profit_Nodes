@@ -78,10 +78,21 @@ function install_node() {
     }
 
     # Проверяем, существуют ли файлы multiple-cli и multiple-node
+    # Проверяем, где находятся файлы
+    if [[ -d "$INSTALL_DIR/multiple-cli" ]]; then
+        echo -e "${YELLOW}⚠️ Файлы находятся во вложенной папке. Перемещаем...${NC}"
+        mv "$INSTALL_DIR/multiple-cli/"* "$INSTALL_DIR/"
+        mv "$INSTALL_DIR/multiple-node/"* "$INSTALL_DIR/"
+        rm -rf "$INSTALL_DIR/multiple-cli" "$INSTALL_DIR/multiple-node"
+    fi
+    
+    # Повторная проверка наличия файлов
     if [[ ! -f "$INSTALL_DIR/multiple-cli" ]] || [[ ! -f "$INSTALL_DIR/multiple-node" ]]; then
         echo -e "${RED}❌ Ошибка: Файлы multiple-cli или multiple-node отсутствуют!${NC}"
+        ls -lah "$INSTALL_DIR"  # Выводим содержимое папки для диагностики
         exit 1
     fi
+
 
     # Даем файлам права на выполнение
     chmod +x "$INSTALL_DIR/multiple-cli"
