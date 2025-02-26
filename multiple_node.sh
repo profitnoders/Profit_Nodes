@@ -2,16 +2,17 @@
 
 # Оформление текста: цвета и фоны
 CLR_INFO='\033[1;97;44m'  # Белый текст на голубом фоне
-CLR_SUCCESS='\033[1;30;42m'  # Черный текст на зеленом фоне
+CLR_SUCCESS='\033[0;32;40m'  # Зеленый текст на черном фоне
 CLR_WARNING='\033[1;37;41m'  # Белый текст на красном фоне
 CLR_ERROR='\033[1;31;40m'  # Красный текст на черном фоне
+CYAN='\033[0;36;43m'  # Голубой текст на желтом фоне
 CLR_RESET='\033[0m'  # Сброс форматирования
 
 # Логотип
 function show_logo() {
-    echo -e "${CLR_SUCCESS}===============================${CLR_RESET}"
-    echo -e "${CLR_SUCCESS}  Добро пожаловать в скрипт установки ноды Multiple  ${CLR_RESET}"
-    echo -e "${CLR_SUCCESS}===============================${CLR_RESET}"
+    echo -e "${CLR_SUCCESS}========================================================${CLR_RESET}"
+    echo -e "${CLR_SUCCESS}    Добро пожаловать в скрипт установки ноды Multiple   ${CLR_RESET}"
+    echo -e "${CLR_SUCCESS}========================================================${CLR_RESET}"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
@@ -58,12 +59,12 @@ function install_node() {
     source ./start.sh
 
     # Привязка аккаунта
-    echo -e "${CLR_INFO}🔗 Введите ваш Account ID:${CLR_RESET}"
+    echo -e "${CYAN}🔗 Введите ваш Account ID:${CLR_RESET}"
     read -r IDENTIFIER
-    echo -e "${CLR_INFO}🔑 Введите ваш PIN:${CLR_RESET}"
+    echo -e "${CYAN}🔑 Введите ваш PIN:${CLR_RESET}"
     read -r PIN
 
-    echo -e "${CLR_INFO}🔗 Привязываем аккаунт...${CLR_RESET}"
+    echo -e "${CYAN}🔗 Привязываем аккаунт...${CLR_RESET}"
     multiple-cli bind --bandwidth-download 100 --identifier "$IDENTIFIER" --pin "$PIN" --storage 200 --bandwidth-upload 100
 
     echo -e "${CLR_SUCCESS}✅ Нода Multiple успешно установлена и запущена!${CLR_RESET}"
@@ -72,22 +73,22 @@ function install_node() {
 
 # Обновление ноды
 function reinstal_node() {
-    echo -e "${BLUE}Обновляем ноду Multiple...${NC}"
+    echo -e "${CYAN}Обновляем ноду Multiple...${NC}"
     pkill -f multiple-node
     sudo rm -rf ~/multipleforlinux multipleforlinux.tar
     sleep 5
     
     install_node
-    echo -e "${GREEN}Нода Multiple успешно обновлена!${NC}"
+    echo -e "${CLR_SUCCESS}Нода Multiple успешно обновлена!${NC}"
 }
 
 # Удаление ноды
 function remove_node() {
-    echo -e "${BLUE}Удаляем ноду Multiple...${NC}"
+    echo -e "${CLR_WARNING}Удаляем ноду Multiple...${NC}"
     pkill -f multiple-node
     sudo rm -rf ~/MultipleForLinux multipleforlinux.tar
     rm -rf multiple_node.sh
-    echo -e "${GREEN}Нода Multiple успешно удалена!${NC}"
+    echo -e "${CLR_SUCCESS}Нода Multiple успешно удалена!${NC}"
 }
 
 # Просмотр статуса
@@ -96,7 +97,7 @@ function check_status() {
         cd ~/multipleforlinux || exit
         ./multiple-cli status
     else
-        echo -e "${RED}Нода не найдена! Убедитесь, что она установлена.${NC}"
+        echo -e "${CLR_WARNING}Нода не найдена! Убедитесь, что она установлена.${NC}"
     fi
 }
 
@@ -116,8 +117,8 @@ function show_menu() {
         2) reinstal_node ;;
         3) remove_node ;;
         4) check_status ;;
-        5) echo -e "${GREEN}Выход...${NC}" ;;
-        *) echo -e "${RED}Неверный выбор! Пожалуйста, выберите от 1 до 5.${NC}" ;;
+        5) echo -e "${CLR_SUCCESS}Выход...${NC}" ;;
+        *) echo -e "${CLR_WARNING}Неверный выбор! Пожалуйста, выберите от 1 до 5.${NC}" ;;
     esac
 }
 
