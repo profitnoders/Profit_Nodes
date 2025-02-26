@@ -42,7 +42,7 @@ function install_node() {
 
     # Определяем путь установки
     INSTALL_DIR="$HOME/multipleforlinux"
-    
+
     # Удаляем старую папку, если она есть, чтобы избежать проблем с дубликатами
     if [[ -d "$INSTALL_DIR" ]]; then
         echo -e "${YELLOW}⚠️ Найдена старая установка, удаляем...${NC}"
@@ -56,9 +56,12 @@ function install_node() {
         exit 1
     }
 
-    # Распаковываем архив прямо в $HOME, чтобы папка multipleforlinux появилась в /root
-    echo -e "${BLUE}📦 Распаковываем файлы...${NC}"
-    tar -xvf "$HOME/MultipleForLinux.tar" -C "$HOME" || {
+    # Создаем папку multipleforlinux перед разархивацией
+    mkdir -p "$INSTALL_DIR"
+
+    # Распаковываем архив в папку multipleforlinux
+    echo -e "${BLUE}📦 Распаковываем файлы в папку multipleforlinux...${NC}"
+    tar -xvf "$HOME/MultipleForLinux.tar" --strip-components=1 -C "$INSTALL_DIR" || {
         echo -e "${RED}❌ Ошибка: Файл не является архивом или поврежден.${NC}"
         exit 1
     }
@@ -108,8 +111,6 @@ function install_node() {
     "$INSTALL_DIR/multiple-cli" status
 }
 
-
-
 # Обновление ноды
 function reinstal_node() {
     echo -e "${BLUE}Обновляем ноду Multiple...${NC}"
@@ -125,6 +126,7 @@ function remove_node() {
     echo -e "${BLUE}Удаляем ноду Multiple...${NC}"
     pkill -f multiple-node
     sudo rm -rf ~/multipleforlinux multipleforlinux.tar
+    rm -rf multiple_node.sh
     echo -e "${GREEN}Нода Multiple успешно удалена!${NC}"
 }
 
