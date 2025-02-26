@@ -56,9 +56,10 @@ function install_node() {
     echo "export PATH=\$PATH:$(pwd)" >> ~/.bashrc
     source ~/.bashrc
 
-    # Назначаем права для папки
+    # 🛠️ Назначаем права для папки
     echo -e "${BLUE}🛠️ Назначаем права для папки...${NC}"
-    chmod -R 777 MultipleForLinux
+    INSTALL_DIR="/root/MultipleForLinux"
+    chmod -R 777 "$INSTALL_DIR"
 
     # Запускаем ноду
     echo -e "${BLUE}🚀 Запускаем Multiple Node...${NC}"
