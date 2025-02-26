@@ -28,9 +28,9 @@ function install_dependencies() {
 function install_node() {
     echo -e "${BLUE}Начинаем установку Hemi...${NC}"
     install_dependencies
-    curl -L -O https://github.com/hemilabs/heminetwork/releases/download/v0.11.4/heminetwork_v0.11.4_linux_amd64.tar.gz
+    curl -L -O https://github.com/hemilabs/heminetwork/releases/download/v0.11.4/heminetwork_v0.11.5_linux_amd64.tar.gz
     mkdir -p hemi
-    tar --strip-components=1 -xzvf heminetwork_v0.11.4_linux_amd64.tar.gz -C hemi
+    tar --strip-components=1 -xzvf heminetwork_v0.11.5_linux_amd64.tar.gz -C hemi
     cd hemi || exit
 
     echo -e "${YELLOW}Создаем tBTC кошелек...${NC}"
@@ -40,7 +40,7 @@ function install_node() {
 
     echo -e "${YELLOW}Вставьте ваш приватный ключ от кошелька:${NC}"
     read -r PRIV_KEY
-    echo -e "${YELLOW}Укажите размер комиссии (в среднем ≈ 3000):${NC}"
+    echo -e "${YELLOW}Укажите размер комиссии (в среднем ≈ 2000):${NC}"
     read -r FEE
 
     echo "POPM_BTC_PRIVKEY=$PRIV_KEY" > popmd.env
@@ -82,7 +82,7 @@ EOT
 function update_node() {
     echo -e "${BLUE}Обновляем ноду Hemi...${NC}"
     sudo systemctl stop hemi
-    sudo rm -rf hemi heminetwork_v0.11.4_linux_amd64.tar.gz /etc/systemd/system/hemi.service
+    sudo rm -rf hemi heminetwork_v0.11.5_linux_amd64.tar.gz /etc/systemd/system/hemi.service
 
     install_node
     echo -e "${GREEN}Нода успешно обновлена!${NC}"
@@ -107,7 +107,7 @@ function remove_node() {
     echo -e "${BLUE}Удаляем ноду Hemi...${NC}"
     sudo systemctl stop hemi
     sudo systemctl disable hemi
-    sudo rm -rf hemi heminetwork_v0.11.4_linux_amd64.tar.gz /etc/systemd/system/hemi.service
+    sudo rm -rf hemi heminetwork_v0.11.5_linux_amd64.tar.gz /etc/systemd/system/hemi.service
     sudo systemctl daemon-reload
     sudo rm -rf hemi_script.sh
     echo -e "${GREEN}Нода успешно удалена!${NC}"
