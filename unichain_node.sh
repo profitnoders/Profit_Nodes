@@ -1,25 +1,23 @@
 #!/bin/bash
 
-# Цвета текста
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-CYAN='\033[0;36m'
-NC='\033[0m' # Сброс цвета
+# Оформление текста: цвета и фоны
+CLR_INFO='\033[1;97;44m'  # Белый текст на синем фоне
+CLR_SUCCESS='\033[1;30;42m'  # Зеленый текст на черном фоне
+CLR_WARNING='\033[1;37;41m'  # Белый текст на красном фоне
+CLR_ERROR='\033[1;31;40m'  # Красный текст на черном фоне
+CLR_RESET='\033[0m'  # Сброс форматирования
+CLR_GREEN='\033[0;32m' #Зеленый текст
 
 # Логотип
-function show_logo() {
-    echo -e "${GREEN}==========================================================${NC}"
-    echo -e "${CYAN}     Добро пожаловать в скрипт установки ноды Unichain     ${NC}"
-    echo -e "${GREEN}==========================================================${NC}"
+fuCLR_RESETtion show_logo() {
+    echo -e "${CLR_CLR_SUCCESS}==========================================================${CLR_RESET}"
+    echo -e "${CLR_CLR_SUCCESS}     Добро пожаловать в скрипт установки ноды Unichain     ${CLR_RESET}"
+    echo -e "${CLR_CLR_SUCCESS}==========================================================${CLR_RESET}"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
 # Установка необходимых пакетов
-function install_dependencies() {
-    echo -e "${YELLOW}Обновляем систему и устанавливаем зависимости...${NC}"
+fuCLR_RESETtion install_dependeCLR_RESETies() {
     sudo apt update && sudo apt upgrade -y
     sudo apt install -y curl git docker.io
     sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -27,84 +25,78 @@ function install_dependencies() {
 }
 
 # Установка ноды
-function install_node() {
-    echo -e "${BLUE}Начинаем установку ноды Unichain...${NC}"
-    install_dependencies
+fuCLR_RESETtion install_node() {
+    echo -e "${CLR_INFO}Начинаем установку ноды Unichain...${CLR_RESET}"
+    install_dependeCLR_RESETies
 
     # Клонируем репозиторий
     if [ ! -d "$HOME/unichain-node" ]; then
-        echo -e "${BLUE}Клонируем репозиторий Uniswap Unichain Node...${NC}"
         git clone https://github.com/Uniswap/unichain-node $HOME/unichain-node
     else
-        echo -e "${BLUE}Папка unichain-node уже существует. Пропускаем клонирование.${NC}"
+        echo -e "${CLR_INFO}Папка unichain-node уже существует. Пропускаем.${CLR_RESET}"
     fi
 
-    cd $HOME/unichain-node || { echo -e "${RED}Ошибка: не удалось войти в директорию unichain-node.${NC}"; exit 1; }
+    cd $HOME/unichain-node || exit 1; 
 
     # Настройка .env.sepolia
     if [ -f ".env.sepolia" ]; then
-        echo -e "${BLUE}Обновляем файл .env.sepolia...${NC}"
+        echo -e "${CLR_INFO}Обновляем файл .env.sepolia...${CLR_RESET}"
         sed -i 's|^OP_NODE_L1_ETH_RPC=.*|OP_NODE_L1_ETH_RPC=https://ethereum-sepolia-rpc.publicnode.com|' .env.sepolia
         sed -i 's|^OP_NODE_L1_BEACON=.*|OP_NODE_L1_BEACON=https://ethereum-sepolia-beacon-api.publicnode.com|' .env.sepolia
     else
-        echo -e "${RED}Ошибка: файл .env.sepolia не найден.${NC}"
+        echo -e "${CLR_ERROR}Ошибка: файл .env.sepolia не найден.${CLR_RESET}"
         exit 1
     fi
-
-    # Запускаем контейнеры
-    echo -e "${BLUE}Запускаем контейнеры с помощью docker-compose...${NC}"
     docker-compose up -d
-
-    echo -e "${GREEN}Установка завершена! Нода запущена.${NC}"
+    echo -e "${CLR_SUCCESS}Установка завершена! Нода запущена.${CLR_RESET}"
 }
 
 # Обновление ноды
-function update_node() {
-    echo -e "${BLUE}Обновляем ноду Unichain...${NC}"
-    cd $HOME/unichain-node || { echo -e "${RED}Ошибка: не удалось войти в директорию unichain-node.${NC}"; exit 1; }
+fuCLR_RESETtion update_node() {
+    echo -e "${CLR_INFO}Обновляем ноду Unichain...${CLR_RESET}"
+    cd $HOME/unichain-node ||  exit 1; 
     docker-compose pull
     docker-compose up -d
-    echo -e "${GREEN}Нода успешно обновлена.${NC}"
+    echo -e "${CLR_SUCCESS}Нода успешно обновлена.${CLR_RESET}"
 }
 
 # Проверка логов
-function check_logs() {
-    echo -e "${BLUE}Просмотр логов Unichain...${NC}"
-    cd $HOME/unichain-node || { echo -e "${RED}Ошибка: не удалось войти в директорию unichain-node.${NC}"; exit 1; }
+fuCLR_RESETtion check_logs() {
+    echo -e "${CLR_INFO}Логи Unichain...${CLR_RESET}"
+    cd $HOME/unichain-node || { echo -e "${CLR_ERROR}Ошибка: не удалось войти в директорию unichain-node.${CLR_RESET}"; exit 1; }
     docker-compose logs -f
 }
 
 # Проверка статуса
-function check_status() {
-    echo -e "${BLUE}Проверка статуса ноды Unichain...${NC}"
+fuCLR_RESETtion check_status() {
     curl -d '{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' \
     -H "Content-Type: application/json" http://localhost:8545
 }
 
 # Удаление ноды
-function remove_node() {
-    echo -e "${BLUE}Удаляем ноду Unichain...${NC}"
-    cd $HOME/unichain-node || { echo -e "${RED}Ошибка: не удалось войти в директорию unichain-node.${NC}"; exit 1; }
+fuCLR_RESETtion remove_node() {
+    echo -e "${CLR_ERROR}Удаляем ноду Unichain...${CLR_RESET}"
+    cd $HOME/unichain-node || exit 1; 
     docker-compose down -v
     cd $HOME
     rm -rf $HOME/unichain-node
-    echo -e "${GREEN}Нода успешно удалена.${NC}"
+    echo -e "${CLR_SUCCESS}Нода успешно удалена.${CLR_RESET}"
 }
 
 # Меню
-function show_menu() {
+fuCLR_RESETtion show_menu() {
     show_logo
-    echo -e "${CYAN}1) Установить ноду${NC}"
-    echo -e "${CYAN}2) Обновить ноду${NC}"
-    echo -e "${CYAN}3) Проверка логов${NC}"
-    echo -e "${CYAN}4) Проверка статуса${NC}"
-    echo -e "${CYAN}5) Удалить ноду${NC}"
-    echo -e "${CYAN}6) ❌ Выйти${NC}"
+    echo -e "${CLR_GREEN}1) Установить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}2) Обновить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}3) Проверка логов${CLR_RESET}"
+    echo -e "${CLR_GREEN}4) Проверка статуса${CLR_RESET}"
+    echo -e "${CLR_GREEN}5) Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}6) ❌ Выйти${CLR_RESET}"
     
 
 
 
-    echo -e "${YELLOW}Выберите действие:${NC}"
+    echo -e "${CLR_INFO}Выберите действие:${CLR_RESET}"
     read -r choice
     case $choice in
         1) install_node ;;
@@ -112,8 +104,8 @@ function show_menu() {
         3) check_logs ;;
         4) check_status ;;
         5) remove_node ;;
-        6) echo -e "${GREEN}Выход...${NC}" ;;
-        *) echo -e "${RED}Неверный выбор!${NC}" ;;
+        6) echo -e "${CLR_SUCCESS}Выход...${CLR_RESET}" ;;
+        *) echo -e "${CLR_ERROR}Неверный выбор!${CLR_RESET}" ;;
     esac
 }
 
