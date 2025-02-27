@@ -65,7 +65,7 @@ function view_logs() {
 
 # Функция перезапуска сервиса ноды
 function restart_node() {
-    echo -e "${CLR_WARNING}🔄 Перезапускаем ноду Titan...${CLR_RESET}"
+    echo -e "${CLR_WARNING}⚙️ Перезапускаем ноду Titan...${CLR_RESET}"
     docker restart titan
     sleep 2
     docker logs -f titan
@@ -86,7 +86,7 @@ function show_menu() {
     show_logo
     echo -e "${CLR_WARNING}📌 Выберите нужное действие:${CLR_RESET}"
     echo -e "${CLR_INFO}1) 🚀 Установить ноду${CLR_RESET}"
-    echo -e "${CLR_INFO}2) 🔄 Перезапустить ноду${CLR_RESET}"
+    echo -e "${CLR_INFO}2) ⚙️ Перезапустить ноду${CLR_RESET}"
     echo -e "${CLR_INFO}3) 🔄 Обновить ноду${CLR_RESET}"
     echo -e "${CLR_INFO}4) 📜 Просмотреть логи${CLR_RESET}"
     echo -e "${CLR_INFO}5) 🗑️  Удалить ноду${CLR_RESET}"
