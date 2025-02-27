@@ -95,28 +95,6 @@ function view_logs() {
     docker-compose logs -f
 }
 
-# Замена портов в конфигурации
-function replace_ports() {
-    local COMPOSE_FILE="$HOME/nwaku-compose/docker-compose.yml"
-
-    if [[ ! -f "$COMPOSE_FILE" ]]; then
-        echo -e "${RED}Файл docker-compose.yml не найден.${NC}"
-        exit 1
-    fi
-
-    echo -e "${YELLOW}Введите текущий внешний порт:${NC}"
-    read OLD_PORT
-    echo -e "${YELLOW}Введите новый внешний порт:${NC}"
-    read NEW_PORT
-
-    cd $HOME/nwaku-compose
-    docker-compose down
-    sed -i "s/:${OLD_PORT}:/:${NEW_PORT}:/" docker-compose.yml
-    docker-compose up -d
-
-    echo -e "${GREEN}Порты успешно заменены!${NC}"
-}
-
 # Удаление ноды Waku
 function remove_node() {
     echo -e "${BLUE}Удаляем ноду Waku...${NC}"
@@ -133,9 +111,8 @@ function show_menu() {
     echo -e "${CYAN}1) 🚀 Установить ноду${NC}"
     echo -e "${CYAN}2) 🔄 Обновить ноду${NC}"
     echo -e "${CYAN}3) 📜 Просмотр логов${NC}"
-    echo -e "${CYAN}4) 🔧 Замена портов${NC}"
-    echo -e "${CYAN}5) 🗑️ Удалить ноду${NC}"
-    echo -e "${CYAN}6) ❌ Выйти${NC}"
+    echo -e "${CYAN}4) 🗑️ Удалить ноду${NC}"
+    echo -e "${CYAN}5) ❌ Выйти${NC}"
 
     echo -e "${YELLOW}Выберите действие:${NC}"
     read choice
@@ -144,9 +121,8 @@ function show_menu() {
         1) install_node ;;
         2) update_node ;;
         3) view_logs ;;
-        4) replace_ports ;;
-        5) remove_node ;;
-        6) echo -e "${GREEN}Выход...${NC}" && exit 0 ;;
+        4) remove_node ;;
+        5) echo -e "${GREEN}Выход...${NC}" && exit 0 ;;
         *) echo -e "${RED}Неверный выбор! Попробуйте снова.${NC}" && show_menu ;;
     esac
 }
