@@ -10,7 +10,7 @@ CLR_GREEN='\033[0;32m' #Зеленый текст
 
 # Логотип
 function show_logo() {
-    echo -e "${CYAN}  Добро пожаловать в скрипт установки ноды Hemi  ${CLR_RESET}"
+    echo -e "${CLR_INFO}  Добро пожаловать в скрипт установки ноды Hemi  ${CLR_RESET}"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
@@ -64,7 +64,6 @@ function install_node() {
 
 # Создание systemd-сервиса
 function create_service() {
-    echo -e "${CYAN}🔧 Создаем systemd-сервис Hemi...${CLR_RESET}"
     USERNAME=$(whoami)
     HOME_DIR=$(eval echo "~$USERNAME")
 
@@ -128,21 +127,21 @@ function check_logs() {
 
 # Просмотр статуса
 function check_status() {
-    echo -e "${CYAN}📌 Проверяем статус ноды...${CLR_RESET}"
+    echo -e "${CLR_INFO}📌 Проверяем статус ноды...${CLR_RESET}"
     sudo systemctl status hemi --no-pager
 }
 
 # Меню
 function show_menu() {
     show_logo
-    echo -e "${CYAN}📌 Выберите действие:${CLR_RESET}"
-    echo -e "${CYAN}1) 🚀 Установить ноду${CLR_RESET}"
-    echo -e "${CYAN}2) 🔄 Обновить ноду${CLR_RESET}"
-    echo -e "${CYAN}3) ⚙️ Изменить комиссию${CLR_RESET}"
-    echo -e "${CYAN}4) 🗑️ Удалить ноду${CLR_RESET}"
-    echo -e "${CYAN}5) 💻 Проверить логи${CLR_RESET}"
-    echo -e "${CYAN}6) 📊 Проверить статус${CLR_RESET}"
-    echo -e "${CYAN}7) ❌ Выйти${CLR_RESET}"
+    echo -e "${CLR_INFO}📌 Выберите действие:${CLR_RESET}"
+    echo -e "${CLR_GREEN}1) 🚀 Установить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}2) 🔄 Обновить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}3) ⚙️ Изменить комиссию${CLR_RESET}"
+    echo -e "${CLR_GREEN}4) 🗑️ Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}5) 💻 Проверить логи${CLR_RESET}"
+    echo -e "${CLR_GREEN}6) 📊 Проверить статус${CLR_RESET}"
+    echo -e "${CLR_GREEN}7) ❌ Выйти${CLR_RESET}"
 
     echo -e "${CLR_WARNING}Введите номер действия:${CLR_RESET}"
     read -r choice
