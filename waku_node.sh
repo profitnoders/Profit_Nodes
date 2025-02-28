@@ -37,13 +37,13 @@ function install_node() {
     cd nwaku-compose
     cp .env.example .env
 
-    echo -e "\033[0;36;43mВставьте ваш RPC Sepolia ETH:\033[0m"
+    echo -e "\033[1;97;44mВставьте ваш RPC Sepolia ETH:\033[0m"
     read RPC
     
-    echo -e "\033[0;36;43m\nВставьте ваш приватный ключ от EVM кошелька, на котором есть Sepolia ETH:\033[0m"
+    echo -e "\033[1;97;44m\nВставьте ваш приватный ключ от EVM кошелька, на котором есть Sepolia ETH:"\033[0m
     read PRIVATE_KEY
     
-    echo -e "\033[0;36;43m\nУстановите пароль:\033[0m"
+    echo -e "\033[1;97;44m\nУстановите пароль:\033[0m"
     read PASSWORD
 
 
