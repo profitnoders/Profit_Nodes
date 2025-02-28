@@ -60,6 +60,7 @@ function update_node() {
     sudo rm -r keystore rln_tree
     git pull origin master
     ./register_rln.sh
+    docker compose pull
     docker-compose up -d
 
     echo -e "\033[1;30;42mОбновление завершено!\033[0m"
