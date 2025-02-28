@@ -1,8 +1,16 @@
 #!/bin/bash
 
+# Оформление текста: цвета и фоны
+CLR_INFO='\033[1;97;44m'  # Белый текст на синем фоне
+CLR_SUCCESS='\033[1;30;42m'  # Зеленый текст на черном фоне
+CLR_WARNING='\033[1;37;41m'  # Белый текст на красном фоне
+CLR_ERROR='\033[1;31;40m'  # Красный текст на черном фоне
+CLR_RESET='\033[0m'  # Сброс форматирования
+CLR_GREEN='\033[0;32m' #Зеленый текст
+
 # Функция отображения логотипа
 function show_logo() {
-    echo -e "\033[1;97;44m        Добро пожаловать в скрипт управления нодой Waku        \033[0m"
+    echo -e "${CLR_INFO}        Добро пожаловать в скрипт управления нодой Waku        ${CLR_RESET}"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
@@ -23,8 +31,8 @@ function install_dependencies() {
 
     if ! command -v docker-compose &> /dev/null; then
         sudo apt update && sudo apt install -y docker-compose
-        command -v docker-compose &> /dev/null && echo -e "\033[1;30;42mDocker Compose успешно установлен!\033[0m" || { echo -e "\033[1;31;40mОшибка установки.\033[0m"; exit 1; }
-    fi  # Закрывающий fi для второго if
+        command -v docker-compose &> /dev/null && echo -e "${CLR_INFO}Docker Compose успешно установлен!${CLR_RESET}" || { echo -e "\033[1;31;40mОшибка установки.${CLR_RESET}"; exit 1; }
+    fi 
 }
 
 # Установка ноды Waku
@@ -37,13 +45,13 @@ function install_node() {
     cd nwaku-compose
     cp .env.example .env
 
-    echo -e "\033[1;97;44mВставьте ваш RPC Sepolia ETH:\033[0m"
+    echo -e "${CLR_INFO}Вставьте ваш RPC Sepolia ETH:${CLR_RESET}"
     read RPC
     
-    echo -e "\033[1;97;44m\nВставьте ваш приватный ключ от EVM кошелька, на котором есть Sepolia ETH:\033[0m"
+    echo -e "${CLR_INFO}\nВставьте ваш приватный ключ от EVM кошелька, на котором есть Sepolia ETH:${CLR_RESET}"
     read PRIVATE_KEY
     
-    echo -e "\033[1;97;44m\nУстановите пароль:\033[0m"
+    echo -e "${CLR_INFO}\nУстановите пароль:${CLR_RESET}"
     read PASSWORD
 
 
@@ -66,12 +74,12 @@ function update_node() {
     docker compose pull
     docker-compose up -d
 
-    echo -e "\033[1;30;42mОбновление завершено!\033[0m"
+    echo -e "${CLR_INFO}Обновление завершено!${CLR_RESET}"
 }
 
 # Просмотр логов ноды
 function view_logs() {
-    echo -e "\033[1;97;44mПросмотр логов ноды Waku...\033[0m"
+    echo -e "${CLR_INFO}Просмотр логов ноды Waku...${CLR_RESET}"
     cd $HOME/nwaku-compose && docker-compose logs -f
 }
 
@@ -82,19 +90,19 @@ function remove_node() {
     cd $HOME
     rm -rf nwaku-compose
     rm -rf waku_node.sh
-    echo -e "\033[1;30;42mНода успешно удалена!\033[0m"
+    echo -e "${CLR_INFO}Нода успешно удалена!${CLR_RESET}"
 }
 
 # Главное меню
 function show_menu() {
     show_logo
-    echo -e "\033[0;32m 1) 🚀 Установить ноду\033[0m"
-    echo -e "\033[0;32m 2) 📜 Просмотр логов\033[0m"
-    echo -e "\033[0;32m 3) 🔄 Обновить ноду\033[0m"
-    echo -e "\033[0;32m 4) 🗑️ Удалить ноду\033[0m"
-    echo -e "\033[0;32m 5) ❌ Выйти\033[0m"
+    echo -e "${CLR_GREEN} 1) 🚀 Установить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN} 2) 📜 Просмотр логов${CLR_RESET}"
+    echo -e "${CLR_GREEN} 3) 🔄 Обновить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN} 4) 🗑️ Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN} 5) ❌ Выйти${CLR_RESET}"
 
-    echo -e "\033[1;37;41mВыберите действие:\033[0m"
+    echo -e "${CLR_INFO}Выберите действие:${CLR_RESET}"
     read choice
 
     case $choice in
@@ -102,8 +110,8 @@ function show_menu() {
         2) view_logs ;;
         3) update_node ;;
         4) remove_node ;;
-        5) echo -e "\033[1;30;42mВыход...\033[0m" && exit 0 ;;
-        *) echo -e "\033[1;31;40mНеверный выбор! Попробуйте снова.\033[0m" && show_menu ;;
+        5) echo -e "${CLR_INFO}Выход...${CLR_RESET}" && exit 0 ;;
+        *) echo -e "${CLR_INFO}Неверный выбор! Попробуйте снова.${CLR_RESET}" && show_menu ;;
     esac
 }
 
