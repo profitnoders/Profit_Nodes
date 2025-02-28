@@ -32,11 +32,11 @@ function install_node() {
     docker pull --platform linux/amd64 gcr.io/abacus-labs-dev/hyperlane-agent:agents-v1.0.0
 
     # Запрос данных у пользователя
-    echo -e "Введите имя валидатора:"
+    echo -e ${CLR_INFO}"Введите имя валидатора:${CLR_RESET}"
     read -r VALIDATOR_NAME
-    echo -e "Введите private key EVM кошелька:"
+    echo -e ${CLR_INFO}"Введите private key EVM кошелька:${CLR_RESET}"
     read -r PRIVATE_KEY
-    echo -e "Введите вашу RPC для сети Base Mainnet:"
+    echo -e ${CLR_INFO}"Введите вашу RPC для сети Base Mainnet:${CLR_RESET}"
     read -r BASE_MAINNET_RPC
 
     # Создание рабочей директории
