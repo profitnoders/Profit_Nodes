@@ -1,19 +1,16 @@
 #!/bin/bash
 
-# Цвета текста
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-CYAN='\033[0;36m'
-NC='\033[0m' # Нет цвета (сброс цвета)
+# Оформление текста: цвета и фоны
+CLR_INFO='\033[1;97;44m'  # Белый текст на синем фоне
+CLR_SUCCESS='\033[1;30;42m'  # Зеленый текст на черном фоне
+CLR_WARNING='\033[1;37;41m'  # Белый текст на красном фоне
+CLR_ERROR='\033[1;31;40m'  # Красный текст на черном фоне
+CLR_RESET='\033[0m'  # Сброс форматирования
+CLR_GREEN='\033[0;32m' #Зеленый текст
 
 # Функция отображения логотипа
 function show_logo() {
-    echo -e "${GREEN}==========================================================${NC}"
-    echo -e "${CYAN}       Добро пожаловать в скрипт управления нодой Sonaric       ${NC}"
-    echo -e "${GREEN}==========================================================${NC}"
+    echo -e "${CLR_INFO}       Добро пожаловать в скрипт управления нодой Sonaric       ${CLR_RESET}"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
@@ -26,36 +23,20 @@ function install_dependencies() {
     sudo apt-get install -y nodejs
 }
 
-# Функция проверки версии Ubuntu
-function check_ubuntu_version() {
-    UBUNTU_VERSION=$(lsb_release -rs)
-    REQUIRED_VERSION=22.04
-
-    if (( $(echo "$UBUNTU_VERSION < $REQUIRED_VERSION" | bc -l) )); then
-        echo -e "${RED}Версия Ubuntu должна быть 22.04 либо 24.04${NC}"
-        exit 1
-    fi
-}
-
 # Установка ноды
 function install_node() {
-    check_ubuntu_version
     install_dependencies
-    echo -e "${BLUE}Устанавливаем ноду Sonaric...${NC}"
-    sh -c "$(curl -fsSL http://get.sonaric.xyz/scripts/install.sh)"
 
-    echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
-    echo -e "${YELLOW}Команда для проверки состояния ноды:${NC}"
-    echo "sonaric node-info"
-    echo -e "${PURPLE}-----------------------------------------------------------------------${NC}"
-    echo -e "${GREEN}Установка завершена!${NC}"
+    sh -c "$(curl -fsSL http://get.sonaric.xyz/scripts/install.sh)"
+    sleep 5
+    
     sonaric node-info
 }
 
 # Обновление ноды
 function update_node() {
     sh -c "$(curl -fsSL http://get.sonaric.xyz/scripts/install.sh)"
-    echo -e "${GREEN}Обновлено!${NC}"
+    echo -e "${CLR_SUCCESS}Обновлено!${CLR_RESET}"
     sonaric node-info
 }
 
@@ -66,28 +47,28 @@ function check_node_status() {
 
 # Проверка поинтов
 function check_points() {
-    echo -e "${BLUE}Нафармленные поинты:${NC}"
+    echo -e "${CLR_SUCCESS}Нафармленные поинты:${CLR_RESET}"
     sonaric points
 }
 
 # Бекап ноды
 function backup_node() {
-    echo -e "${YELLOW}Укажите ваше название ноды при установке :${NC}"
+    echo -e "${CLR_ERROR}Укажите ваше название ноды при установке :${CLR_RESET}"
     read NODE_NAME
 
     sonaric identity-export -o "$NODE_NAME.identity"
 
-    echo -e "${GREEN}Резервный файл создан: ${NODE_NAME}.identity${NC}"
+    echo -e "${CLR_SUCCESS}Резервный файл создан: ${NODE_NAME}.identity${CLR_RESET}"
     cd && cat "${NODE_NAME}.identity"
 }
 
 # Регистрация ноды
 function register_node() {
-    echo -e "${YELLOW}Чтобы зарегистрировать ноду, укажите код из Discord:${NC}"
+    echo -e "${CLR_ERROR}Чтобы зарегистрировать ноду, укажите код из Discord:${CLR_RESET}"
     read DISCORD_CODE
 
     if [ -z "$DISCORD_CODE" ]; then
-        echo -e "${RED}Ошибка: код не может быть пустым.${NC}"
+        echo -e "${CLR_ERROR}Ошибка: код не может быть пустым.${CLR_RESET}"
         exit 1
     fi
 
@@ -96,25 +77,24 @@ function register_node() {
 
 # Удаление ноды
 function remove_node() {
-    echo -e "${BLUE}Удаляем ноду.${NC}"
     sudo systemctl stop sonaricd
     sudo rm -rf $HOME/.sonaric
-    echo -e "${GREEN}Нода удалена!${NC}"
+    echo -e "${CLR_SUCCESS}Нода удалена!${CLR_RESET}"
 }
 
 # Главное меню
 function show_menu() {
     show_logo
-    echo -e "${CYAN}1) 🚀 Установить ноду${NC}"
-    echo -e "${CYAN}2) 🔄 Обновить ноду${NC}"
-    echo -e "${CYAN}3) 📜 Проверить состояние ноды${NC}"
-    echo -e "${CYAN}4) 🏆 Проверить поинты${NC}"
-    echo -e "${CYAN}5) 💾 Создать бекап ноды${NC}"
-    echo -e "${CYAN}6) 🔑 Зарегистрировать ноду${NC}"
-    echo -e "${CYAN}7) 🗑️ Удалить ноду${NC}"
-    echo -e "${CYAN}8) ❌ Выйти${NC}"
+    echo -e "${CLR_GREEN}1) 🚀 Установить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}2) 🔄 Обновить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}3) 📜 Проверить состояние ноды${CLR_RESET}"
+    echo -e "${CLR_GREEN}4) 🏆 Проверить поинты${CLR_RESET}"
+    echo -e "${CLR_GREEN}5) 💾 Создать бекап ноды${CLR_RESET}"
+    echo -e "${CLR_GREEN}6) 🔑 Зарегистрировать ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}7) 🗑️ Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}8) ❌ Выйти${CLR_RESET}"
 
-    echo -e "${YELLOW}Выберите номер действия:${NC}"
+    echo -e "${CLR_WARNING}Выберите номер действия:${CLR_RESET}"
     read -r choice
 
     case $choice in
@@ -125,8 +105,8 @@ function show_menu() {
         5) backup_node ;;
         6) register_node ;;
         7) remove_node ;;
-        8) echo -e "${GREEN}Выход...${NC}" && exit 0 ;;
-        *) echo -e "${RED}Неверный выбор! Попробуйте снова.${NC}" && show_menu ;;
+        8) echo -e "${CLR_WARNING}Выход...${CLR_RESET}" && exit 0 ;;
+        *) echo -e "${CLR_WARNING}Неверный выбор! Попробуйте снова.${CLR_RESET}" && show_menu ;;
     esac
 }
 
