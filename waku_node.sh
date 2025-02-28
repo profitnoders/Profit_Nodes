@@ -2,18 +2,10 @@
 
 # Функция отображения логотипа
 function show_logo() {
-    echo -e "\033[1;30;42m==========================================================\033[0m"
     echo -e "\033[1;97;44m        Добро пожаловать в скрипт управления нодой Waku        \033[0m"
-    echo -e "\033[1;30;42m==========================================================\033[0m"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
-# Проверка и установка curl, если он отсутствует
-if ! command -v curl &> /dev/null; then
-    echo -e "\033[1;37;41mУстанавливаем curl...\033[0m"
-    sudo apt update
-    sudo apt install curl -y
-fi
 
 # Функция установки необходимых пакетов
 function install_dependencies() {
@@ -21,6 +13,11 @@ function install_dependencies() {
     sudo apt upgrade -y
     sudo apt install -y curl iptables build-essential git wget jq make gcc nano tmux htop \
         nvme-cli pkg-config libssl-dev libleveldb-dev tar clang bsdmainutils ncdu unzip
+    # Проверка и установка curl, если он отсутствует
+    if ! command -v curl &> /dev/null; then
+        sudo apt update
+        sudo apt install curl -y
+    fi
 }
 
 # Функция установки Docker и Docker Compose
