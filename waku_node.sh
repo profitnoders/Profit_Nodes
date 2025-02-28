@@ -39,10 +39,13 @@ function install_node() {
 
     echo -e "\033[0;36;43mВставьте ваш RPC Sepolia ETH:\033[0m"
     read RPC
-    echo -e "\033[0;36;43mВставьте ваш приватный ключ от EVM кошелька, на котором есть Sepolia ETH:\033[0m"
+    
+    echo -e "\033[0;36;43m\nВставьте ваш приватный ключ от EVM кошелька, на котором есть Sepolia ETH:\033[0m"
     read PRIVATE_KEY
-    echo -e "\033[0;36;43mУстановите пароль:\033[0m"
+    
+    echo -e "\033[0;36;43m\nУстановите пароль:\033[0m"
     read PASSWORD
+
 
     sed -i "s|RLN_RELAY_ETH_CLIENT_ADDRESS=.*|RLN_RELAY_ETH_CLIENT_ADDRESS=$RPC|" .env
     sed -i "s|ETH_TESTNET_KEY=.*|ETH_TESTNET_KEY=$PRIVATE_KEY|" .env
