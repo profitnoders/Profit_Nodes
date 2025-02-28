@@ -9,15 +9,13 @@ CLR_RESET='\033[0m'  # Сброс форматирования
 CLR_GREEN='\033[0;32m' #Зеленый текст
 
 # Логотип
-fuCLR_RESETtion show_logo() {
-    echo -e "${CLR_CLR_SUCCESS}==========================================================${CLR_RESET}"
-    echo -e "${CLR_CLR_SUCCESS}     Добро пожаловать в скрипт установки ноды Unichain     ${CLR_RESET}"
-    echo -e "${CLR_CLR_SUCCESS}==========================================================${CLR_RESET}"
+function show_logo() {
+    echo -e "${CLR_SUCCESS}     Добро пожаловать в скрипт установки ноды Unichain     ${CLR_RESET}"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
 # Установка необходимых пакетов
-fuCLR_RESETtion install_dependeCLR_RESETies() {
+function install_dependencies() {
     sudo apt update && sudo apt upgrade -y
     sudo apt install -y curl git docker.io
     sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -25,9 +23,9 @@ fuCLR_RESETtion install_dependeCLR_RESETies() {
 }
 
 # Установка ноды
-fuCLR_RESETtion install_node() {
+function install_node() {
     echo -e "${CLR_INFO}Начинаем установку ноды Unichain...${CLR_RESET}"
-    install_dependeCLR_RESETies
+    install_dependencies
 
     # Клонируем репозиторий
     if [ ! -d "$HOME/unichain-node" ]; then
@@ -52,7 +50,7 @@ fuCLR_RESETtion install_node() {
 }
 
 # Обновление ноды
-fuCLR_RESETtion update_node() {
+function update_node() {
     echo -e "${CLR_INFO}Обновляем ноду Unichain...${CLR_RESET}"
     cd $HOME/unichain-node ||  exit 1; 
     docker-compose pull
@@ -61,21 +59,20 @@ fuCLR_RESETtion update_node() {
 }
 
 # Проверка логов
-fuCLR_RESETtion check_logs() {
+function check_logs() {
     echo -e "${CLR_INFO}Логи Unichain...${CLR_RESET}"
-    cd $HOME/unichain-node || { echo -e "${CLR_ERROR}Ошибка: не удалось войти в директорию unichain-node.${CLR_RESET}"; exit 1; }
+    cd $HOME/unichain-node ||  exit 1; 
     docker-compose logs -f
 }
 
 # Проверка статуса
-fuCLR_RESETtion check_status() {
+function check_status() {
     curl -d '{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' \
     -H "Content-Type: application/json" http://localhost:8545
 }
 
 # Удаление ноды
-fuCLR_RESETtion remove_node() {
-    echo -e "${CLR_ERROR}Удаляем ноду Unichain...${CLR_RESET}"
+function remove_node() {
     cd $HOME/unichain-node || exit 1; 
     docker-compose down -v
     cd $HOME
@@ -84,7 +81,7 @@ fuCLR_RESETtion remove_node() {
 }
 
 # Меню
-fuCLR_RESETtion show_menu() {
+function show_menu() {
     show_logo
     echo -e "${CLR_GREEN}1) Установить ноду${CLR_RESET}"
     echo -e "${CLR_GREEN}2) Обновить ноду${CLR_RESET}"
