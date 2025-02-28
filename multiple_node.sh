@@ -9,24 +9,19 @@ CLR_RESET='\033[0m'  # Сброс форматирования
 
 # Логотип
 function show_logo() {
-    echo -e "${CLR_GREEN}========================================================${CLR_RESET}"
     echo -e "${CLR_GREEN}    Добро пожаловать в скрипт установки ноды Multiple   ${CLR_RESET}"
-    echo -e "${CLR_GREEN}========================================================${CLR_RESET}"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
 # Установка необходимых пакетов
 function install_dependencies() {
-    echo -e "${CLR_INFO}🔍 Устанавливаем необходимые пакеты...${CLR_RESET}"
     sudo apt update && sudo apt upgrade -y
     sudo apt install -y curl tar wget
 }
 
 # Функция установки ноды Multiple
 function install_node() {
-    echo -e "${CLR_INFO}🚀 Начинаем установку ноды Multiple...${CLR_RESET}"
     install_dependencies
-
     # Определяем архитектуру системы
     ARCH=$(uname -m)
     if [[ "$ARCH" == "x86_64" || "$ARCH" == "aarch64" ]]; then
