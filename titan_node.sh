@@ -6,109 +6,96 @@ CLR_SUCCESS='\033[1;30;42m'  # Зеленый текст на черном фо�
 CLR_WARNING='\033[1;37;41m'  # Белый текст на красном фоне
 CLR_ERROR='\033[1;31;40m'  # Красный текст на черном фоне
 CLR_RESET='\033[0m'  # Сброс форматирования
-CLR_GREEN='\033[0;32m' #Зеленый текст
+CLR_GREEN='\033[0;32m' # Зеленый текст
 
 # Функция отображения логотипа
 function show_logo() {
-    echo -e "${CLR_INFO}          Установочный скрипт для Titan Node              ${CLR_RESET}"
+    echo -e "${CLR_INFO}     Добро пожаловать в скрипт установки ноды Titan      ${CLR_RESET}"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
-# Функция установки зависимостей
+# Функция установки необходимых пакетов
 function install_dependencies() {
-    sudo apt update && sudo apt upgrade -y
-    sudo apt install -y wget tar curl
+    sudo apt update -y && sudo apt upgrade -y
+    sudo apt install -y curl wget git docker.io
+}
+
+# Функция установки Docker
+function install_docker() {
+    echo -e "${CLR_INFO}Проверяем Docker...${CLR_RESET}"
+    if ! command -v docker &> /dev/null; then
+        echo -e "${CLR_WARNING}Docker не установлен. Устанавливаем Docker...${CLR_RESET}"
+        sudo apt install docker.io -y
+    else
+        echo -e "${CLR_SUCCESS}Docker уже установлен!${CLR_RESET}"
+    fi
 }
 
 # Функция установки ноды Titan
 function install_node() {
-    echo -e "${CLR_INFO}🚀 Начинаем установку ноды Titan...${CLR_RESET}"
     install_dependencies
+    install_docker
 
-    # Указываем директорию установки
-    INSTALL_DIR="/root/titan-edge"
+    echo -e "${CLR_INFO}Удаляем старые данные ноды...${CLR_RESET}"
+    rm -rf ~/.titanedge
 
-    # Скачиваем архив с нодой
-    echo -e "${CLR_INFO}🌍 Скачиваем клиент Titan...${CLR_RESET}"
-    wget -O /root/titan-edge.tar.gz "https://github.com/Titannet-dao/titan-node/releases/download/v0.1.20/titan-edge_v0.1.20_246b9dd_linux-amd64.tar.gz"
+    echo -e "${CLR_INFO}Скачиваем Docker-образ ноды Titan...${CLR_RESET}"
+    docker pull nezha123/titan-edge
 
-    # Удаляем предыдущую папку, если была
-    rm -rf "$INSTALL_DIR"
+    echo -e "${CLR_INFO}Создаем хранилище для ноды...${CLR_RESET}"
+    mkdir -p ~/.titanedge
 
-    # Распаковываем архив
-    echo -e "${CLR_INFO}📦 Распаковываем файлы...${CLR_RESET}"
-    mkdir -p "$INSTALL_DIR"
-    tar -xvf /root/titan-edge.tar.gz -C "$INSTALL_DIR" --strip-components=1
+    echo -e "${CLR_INFO}Запускаем контейнер Titan...${CLR_RESET}"
+    docker run --network=host -d -v ~/.titanedge:/root/.titanedge nezha123/titan-edge
 
-    # Проверяем, создалась ли папка
-    if [[ ! -d "$INSTALL_DIR" ]]; then
-        echo -e "${CLR_ERROR}❌ Ошибка: Папка Titan не была создана!${CLR_RESET}"
-        exit 1
-    fi
-
-    cd "$INSTALL_DIR" || exit
-
-    # Копируем исполняемые файлы в системные директории
-    echo -e "${CLR_INFO}🔑 Устанавливаем Titan Edge...${CLR_RESET}"
-    sudo cp titan-edge /usr/local/bin
-    sudo cp libgoworkerd.so /usr/local/lib
-
-    # Настройка окружения
-    echo -e "${CLR_INFO}🔧 Настраиваем окружение...${CLR_RESET}"
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
-
-    # Запуск ноды
-    echo -e "${CLR_INFO}🚀 Запускаем Titan Node...${CLR_RESET}"
-    titan-edge daemon start --init --url https://cassini-locator.titannet.io:5000/rpc/v0 &
-
-    echo -e "${CLR_SUCCESS}✅ Нода Titan успешно установлена и запущена!${CLR_RESET}"
+    echo -e "${CLR_SUCCESS}✅ Установка завершена! Нода запущена.${CLR_RESET}"
 }
 
-# Функция проверки статуса ноды
-function check_status() {
-    echo -e "${CLR_INFO}📌 Проверяем статус ноды...${CLR_RESET}"
-    titan-edge status
+# Функция привязки идентификатора
+function bind_identity() {
+    echo -e "${CLR_WARNING}Введите ваш Identity Code:${CLR_RESET}"
+    read -r IDENTITY_CODE
+
+    echo -e "${CLR_INFO}Привязываем ваш код...${CLR_RESET}"
+    docker run --rm -it -v ~/.titanedge:/root/.titanedge nezha123/titan-edge bind --hash="$IDENTITY_CODE" https://api-test1.container1.titannet.io/api/v2/device/binding
+
+    echo -e "${CLR_SUCCESS}✅ Нода успешно привязана!${CLR_RESET}"
 }
 
 # Функция удаления ноды
 function remove_node() {
-    echo -e "${CLR_ERROR}⚠️ ВНИМАНИЕ: Удаление ноды Titan!${CLR_RESET}"
-    sudo systemctl stop titan-edge
-    sudo rm -rf /usr/local/bin/titan-edge
-    sudo rm -rf /usr/local/lib/libgoworkerd.so
-    rm -rf /root/titan-edge
-    rm -rf /root/titan-edge.tar.gz
+    echo -e "${CLR_ERROR}Останавливаем и удаляем ноду Titan...${CLR_RESET}"
+    docker stop $(docker ps -q --filter ancestor=nezha123/titan-edge) 2>/dev/null
+    docker rm $(docker ps -aq --filter ancestor=nezha123/titan-edge) 2>/dev/null
+    rm -rf ~/.titanedge
     echo -e "${CLR_SUCCESS}✅ Нода успешно удалена!${CLR_RESET}"
 }
 
-# Функция привязки аккаунта
-function bind_node() {
-    echo -e "${CLR_INFO}🔗 Вставьте ваш идентификационный код:${CLR_RESET}"
-    read -r IDENTIFIER
-
-    titan-edge bind --hash="$IDENTIFIER" https://api-test1.container1.titannet.io/api/v2/device/b
-
-    echo -e "${CLR_SUCCESS}✅ Аккаунт успешно привязан!${CLR_RESET}"
+# Функция просмотра логов
+function check_logs() {
+    echo -e "${CLR_INFO}Просмотр логов ноды Titan...${CLR_RESET}"
+    docker logs --tail 100 -f $(docker ps -q --filter ancestor=nezha123/titan-edge)
 }
 
-# Функция отображения меню
+# Главное меню
 function show_menu() {
     show_logo
-    echo -e "${CLR_WARNING}📌 Выберите нужное действие:${CLR_RESET}"
+    echo -e "${CLR_INFO}Выберите действие:${CLR_RESET}"
     echo -e "${CLR_GREEN}1) 🚀 Установить ноду${CLR_RESET}"
-    echo -e "${CLR_GREEN}2) 🔄 Привязать аккаунт${CLR_RESET}"
-    echo -e "${CLR_GREEN}3) 📜 Проверить статус ноды${CLR_RESET}"
-    echo -e "${CLR_GREEN}4) 🗑️  Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}2) 🔗 Привязать Identity Code${CLR_RESET}"
+    echo -e "${CLR_GREEN}3) 📜 Просмотр логов${CLR_RESET}"
+    echo -e "${CLR_ERROR}4) 🗑️ Удалить ноду${CLR_RESET}"
     echo -e "${CLR_GREEN}5) ❌ Выйти${CLR_RESET}"
+    
     read -p "Введите номер действия: " choice
 
     case $choice in
         1) install_node ;;
-        2) bind_node ;;
-        3) check_status ;;
+        2) bind_identity ;;
+        3) check_logs ;;
         4) remove_node ;;
-        5) exit 0 ;;
-        *) echo -e "${CLR_ERROR}❌ Ошибка: Некорректный выбор! Попробуйте снова.${CLR_RESET}" ;;
+        5) echo -e "${CLR_SUCCESS}Выход...${CLR_RESET}" && exit 0 ;;
+        *) echo -e "${CLR_ERROR}Ошибка: Неверный выбор! Попробуйте снова.${CLR_RESET}" && show_menu ;;
     esac
 }
 
