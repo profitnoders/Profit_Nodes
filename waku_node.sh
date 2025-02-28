@@ -6,7 +6,6 @@ function show_logo() {
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
-
 # Функция установки необходимых пакетов
 function install_dependencies() {
     sudo apt update -y
@@ -74,7 +73,6 @@ function view_logs() {
 
 # Удаление ноды Waku
 function remove_node() {
-    echo -e "\033[1;97;44mУдаляем ноду Waku...\033[0m"
     cd $HOME/nwaku-compose
     docker-compose down
     cd $HOME
@@ -86,19 +84,19 @@ function remove_node() {
 # Главное меню
 function show_menu() {
     show_logo
-    echo -e "\033[0;36;43m1) 🚀 Установить ноду\033[0m"
-    echo -e "\033[0;36;43m2) 🔄 Обновить ноду\033[0m"
-    echo -e "\033[0;36;43m3) 📜 Просмотр логов\033[0m"
-    echo -e "\033[0;36;43m4) 🗑️ Удалить ноду\033[0m"
-    echo -e "\033[0;36;43m5) ❌ Выйти\033[0m"
+    echo -e "\033[0;32m) 🚀 Установить ноду\033[0m"
+    echo -e "\033[0;32m) 📜 Просмотр логов\033[0m"
+    echo -e "\033[0;32m) 🔄 Обновить ноду\033[0m"
+    echo -e "\033[0;32m) 🗑️ Удалить ноду\033[0m"
+    echo -e "\033[0;32m) ❌ Выйти\033[0m"
 
     echo -e "\033[1;37;41mВыберите действие:\033[0m"
     read choice
 
     case $choice in
         1) install_node ;;
-        2) update_node ;;
-        3) view_logs ;;
+        2) view_logs ;;
+        3) update_node ;;
         4) remove_node ;;
         5) echo -e "\033[1;30;42mВыход...\033[0m" && exit 0 ;;
         *) echo -e "\033[1;31;40mНеверный выбор! Попробуйте снова.\033[0m" && show_menu ;;
