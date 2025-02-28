@@ -9,9 +9,7 @@ CLR_GREEN='\033[0;32m' #Зеленый текст
 CLR_RESET='\033[0m'  # Сброс форматирования
 
 function show_logo() {
-    echo -e "${CLR_GREEN}==========================================================${CLR_RESET}"
-    echo -e "${CLR_GREEN}     Добро пожаловать в скрипт управления нодой Cysic     ${CLR_RESET}"
-    echo -e "${CLR_GREEN}==========================================================${CLR_RESET}"
+    echo -e "${CLR_INFO}     Добро пожаловать в скрипт управления нодой Cysic     ${CLR_RESET}"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
@@ -64,7 +62,7 @@ EOF'
 }
 
 function remove_node() {
-    echo -e "${CLR_INFO}Удаление ноды Cysic...${CLR_RESET}"
+    echo -e "${CLR_WARNING}Удаление ноды Cysic...${CLR_RESET}"
 
     # Остановка и удаление службы
     if sudo systemctl is-active --quiet cysic; then
@@ -98,20 +96,10 @@ function show_menu() {
     read -r choice
 
     case $choice in
-        1)
-            install_node
-            ;;
-        2)
-            remove_node
-            ;;
-        3)
-            echo -e "${CLR_WARNING}Выход...${CLR_RESET}"
-            exit 0
-            ;;
-        *)
-            echo -e "${CLR_WARNING}Неверный выбор! Пожалуйста, выберите пункт из меню.${CLR_RESET}"
-            show_menu
-            ;;
+        1) install_node ;;
+        2) remove_node ;;
+        3) echo -e "${CLR_SUCCESS}Выход...${CLR_RESET}" && exit 0 ;;
+        *) echo -e "${CLR_ERROR}❌ Ошибка: Неверный ввод! Попробуйте снова.${CLR_RESET}" ;;
     esac
 }
 
