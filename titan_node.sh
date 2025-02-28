@@ -11,6 +11,7 @@ CLR_GREEN='\033[0;32m' #Зеленый текст
 # Функция отображения логотипа
 function show_logo() {
     echo -e "${CLR_INFO}          Установочный скрипт для Titan Node              ${CLR_RESET}"
+    curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
 # Функция установки зависимостей
