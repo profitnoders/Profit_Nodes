@@ -9,9 +9,7 @@ CLR_RESET='\033[0m'  # Сброс форматирования
 
 # Функция для отображения приветственного баннера
 function show_logo() {
-    echo -e "${CLR_SUCCESS}**********************************************************${CLR_RESET}"
     echo -e "${CLR_INFO}          Установочный скрипт для Nexus Node              ${CLR_RESET}"
-    echo -e "${CLR_SUCCESS}**********************************************************${CLR_RESET}"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
