@@ -9,9 +9,7 @@ CLR_RESET='\033[0m'  # Сброс цвета
 
 # Функция отображения логотипа
 function show_logo() {
-    echo -e "${CLR_SUCCESS}==========================================================${CLR_RESET}"
     echo -e "${CLR_INFO}         Добро пожаловать в установщик Gaianet Node       ${CLR_RESET}"
-    echo -e "${CLR_SUCCESS}==========================================================${CLR_RESET}"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
@@ -43,7 +41,6 @@ function install_node() {
 
 # Запуск ноды
 function start_node() {
-    echo -e "${CLR_INFO}▶ Запускаем ноду Gaianet...${CLR_RESET}"
     gaianet start
     echo -e "${CLR_SUCCESS}✅ Нода запущена!${CLR_RESET}"
 }
