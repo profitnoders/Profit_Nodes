@@ -18,17 +18,14 @@ function install_dependencies() {
         sudo apt update
         sudo apt install curl -y
     fi
-}
-
-# Функция установки Docker и Docker Compose
-function install_docker() {
     if ! command -v docker &> /dev/null; then
         curl -fsSL https://get.docker.com | sh
     fi
-    if ! command -v docker-compose &> /dev/null; then
-    sudo apt update && sudo apt install -y docker-compose
-    command -v docker-compose &> /dev/null && echo -e "\033[1;30;42mDocker Compose успешно установлен!\033[0m" || { echo -e "\033[1;31;40mОшибка установки.\033[0m"; exit 1; }
 
+    if ! command -v docker-compose &> /dev/null; then
+        sudo apt update && sudo apt install -y docker-compose
+        command -v docker-compose &> /dev/null && echo -e "\033[1;30;42mDocker Compose успешно установлен!\033[0m" || { echo -e "\033[1;31;40mОшибка установки.\033[0m"; exit 1; }
+    fi  # Закрывающий fi для второго if
 }
 
 # Установка ноды Waku
