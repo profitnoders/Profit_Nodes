@@ -1,32 +1,28 @@
 #!/bin/bash
 
-# Цветовые коды для отображения текста
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-CYAN='\033[0;36m'
-NC='\033[0m' # Сброс цвета
+# Оформление текста: цвета и фоны
+CLR_INFO='\033[1;97;44m'  # Белый текст на синем фоне
+CLR_SUCCESS='\033[1;30;42m'  # Зеленый текст на черном фоне
+CLR_WARNING='\033[1;37;41m'  # Белый текст на красном фоне
+CLR_ERROR='\033[1;31;40m'  # Красный текст на черном фоне
+CLR_RESET='\033[0m'  # Сброс форматирования
+CLR_GREEN='\033[0;32m' #Зеленый текст
 
 # Функция для отображения логотипа
 function show_logo() {
-    echo -e "${GREEN}===============================${NC}"
-    echo -e "${CYAN} Добро пожаловать в скрипт установки ноды Dria ${NC}"
-    echo -e "${GREEN}===============================${NC}"
+    echo -e "${CLR_SUCCESS} Добро пожаловать в скрипт установки ноды Dria ${CLR_RESET}"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
 # Функция для установки зависимостей
 function install_dependencies() {
-    echo -e "${YELLOW}Обновляем систему и устанавливаем необходимые пакеты...${NC}"
     sudo apt update && sudo apt upgrade -y
     sudo apt install -y git make jq build-essential gcc unzip wget lz4 aria2 curl
 }
 
 # Установка ноды
 function install_node() {
-    echo -e "${BLUE}Начинаем установку ноды Dria...${NC}"
+    echo -e "${CLR_INFO}Начинаем установку ноды Dria...${CLR_RESET}"
     install_dependencies
 
     # Обновление и установка зависимостей
@@ -35,12 +31,12 @@ function install_node() {
 
     # Проверка архитектуры системы
     ARCH=$(uname -m)
-    if [[ "$ARCH" == "aarch64" ]]; then
-        curl -L -o dkn-compute-node.zip https://github.com/firstbatchxyz/dkn-compute-launcher/releases/latest/download/dkn-compute-launcher-linux-arm64.zip
-    elif [[ "$ARCH" == "x86_64" ]]; then
-        curl -L -o dkn-compute-node.zip https://github.com/firstbatchxyz/dkn-compute-launcher/releases/latest/download/dkn-compute-launcher-linux-amd64.zip
+
+    if [[ "$ARCH" == "aarch64" || "$ARCH" == "x86_64" ]]; then
+        DOWNLOAD_URL="https://github.com/firstbatchxyz/dkn-compute-launcher/releases/latest/download/dkn-compute-launcher-linux-amd64.zip"
+        curl -L -o dkn-compute-node.zip "$DOWNLOAD_URL"
     else
-        echo -e "${RED}Не поддерживаемая архитектура системы: $ARCH${NC}"
+        echo -e "\033[1;31;40mОшибка поддержки архитектуры $ARCH\033[0m"
         exit 1
     fi
 
@@ -54,7 +50,6 @@ function install_node() {
 
 # Создание и запуск сервиса
 function create_and_start_service() {
-    echo -e "${BLUE}Настраиваем системный сервис для ноды Dria...${NC}"
     USERNAME=$(whoami)
     HOME_DIR=$(eval echo "~$USERNAME")
 
@@ -77,67 +72,55 @@ EOT"
     sudo systemctl daemon-reload
     sudo systemctl enable dria
     sudo systemctl start dria
-    echo -e "${GREEN}Сервис Dria запущен!${NC}"
+    echo -e "${CLR_SUCCESS}Сервис Dria запущен!${CLR_RESET}"
 }
 
 # Обновление ноды
 function update_node() {
-    echo -e "${BLUE}Обновление ноды до последней версии...${NC}"
+    echo -e "${CLR_INFO}Обновление ноды до последней версии...${CLR_RESET}"
     sudo systemctl stop dria
     rm -rf $HOME/dkn-compute-node
     install_node
     create_and_start_service
-    echo -e "${GREEN}Нода обновлена!${NC}"
-}
-
-# Изменение порта
-function change_port() {
-    echo -e "${YELLOW}Введите новый порт для ноды Dria:${NC}"
-    read -r NEW_PORT
-    sed -i "s|DKN_P2P_LISTEN_ADDR=/ip4/0.0.0.0/tcp/[0-9]*|DKN_P2P_LISTEN_ADDR=/ip4/0.0.0.0/tcp/$NEW_PORT|" "$HOME/dkn-compute-node/.env"
-    sudo systemctl restart dria
-    echo -e "${GREEN}Порт успешно изменен на $NEW_PORT.${NC}"
+    echo -e "${CLR_SUCCESS}Нода обновлена!${CLR_RESET}"
 }
 
 # Проверка логов
 function check_logs() {
-    echo -e "${BLUE}Просмотр логов ноды Dria...${NC}"
+    echo -e "${CLR_INFO}Логи ноды Dria...${CLR_RESET}"
     sudo journalctl -u dria -f --no-hostname -o cat
 }
 
 # Удаление ноды
 function remove_node() {
-    echo -e "${BLUE}Удаление ноды Dria...${NC}"
     sudo systemctl stop dria
     sudo systemctl disable dria
     sudo rm /etc/systemd/system/dria.service
     rm -rf $HOME/dkn-compute-node
     sudo systemctl daemon-reload
-    echo -e "${GREEN}Нода успешно удалена.${NC}"
+    echo -e "${CLR_GREEN}Нода успешно удалена.${CLR_RESET}"
 }
 
 # Меню выбора действий
 function show_menu() {
     show_logo
-    echo -e "${CYAN}1) ${GREEN} 🚀 ${NC}${CYAN}Установить ноду${NC}"
-    echo -e "${CYAN}2) ${GREEN} ✅ ${NC}${CYAN}Запустить ноду${NC}"
-    echo -e "${CYAN}3) ${BLUE} 🔄 ${NC}${CYAN}Обновить ноду${NC}"
-    echo -e "${CYAN}4) ${BLUE} 🔧 ${NC}${CYAN}Изменить порт${NC}"
-    echo -e "${CYAN}5) ${BLUE} 📜${NC}${CYAN} Просмотр логов${NC}"
-    echo -e "${CYAN}6) ${RED} 🗑️ ${NC}${CYAN}Удалить ноду${NC}"
-    echo -e "${CYAN}7) ${RED} ❌ ${NC}${CYAN}Выйти${NC}"
-    echo -e "${YELLOW}Введите номер:${NC}"
+    echo -e "${CLR_GREEN}1) 🚀 Установить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}2) ✅ Запустить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}3) 🔄 Обновить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}4) 📜 Просмотр логов${CLR_RESET}"
+    echo -e "${CLR_GREEN}5) 🗑️ Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}6) ❌ Выйти${CLR_RESET}"
+    echo -e "${CLR_INFO}Введите номер:${CLR_RESET}"
     read -r choice
 
     case $choice in
         1) install_node ;;
         2) create_and_start_service ;;
         3) update_node ;;
-        4) change_port ;;
-        5) check_logs ;;
-        6) remove_node ;;
-        7) echo -e "${GREEN}Выход...${NC}" ;;
-        *) echo -e "${RED}Неверный выбор. Попробуйте снова.${NC}" ;;
+        4) check_logs ;;
+        5) remove_node ;;
+        6) echo -e "${CLR_ERROR}Выход...${CLR_RESET}" ;;
+        *) echo -e "${CLR_WARNING}Неверный выбор. Попробуйте снова.${CLR_RESET}" ;;
     esac
 }
 
