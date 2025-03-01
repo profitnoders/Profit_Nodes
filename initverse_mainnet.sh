@@ -57,7 +57,7 @@ After=network.target
 User=$(whoami)
 WorkingDirectory=$HOME/initverse
 EnvironmentFile=$HOME/initverse/.env
-ExecStart=/bin/bash -c 'source $HOME/initverse/.env && $HOME/initverse/iniminer-linux-x64 --pool stratum+tcp://${WALLET}.${MAINER_NAME}@pool-c.yatespool.com:31189 --cpu-devices 1 --cpu-devices 2'
+ExecStart=/bin/bash -c 'source $HOME/initverse/.env && $HOME/initverse/iniminer-linux-x64 --pool stratum+tcp://${WALLET}.${MAINER_NAME}@pool-b.yatespool.com:32488 --cpu-devices 1 --cpu-devices 2'
 Restart=on-failure
 
 [Install]
