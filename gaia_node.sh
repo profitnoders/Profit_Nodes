@@ -31,7 +31,7 @@ function install_node() {
     sleep 9
 
     echo -e "${CLR_INFO}▶ Инициализируем узел с конфигурацией...${CLR_RESET}"
-    gaianet init --config https://raw.githubusercontent.com/GaiaNet-AI/node-configs/main/qwen2-0.5b-instruct/config.json
+    gaianet init --config https://raw.githubusercontent.com/GaiaNet-AI/node-configs/main/qwen2.5-0.5b-instruct/config.json
     sleep 3
 
     #sed -i 's/"llamaedge_port": "8080"/"llamaedge_port": "8781"/g' ~/gaianet/config.json
@@ -63,121 +63,11 @@ function setup_bot() {
     echo -e "${CLR_INFO}▶ Устанавливаем библиотеки Python...${CLR_RESET}"
     pip install requests faker
 
-    echo -e "${CLR_INFO}▶ Получаем Node ID для подстановки в бота...${CLR_RESET}"
-    NODE_ID=$(gaianet info | awk -F': ' '/Node ID/{print $2}' | tr -d '[:space:]' | sed 's/\x1B\[[0-9;]*[mK]//g')
-
-    if [[ -z "$NODE_ID" ]]; then
-        echo -e "${CLR_ERROR}❌ Не удалось получить Node ID. Проверьте работу ноды!${CLR_RESET}"
-        exit 1
-    fi
-
-    echo -e "${CLR_SUCCESS}✅ Node ID: $NODE_ID${CLR_RESET}"
-
-    echo -e "${CLR_INFO}▶ Создаём скрипт бота...${CLR_RESET}"
-    cat <<EOF > ~/random_chat_with_faker.py
-import requests
-import random
-import logging
-import time
-from faker import Faker
-from datetime import datetime
-
-# GaiaNet Node URL
-node_url = "https://$NODE_ID.gaia.domains/v1/chat/completions"
-
-faker = Faker()
-
-headers = {
-    "accept": "application/json",
-    "Content-Type": "application/json"
-}
-
-# Logging setup
-logging.basicConfig(filename='chat_log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
-
-# Conversation styles
-styles = ["formal", "friendly", "technical", "humorous", "philosophical"]
-
-# Chat history (max 5 messages)
-chat_history = []
-
-# Function to log messages
-def log_message(sender, message):
-    logging.info(f"{sender}: {message}")
-
-# Function to send a request to GaiaNet API
-def send_message(node_url, message):
-    try:
-        response = requests.post(node_url, json=message, headers=headers)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"API request error: {e}")
-        return None
-
-# Function to extract AI's response
-def extract_reply(response):
-    if response and 'choices' in response:
-        return response['choices'][0]['message']['content']
-    return "Sorry, I couldn't process that request."
-
-# Function to generate a random question based on the conversation style
-def generate_question(style):
-    word_count = random.randint(5, 12)  # Randomize sentence length (5-12 words)
+    curl -L -o gaia_bot.py https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/gaia_bot.py
     
-    if style == "formal":
-        return faker.paragraph(nb_sentences=1)  # Generates a formal-style question
-    elif style == "friendly":
-        return f"{faker.first_name()} would ask: {faker.sentence(nb_words=word_count)}"
-    elif style == "technical":
-        return f"Can you explain how {faker.word()} works in blockchain?"
-    elif style == "humorous":
-        return f"Why does {faker.word()} remind me of a programming joke?"
-    elif style == "philosophical":
-        return f"What does {faker.word()} mean in the grand scheme of things?"
-    
-    return faker.sentence(nb_words=word_count)
-
-# Main chat loop
-while True:
-    current_style = random.choice(styles)  # Pick a random style
-    question = generate_question(current_style)  # Generate a unique question
-
-    # Add to chat history
-    chat_history.append({"role": "user", "content": question})
-    if len(chat_history) > 5:  # Keep only the last 5 messages
-        chat_history.pop(0)
-
-    # Create JSON request
-    message = {"messages": chat_history}
-
-    # Log the question
-    question_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    log_message("User", f"Q ({question_time}): {question}")
-
-    # Send request & receive response
-    response = send_message(node_url, message)
-    reply = extract_reply(response)
-
-    # Add AI response to chat history
-    chat_history.append({"role": "assistant", "content": reply})
-
-    # Log the response
-    reply_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    log_message("AI", f"A ({reply_time}): {reply}")
-
-    # Print the conversation
-    print(f"\n[{current_style.upper()} STYLE]\n👤 Question ({question_time}): {question}\n🤖 Answer ({reply_time}): {reply}\n")
-
-    # Random typing delay (20-90 seconds)
-    delay = random.uniform(20, 90)
-    print(f"⏳ Waiting {delay} seconds before the next message...\n")
-    time.sleep(delay)
-
-EOF
 
     echo -e "${CLR_INFO}▶ Запускаем бота в screen-сессии...${CLR_RESET}"
-    screen -S faker_session -dm python3 ~/random_chat_with_faker.py
+    screen -S gaia_bot -dm python3 ~/gaia_bot.py
 
     echo -e "${CLR_SUCCESS}✅ Бот успешно запущен!${CLR_RESET}"
 }
