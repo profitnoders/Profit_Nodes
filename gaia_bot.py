@@ -87,7 +87,7 @@ def run_chatbot(api_key: str, base_url: str):
 # Основной запуск
 def main():
     api_key = input("🔑 Введите ваш API ключ: ")
-    domain_name = input("🌐 Введите имя домена (например, adminodes): ")
+    domain_name = input("🌐 Введите имя домена (например, antonprofit): ")
     
     base_url = f"https://{domain_name}.gaia.domains"
     
