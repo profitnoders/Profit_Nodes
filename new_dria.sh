@@ -90,12 +90,10 @@ function show_menu() {
     echo -e "${CLR_GREEN}1) 🚀 Установить ноду${CLR_RESET}"
     echo -e "${CLR_GREEN}2) ⚙️  Настроить ноду${CLR_RESET}"
     echo -e "${CLR_GREEN}3) ✅ Запустить ноду${CLR_RESET}"
-    echo -e "${CLR_GREEN}4) ⏹️  Остановить ноду${CLR_RESET}"
-    echo -e "${CLR_GREEN}5) 🔄 Обновить ноду${CLR_RESET}"
-    echo -e "${CLR_GREEN}6) 📊 Проверить производительность моделей${CLR_RESET}"
-    echo -e "${CLR_GREEN}7) 📜 Просмотр логов${CLR_RESET}"
-    echo -e "${CLR_GREEN}8) 🗑️  Удалить ноду${CLR_RESET}"
-    echo -e "${CLR_GREEN}9) ❌ Выйти${CLR_RESET}"
+    echo -e "${CLR_GREEN}4) 🔄 Обновить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}5) 📊 Проверить производительность моделей${CLR_RESET}"
+    echo -e "${CLR_GREEN}6) 🗑️  Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}7) ❌ Выйти${CLR_RESET}"
     echo -e "${CLR_INFO}Введите номер:${CLR_RESET}"
     read -r choice
 
@@ -103,12 +101,10 @@ function show_menu() {
         1) install_node ;;
         2) configure_node ;;
         3) start_node ;;
-        4) stop_node ;;
-        5) update_node ;;
-        6) measure_models ;;
-        7) check_logs ;;
-        8) remove_node ;;
-        9) echo -e "${CLR_ERROR}Выход...${CLR_RESET}" ;;
+        4) update_node ;;
+        5) measure_models ;;
+        6) remove_node ;;
+        7) echo -e "${CLR_ERROR}Выход...${CLR_RESET}" ;;
         *) echo -e "${CLR_WARNING}Неверный выбор. Попробуйте снова.${CLR_RESET}" ;;
     esac
 }
