@@ -37,11 +37,18 @@ function configure_node() {
     dkn-compute-launcher settings
 }
 
-# Запуск ноды
+# Запуск ноды в screen режиме
 function start_node() {
-    echo -e "${CLR_INFO}Запуск ноды Dria...${CLR_RESET}"
-    dkn-compute-launcher start
-    echo -e "${CLR_SUCCESS}Нода успешно запущена!${CLR_RESET}"
+    echo -e "${CLR_INFO}🚀 Запуск ноды Dria в screen сессии...${CLR_RESET}"
+
+    # Проверяем, существует ли уже сессия с таким именем
+    if screen -list | grep -q "dria_node"; then
+        echo -e "${CLR_WARNING}⚠ Нода уже запущена в screen сессии 'dria_node'.${CLR_RESET}"
+    else
+        # Создаем новую screen-сессию и запускаем ноду внутри нее
+        screen -dmS dria_node bash -c "dkn-compute-launcher start; exec bash"
+        echo -e "${CLR_SUCCESS}✅ Нода Dria успешно запущена в screen сессии 'dria_node'!${CLR_RESET}"
+    fi
 }
 
 # Остановка ноды
@@ -70,11 +77,21 @@ function check_logs() {
     dkn-compute-launcher logs
 }
 
-# Удаление ноды
+# Удаление ноды с подтверждением пользователя
 function remove_node() {
-    echo -e "${CLR_WARNING}Удаление ноды Dria...${CLR_RESET}"
-    dkn-compute-launcher uninstall
-    echo -e "${CLR_SUCCESS}Нода успешно удалена.${CLR_RESET}"
+    echo -e "${CLR_WARNING}⚠ Вы уверены, что хотите удалить ноду Dria? (y/n)${CLR_RESET}"
+    read -r confirmation
+
+    if [[ "$confirmation" == "y" || "$confirmation" == "Y" ]]; then
+        echo -e "${CLR_INFO}🚀 Удаление ноды Dria...${CLR_RESET}"
+        
+        # Остановка и удаление ноды
+        dkn-compute-launcher uninstall
+        
+        echo -e "${CLR_SUCCESS}✅ Нода Dria успешно удалена.${CLR_RESET}"
+    else
+        echo -e "${CLR_INFO}❌ Удаление отменено пользователем.${CLR_RESET}"
+    fi
 }
 
 # Меню выбора действий
