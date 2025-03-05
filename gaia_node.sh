@@ -72,15 +72,23 @@ function setup_bot() {
     echo -e "${CLR_SUCCESS}✅ Бот успешно запущен!${CLR_RESET}"
 }
 
-# Удаление ноды
+# Удаление ноды 
 function remove_node() {
-    echo -e "${CLR_WARNING}⚠ Удаляем ноду Gaianet...${CLR_RESET}"
-    gaianet stop
-    rm -rf ~/.gaianet
-    rm -rf gaianet random_chat_with_faker.py gaia_node.sh
+    echo -e "${CLR_WARNING}⚠ Вы уверены, что хотите удалить ноду Gaianet? (y/n)${CLR_RESET}"
+    read -r confirmation
 
-    echo -e "${CLR_SUCCESS}✅ Нода удалена!${CLR_RESET}"
+    if [[ "$confirmation" == "y" || "$confirmation" == "Y" ]]; then
+        echo -e "${CLR_WARNING}🗑 Удаляем ноду Gaianet...${CLR_RESET}"
+        gaianet stop
+        rm -rf ~/.gaianet
+        rm -rf gaianet gaia_node.sh gaia_bot.py chatbot.log
+
+        echo -e "${CLR_SUCCESS}✅ Нода успешно удалена!${CLR_RESET}"
+    else
+        echo -e "${CLR_INFO}❌ Удаление отменено.${CLR_RESET}"
+    fi
 }
+
 
 # Меню управления
 function show_menu() {
