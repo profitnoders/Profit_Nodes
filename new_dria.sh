@@ -51,13 +51,6 @@ function start_node() {
     fi
 }
 
-# Остановка ноды
-function stop_node() {
-    echo -e "${CLR_WARNING}Остановка ноды Dria...${CLR_RESET}"
-    dkn-compute-launcher stop
-    echo -e "${CLR_SUCCESS}Нода успешно остановлена!${CLR_RESET}"
-}
-
 # Обновление ноды
 function update_node() {
     echo -e "${CLR_INFO}Обновление ноды до последней версии...${CLR_RESET}"
@@ -71,11 +64,6 @@ function measure_models() {
     dkn-compute-launcher measure
 }
 
-# Проверка логов
-function check_logs() {
-    echo -e "${CLR_INFO}Просмотр логов ноды Dria...${CLR_RESET}"
-    dkn-compute-launcher logs
-}
 
 # Удаление ноды с подтверждением пользователя
 function remove_node() {
@@ -86,7 +74,9 @@ function remove_node() {
         echo -e "${CLR_INFO}🚀 Удаление ноды Dria...${CLR_RESET}"
         
         # Остановка и удаление ноды
-        dkn-compute-launcher uninstall
+        
+        screen -X -S dria_node quit
+        rm -rf .dria
         
         echo -e "${CLR_SUCCESS}✅ Нода Dria успешно удалена.${CLR_RESET}"
     else
