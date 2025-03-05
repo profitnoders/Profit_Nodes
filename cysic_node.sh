@@ -61,44 +61,68 @@ EOF'
     fi
 }
 
+# Перезапускаем ноду
+function restart_node(){
+    echo -e "${CLR_INFO}Рестрат ноды Cysic ${EVM_ADDRESS}${CLR_RESET}"
+    sudo systemctl restart cysic.service
+}
+
+# Логи ноды
+function logs_node(){
+    echo -e "${CLR_INFO}Логи ноды Cysic ${EVM_ADDRESS}${CLR_RESET}"
+    sudo journalctl -u cysic.service -f
+}
+
+# Удаление ноды с подтверждением
 function remove_node() {
-    echo -e "${CLR_WARNING}Удаление ноды Cysic...${CLR_RESET}"
+    echo -e "${CLR_WARNING}⚠ Вы уверены, что хотите удалить ноду Cysic? (y/n)${CLR_RESET}"
+    read -r confirmation
 
-    # Остановка и удаление службы
-    if sudo systemctl is-active --quiet cysic; then
-        sudo systemctl stop cysic
-        sudo systemctl disable cysic
-        sudo rm /etc/systemd/system/cysic.service
-        sudo systemctl daemon-reload
-        echo -e "${CLR_SUCCESS}Служба Cysic успешно удалена.${CLR_RESET}"
+    if [[ "$confirmation" == "y" || "$confirmation" == "Y" ]]; then
+        echo -e "${CLR_WARNING}🗑 Удаление ноды Cysic...${CLR_RESET}"
+
+        # Остановка и удаление службы
+        if sudo systemctl is-active --quiet cysic; then
+            sudo systemctl stop cysic
+            sudo systemctl disable cysic
+            sudo rm /etc/systemd/system/cysic.service
+            sudo systemctl daemon-reload
+            echo -e "${CLR_SUCCESS}✅ Служба Cysic успешно удалена.${CLR_RESET}"
+        else
+            echo -e "${CLR_WARNING}⚠ Служба Cysic не найдена.${CLR_RESET}"
+        fi
+
+        # Удаление файлов
+        if [ -d "$HOME/cysic-verifier" ]; then
+            rm -rf "$HOME/cysic-verifier"
+            echo -e "${CLR_SUCCESS}✅ Файлы ноды Cysic успешно удалены.${CLR_RESET}"
+        else
+            echo -e "${CLR_WARNING}⚠ Директория ноды Cysic не найдена.${CLR_RESET}"
+        fi
+
+        echo -e "${CLR_SUCCESS}✅ Нода Cysic успешно удалена!${CLR_RESET}"
     else
-        echo -e "${CLR_WARNING}Служба Cysic не найдена.${CLR_RESET}"
+        echo -e "${CLR_INFO}❌ Удаление отменено.${CLR_RESET}"
     fi
-
-    # Удаление файлов
-    if [ -d "$HOME/cysic-verifier" ]; then
-        rm -rf "$HOME/cysic-verifier"
-        echo -e "${CLR_SUCCESS}Файлы ноды Cysic успешно удалены.${CLR_RESET}"
-    else
-        echo -e "${CLR_WARNING}Директория ноды Cysic не найдена.${CLR_RESET}"
-    fi
-
-    echo -e "${CLR_SUCCESS}Нода Cysic успешно удалена!${CLR_RESET}"
 }
 
 function show_menu() {
     show_logo
     echo -e "${CLR_GREEN}1) 🚀 Установить ноду${CLR_RESET}"
-    echo -e "${CLR_GREEN}2) 🗑️  Удалить ноду${CLR_RESET}"
-    echo -e "${CLR_GREEN}3) ❌ Выйти${CLR_RESET}"
+    echo -e "${CLR_GREEN}2) 🔄 Перезапустить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}3) 💻 Посмотреть логи${CLR_RESET}"
+    echo -e "${CLR_GREEN}4) 🗑️  Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}5) ❌ Выйти${CLR_RESET}"
 
     echo -e "${CLR_INFO}Введите номер действия:${CLR_RESET}"
     read -r choice
 
     case $choice in
         1) install_node ;;
-        2) remove_node ;;
-        3) echo -e "${CLR_SUCCESS}Выход...${CLR_RESET}" && exit 0 ;;
+        2) restart_node ;;
+        3) logs_node ;;
+        4) remove_node ;;
+        5) echo -e "${CLR_SUCCESS}Выход...${CLR_RESET}" && exit 0 ;;
         *) echo -e "${CLR_ERROR}❌ Ошибка: Неверный ввод! Попробуйте снова.${CLR_RESET}" ;;
     esac
 }
