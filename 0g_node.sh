@@ -149,18 +149,22 @@ function view_full_logs() {
 # Функция смены RPC
 function change_rpc() {
     echo -e "${CLR_INFO}Выберите RPC для ноды:${CLR_RESET}"
-    echo -e "${CLR_GREEN}1) https://16600.rpc.thirdweb.com/${CLR_RESET}"
-    echo -e "${CLR_GREEN}2) https://og-testnet-evm.itrocket.net/${CLR_RESET}"
+    echo -e "${CLR_GREEN}1) https://evmrpc-testnet.0g.ai/${CLR_RESET}"
+    echo -e "${CLR_GREEN}2) https://0g-json-rpc-public.originstake.com/${CLR_RESET}"
     echo -e "${CLR_GREEN}3) https://rpc.ankr.com/0g_newton${CLR_RESET}"
-    echo -e "${CLR_GREEN}4) https://evmrpc-testnet.0g.ai/${CLR_RESET}"
+    echo -e "${CLR_GREEN}4) https://evm-rpc.0g.testnet.node75.org/${CLR_RESET}"
+    echo -e "${CLR_GREEN}5) https://0g-evm-rpc.murphynode.net/${CLR_RESET}"
+    echo -e "${CLR_GREEN}6) https://16600.rpc.thirdweb.com/${CLR_RESET}"
     
     read -p "Введите номер RPC: " rpc_choice
     
     case $rpc_choice in
-        1) RPC_URL="https://16600.rpc.thirdweb.com/" ;;
-        2) RPC_URL="https://og-testnet-evm.itrocket.net/" ;;
+        1) RPC_URL="https://evmrpc-testnet.0g.ai/" ;;
+        2) RPC_URL="https://0g-json-rpc-public.originstake.com/" ;;
         3) RPC_URL="https://rpc.ankr.com/0g_newton" ;;
-        4) RPC_URL="https://evmrpc-testnet.0g.ai/" ;;
+        4) RPC_URL="https://evm-rpc.0g.testnet.node75.org/" ;;
+        5) RPC_URL="https://0g-evm-rpc.murphynode.net/" ;;
+        6) RPC_URL="https://16600.rpc.thirdweb.com/" ;;
         *) echo -e "${CLR_ERROR}Ошибка: Неверный выбор!${CLR_RESET}" && return ;;
     esac
 
