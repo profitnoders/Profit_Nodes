@@ -47,7 +47,7 @@ def generate_question():
 # Функция отправки запроса к AI
 def send_request(api_key: str, base_url: str, question: str) -> str:
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"}
-    payload = {"model": "qwen2-0.5b-instruct", "messages": [{"role": "user", "content": question}], "temperature": 0.7}
+    payload = {"model": "qwen2.5-0.5b-instruct", "messages": [{"role": "user", "content": question}], "temperature": 0.7}
 
     for attempt in range(100):
         try:
