@@ -9,7 +9,7 @@ CLR_RESET='\033[0m'  # Сброс форматирования
 
 # Функция для отображения логотипа
 function show_logo() {
-    echo -e "${CLR_INFO}      Добро пожаловать в скрипт управления нодой Hyperlane      ${CLR_RESET}"
+    echo -e "${CLR_INFO}      Добро пожаловать в скрипт управления нодой Pipe Network      ${CLR_RESET}"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
@@ -78,7 +78,6 @@ function remove_node() {
 # Меню управления
 function show_menu() {
     show_logo 
-    echo -e "${CLR_SUCCESS} Добро пожаловать в установщик ноды Pipe ${CLR_RESET}"
     echo -e "${CLR_GREEN}1) 🚀 Установить ноду${CLR_RESET}"
     echo -e "${CLR_GREEN}2) ▶  Запустить ноду${CLR_RESET}"
     echo -e "${CLR_GREEN}3) 📊 Проверить статус ноды${CLR_RESET}"
