@@ -80,11 +80,11 @@ function show_menu() {
     show_logo 
     echo -e "${CLR_SUCCESS} Добро пожаловать в установщик ноды Pipe ${CLR_RESET}"
     echo -e "${CLR_GREEN}1) 🚀 Установить ноду${CLR_RESET}"
-    echo -e "${CLR_GREEN}2) ▶ Запустить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}2) ▶  Запустить ноду${CLR_RESET}"
     echo -e "${CLR_GREEN}3) 📊 Проверить статус ноды${CLR_RESET}"
     echo -e "${CLR_GREEN}4) 💰 Проверить поинты${CLR_RESET}"
     echo -e "${CLR_GREEN}5) 🔗 Зарегистрировать ноду${CLR_RESET}"
-    echo -e "${CLR_GREEN}6) 🗑️ Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}6) 🗑️  Удалить ноду${CLR_RESET}"
     echo -e "${CLR_GREEN}7) ❌ Выйти${CLR_RESET}"
     echo -e "${CLR_INFO}Введите номер действия:${CLR_RESET}"
     read -r choice
