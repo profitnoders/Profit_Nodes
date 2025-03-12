@@ -57,9 +57,8 @@ function check_points() {
 
 # Функция регистрации по реферальному коду
 function signup_referral() {
-    read -p "Введите реферальный код: " REF_CODE
     echo -e "${CLR_INFO}▶ Регистрация с реферальным кодом...${CLR_RESET}"
-    ./pop --signup-by-referral-route "$REF_CODE"
+    ./pop --signup-by-referral-route d58d356a91d0ba4b
 }
 
 # Функция удаления ноды
