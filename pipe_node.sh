@@ -18,6 +18,13 @@ function install_dependencies() {
     echo -e "${CLR_INFO}▶ Обновляем систему и устанавливаем зависимости...${CLR_RESET}"
     sudo apt update && sudo apt upgrade -y
     sudo apt install -y screen curl
+    sudo apt update && sudo apt install ufw -y
+
+    #открываем порты
+    sudo ufw allow 8003/tcp
+    sudo ufw allow 80/tcp
+    sudo ufw allow 443/tcp
+    sudo ufw reload
 }
 
 # Функция установки ноды
