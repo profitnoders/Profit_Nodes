@@ -96,7 +96,7 @@ function remove_node() {
     if [[ $confirmation == "y" || $confirmation == "Y" ]]; then
         echo -e "${CLR_INFO}▶ Остановка и удаление ноды...${CLR_RESET}"
         screen -S t3rn-executor -X quit
-        rm -rf $HOME/t3rn
+        rm -rf $HOME/t3rn new_t3rn.sh
         sed -i '/EXECUTOR_PROCESS_BIDS_ENABLED/d' ~/.bashrc
         sed -i '/EXECUTOR_PROCESS_ORDERS_ENABLED/d' ~/.bashrc
         sed -i '/EXECUTOR_PROCESS_CLAIMS_ENABLED/d' ~/.bashrc
