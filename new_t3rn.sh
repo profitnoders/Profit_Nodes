@@ -75,7 +75,7 @@ function start_node() {
     fi
 
     # Создаём screen-сессию и запускаем процесс ноды в нужной директории
-    screen -dmS t3rn-executor bash -c "cd $HOME/t3rn/executor/executor/bin && ./executor"
+    screen -S t3rn-executor -dm bash -c "$HOME/t3rn/executor/executor/bin/executor"
 
     # Проверяем, успешно ли запущена нода
     sleep 2
