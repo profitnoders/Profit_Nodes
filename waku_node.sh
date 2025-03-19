@@ -61,13 +61,14 @@ function install_node() {
 
     ./register_rln.sh
 
-    echo -e "${CLR_INFO}\nЗаменяем порты 5432 -> 5433; 80 -> 81; 8003 -> 8033...${CLR_RESET}"
+    echo -e "${CLR_INFO}\nЗаменяем порты 5432 -> 5433; 80 -> 81; 8003 -> 8033; 3000 -> 3001; 4000 -> 4001...${CLR_RESET}"
     echo -e "${CLR_INFO}\nПроверяем наличие файла $HOME/nwaku-compose/docker-compose.yml...${CLR_RESET}"
     if [[ -s "$HOME/nwaku-compose/docker-compose.yml" ]]; then
         echo -e "${CLR_SUCCESS}Файл найден, продолжаем замену портов...${CLR_RESET}"
         sed -i 's/5432/5433/g' "$HOME/nwaku-compose/docker-compose.yml"
         sed -i 's/80:80/81:80/g' "$HOME/nwaku-compose/docker-compose.yml"
         sed -i 's/8003:8003/8033:8003/g' "$HOME/nwaku-compose/docker-compose.yml"
+        sed -i 's/0.0.0.0:3000:3000/0.0.0.0:3001:3001/g; s/127.0.0.1:4000:4000/127.0.0.1:4001:4001/g' "$HOME/nwaku-compose/docker-compose.yml"
         echo -e "${CLR_SUCCESS}Замена портов выполнена успешно.${CLR_RESET}"
     else
         echo -e "${CLR_ERROR}Ошибка: Файл $HOME/nwaku-compose/docker-compose.yml отсутствует или пуст.${CLR_RESET}"
