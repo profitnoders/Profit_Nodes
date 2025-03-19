@@ -72,13 +72,30 @@ function start_node() {
     echo -e "${CLR_INFO}▶ Чтобы отсоединиться, нажмите: Ctrl + A, затем D${CLR_RESET}"
 }
 
-# Функция перезапуска ноды
-function restart_node() {
-    echo -e "${CLR_INFO}▶ Перезапуск t3rn-executor...${CLR_RESET}"
-    screen -S t3rn-executor -X quit
-    start_node
-    echo -e "${CLR_SUCCESS}✅ Нода успешно перезапущена!${CLR_RESET}"
+# Функция запуска ноды
+function start_node() {
+    echo -e "${CLR_INFO}▶ Запуск t3rn-executor в screen-сессии...${CLR_RESET}"
+
+    # Проверяем, запущена ли уже screen-сессия
+    if screen -list | grep -q "t3rn-executor"; then
+        echo -e "${CLR_WARNING}⚠ Нода уже запущена в screen-сессии 't3rn-executor'.${CLR_RESET}"
+        return
+    fi
+
+    # Создаём screen-сессию и запускаем процесс ноды в нужной директории
+    screen -dmS t3rn-executor bash -c "cd $HOME/t3rn/executor/executor/bin && ./executor"
+
+    # Проверяем, успешно ли запущена нода
+    sleep 2
+    if screen -list | grep -q "t3rn-executor"; then
+        echo -e "${CLR_SUCCESS}✅ Нода успешно запущена в screen-сессии 't3rn-executor'!${CLR_RESET}"
+        echo -e "${CLR_INFO}▶ Чтобы подключиться, используйте: screen -r t3rn-executor${CLR_RESET}"
+        echo -e "${CLR_INFO}▶ Чтобы отсоединиться, нажмите: Ctrl + A, затем D${CLR_RESET}"
+    else
+        echo -e "${CLR_ERROR}❌ Ошибка запуска ноды! Проверьте путь или попробуйте запустить вручную.${CLR_RESET}"
+    fi
 }
+
 
 # Функция удаления ноды (с подтверждением)
 function remove_node() {
@@ -108,9 +125,9 @@ function show_menu() {
     show_logo
     echo -e "${CLR_INFO}Выберите действие:${CLR_RESET}"
     echo -e "${CLR_SUCCESS}1) 🚀 Установить ноду${CLR_RESET}"
-    echo -e "${CLR_SUCCESS}2) ▶ Запустить ноду${CLR_RESET}"
+    echo -e "${CLR_SUCCESS}2)  ▶ Запустить ноду${CLR_RESET}"
     echo -e "${CLR_SUCCESS}3) 🔄 Перезапустить ноду${CLR_RESET}"
-    echo -e "${CLR_WARNING}4) 🗑 Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_WARNING}4)  🗑 Удалить ноду${CLR_RESET}"
     echo -e "${CLR_ERROR}5) ❌ Выйти${CLR_RESET}"
     
     read -p "Введите номер действия: " choice
