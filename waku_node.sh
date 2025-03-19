@@ -61,7 +61,7 @@ function install_node() {
 
     ./register_rln.sh
 
-    echo -e "${CLR_INFO}\nЗаменяем порты 5432 -> 5433; 80 -> 81; 8003 -> 8033; 3000 -> 3001; 4000 -> 4001...${CLR_RESET}"
+    echo -e "${CLR_INFO}\nЗаменяем порты 5432 -> 5433; 80 -> 81; 8003 -> 8033; 3000 -> 3001; 4000 -> 4002...${CLR_RESET}"
     echo -e "${CLR_INFO}\nПроверяем наличие файла $HOME/nwaku-compose/docker-compose.yml...${CLR_RESET}"
     if [[ -s "$HOME/nwaku-compose/docker-compose.yml" ]]; then
         echo -e "${CLR_SUCCESS}Файл найден, продолжаем замену портов...${CLR_RESET}"
