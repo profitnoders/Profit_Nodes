@@ -68,7 +68,9 @@ function install_node() {
         sed -i 's/5432/5433/g' "$HOME/nwaku-compose/docker-compose.yml"
         sed -i 's/80:80/81:80/g' "$HOME/nwaku-compose/docker-compose.yml"
         sed -i 's/8003:8003/8033:8003/g' "$HOME/nwaku-compose/docker-compose.yml"
-        #sed -i 's/0.0.0.0:3000:3000/0.0.0.0:3001:3001/g; s/127.0.0.1:4000:4000/127.0.0.1:4001:4001/g' "$HOME/nwaku-compose/docker-compose.yml"
+        sed -i 's/0.0.0.0:3000:3000/0.0.0.0:3001:3001/g; s/127.0.0.1:4000:4000/127.0.0.1:4001:4001/g' "$HOME/nwaku-compose/docker-compose.yml"
+        [ -f ~/nwaku-compose/monitoring/configuration/grafana.ini ] || touch ~/nwaku-compose/monitoring/configuration/grafana.ini
+        echo -e "[server]\nhttp_port = 3001" >> ~/nwaku-compose/monitoring/configuration/grafana.ini
         echo -e "${CLR_SUCCESS}Замена портов выполнена успешно.${CLR_RESET}"
     else
         echo -e "${CLR_ERROR}Ошибка: Файл $HOME/nwaku-compose/docker-compose.yml отсутствует или пуст.${CLR_RESET}"
