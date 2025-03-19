@@ -63,14 +63,6 @@ function install_node() {
     echo -e "${CLR_SUCCESS}✅ Установка завершена! Теперь вы можете запустить ноду.${CLR_RESET}"
 }
 
-# Функция запуска ноды
-function start_node() {
-    echo -e "${CLR_INFO}▶ Запуск t3rn-executor в screen-сессии...${CLR_RESET}"
-    screen -dmS t3rn-executor bash -c "$HOME/t3rn/executor/executor/bin/executor"
-    echo -e "${CLR_SUCCESS}✅ Нода запущена в screen-сессии 't3rn-executor'!${CLR_RESET}"
-    echo -e "${CLR_INFO}▶ Чтобы подключиться, используйте: screen -r t3rn-executor${CLR_RESET}"
-    echo -e "${CLR_INFO}▶ Чтобы отсоединиться, нажмите: Ctrl + A, затем D${CLR_RESET}"
-}
 
 # Функция запуска ноды
 function start_node() {
