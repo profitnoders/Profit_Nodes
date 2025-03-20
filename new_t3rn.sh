@@ -101,6 +101,12 @@ function restart_node() {
     echo -e "${CLR_SUCCESS}✅ Нода перезапущена!${CLR_RESET}"
 }
 
+# Функция вывода логов ноды
+function logs_node() {
+    echo -e "${CLR_INFO}▶ Логи ноды t3rn-executor...${CLR_RESET}"
+    sudo journalctl -fu t3rn
+}
+
 # Функция удаления ноды (с подтверждением)
 function remove_node() {
     echo -e "${CLR_WARNING}⚠ Вы уверены, что хотите удалить ноду t3rn? (y/n)${CLR_RESET}"
@@ -123,10 +129,11 @@ function show_menu() {
     show_logo
     echo -e "${CLR_INFO}Выберите действие:${CLR_RESET}"
     echo -e "${CLR_SUCCESS}1) 🚀 Установить ноду${CLR_RESET}"
-    echo -e "${CLR_SUCCESS}2) ▶ Запустить ноду${CLR_RESET}"
+    echo -e "${CLR_SUCCESS}2)  ▶ Запустить ноду${CLR_RESET}"
     echo -e "${CLR_SUCCESS}3) 🔄 Перезапустить ноду${CLR_RESET}"
-    echo -e "${CLR_WARNING}4) 🗑 Удалить ноду${CLR_RESET}"
-    echo -e "${CLR_ERROR}5) ❌ Выйти${CLR_RESET}"
+    echo -e "${CLR_SUCCESS}4) 📜 Показать логи ноды${CLR_RESET}"
+    echo -e "${CLR_WARNING}5)  🗑 Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_ERROR}6) ❌ Выйти${CLR_RESET}"
     
     read -p "Введите номер действия: " choice
 
@@ -134,8 +141,9 @@ function show_menu() {
         1) install_node ;;
         2) start_node ;;
         3) restart_node ;;
-        4) remove_node ;;
-        5) echo -e "${CLR_ERROR}Выход...${CLR_RESET}"; exit 0 ;;
+        4) logs_node() ;;
+        5) remove_node ;;
+        6) echo -e "${CLR_ERROR}Выход...${CLR_RESET}"; exit 0 ;;
         *) echo -e "${CLR_WARNING}Неверный ввод, попробуйте снова.${CLR_RESET}" ;;
     esac
 }
