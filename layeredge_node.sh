@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # Цвета оформления
-CLR_SUCCESS='\033[1;32m'  # Зеленый
-CLR_INFO='\033[1;34m'  # Синий
-CLR_WARNING='\033[1;33m'  # Желтый
-CLR_ERROR='\033[1;31m'  # Красный
-CLR_RESET='\033[0m'  # Сброс цвета
+CLR_SUCCESS='\033[1;32m'  
+CLR_INFO='\033[1;34m'  
+CLR_WARNING='\033[1;33m'  
+CLR_ERROR='\033[1;31m'  
+CLR_RESET='\033[0m' 
 
 # Функция вывода логотипа
 function show_logo() {
-    echo -e "${CLR_INFO}     Добро пожаловать в установщик ноды LayerEdge!     ${CLR_RESET}"
+    echo -e "${CLR_INFO}     Добро пожаловать в установщик ноды LayerEdge     ${CLR_RESET}"
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
@@ -46,15 +46,19 @@ function install_node() {
 
     echo -e "${CLR_INFO}▶ Настройка переменных окружения...${CLR_RESET}"
     cat <<EOF > $HOME/light-node/.env
-export GRPC_URL=34.31.74.109:9090
-export CONTRACT_ADDR=cosmos1ufs3tlq4umljk0qfe8k5ya0x6hpavn897u2cnf9k0en9jr7qarqqt56709
-export ZK_PROVER_URL=http://127.0.0.1:3001
-export API_REQUEST_TIMEOUT=100
-export POINTS_API=https://light-node.layeredge.io
-export PRIVATE_KEY='cli-node-private-key'
+GRPC_URL=34.31.74.109:9090
+CONTRACT_ADDR=cosmos1ufs3tlq4umljk0qfe8k5ya0x6hpavn897u2cnf9k0en9jr7qarqqt56709
+ZK_PROVER_URL=http://127.0.0.1:3001
+API_REQUEST_TIMEOUT=100
+POINTS_API=https://light-node.layeredge.io
+PRIVATE_KEY='cli-node-private-key'
 EOF
 
-    echo -e "${CLR_INFO}▶ Настройка systemd-сервиса...${CLR_RESET}"
+    echo -e "${CLR_INFO}▶ Сборка Merkle Service...${CLR_RESET}"
+    cd $HOME/light-node/risc0-merkle-service
+    cargo build
+
+    echo -e "${CLR_INFO}▶ Настройка systemd-сервисов...${CLR_RESET}"
     sudo bash -c "cat <<EOT > /etc/systemd/system/layeredge-merkle.service
 [Unit]
 Description=LayerEdge Merkle Service
@@ -134,7 +138,7 @@ function restart_node() {
 
 # Функция вывода логов ноды
 function logs_node() {
-    echo -e "${CLR_INFO}▶ Логи ноды t3rn-executor...${CLR_RESET}"
+    echo -e "${CLR_INFO}▶ Логи ноды LayerEdge...${CLR_RESET}"
     sudo journalctl -u layeredge-lightnode -f
 }
 
@@ -162,7 +166,7 @@ function show_menu() {
     echo -e "${CLR_SUCCESS}3) 🔄 Перезапустить ноду${CLR_RESET}"
     echo -e "${CLR_SUCCESS}4) 📜 Показать логи ноды${CLR_RESET}"
     echo -e "${CLR_WARNING}5) 🗑 Удалить ноду${CLR_RESET}"
-    echo -e "${CLR_ERROR}5) ❌ Выйти${CLR_RESET}"
+    echo -e "${CLR_ERROR}6) ❌ Выйти${CLR_RESET}"
 
     read -p "Введите номер действия: " choice
     case $choice in
@@ -170,8 +174,8 @@ function show_menu() {
         2) start_node ;;
         3) restart_node ;;
         4) logs_node ;;
-        4) remove_node ;;
-        5) echo -e "${CLR_ERROR}Выход...${CLR_RESET}" ;;
+        5) remove_node ;;
+        6) echo -e "${CLR_ERROR}Выход...${CLR_RESET}" ;;
         *) echo -e "${CLR_WARNING}Неверный ввод, попробуйте снова.${CLR_RESET}" ;;
     esac
 }
