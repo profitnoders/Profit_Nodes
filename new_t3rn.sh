@@ -15,9 +15,10 @@ function show_logo() {
 
 # Функция установки ноды
 function install_node() {
+    show_logo
     echo -e "${CLR_INFO}▶ Обновление системы и установка зависимостей...${CLR_RESET}"
     sudo apt update && sudo apt upgrade -y
-    sudo apt install -y screen wget curl tar
+    sudo apt install -y wget curl tar systemd
 
     echo -e "${CLR_INFO}▶ Создание директории t3rn...${CLR_RESET}"
     mkdir -p $HOME/t3rn && cd $HOME/t3rn
@@ -30,86 +31,90 @@ function install_node() {
     tar -xzf executor-linux-*.tar.gz
     cd executor/executor/bin
 
-    echo -e "${CLR_INFO}▶ Настройка окружения...${CLR_RESET}"
-    echo "export ENVIRONMENT=testnet" >> ~/.bashrc
-    echo "export LOG_LEVEL=debug" >> ~/.bashrc
-    echo "export LOG_PRETTY=false" >> ~/.bashrc
-    echo "export EXECUTOR_PROCESS_BIDS_ENABLED=true" >> ~/.bashrc
-    echo "export EXECUTOR_PROCESS_ORDERS_ENABLED=true" >> ~/.bashrc
-    echo "export EXECUTOR_PROCESS_CLAIMS_ENABLED=true" >> ~/.bashrc
-    echo "export EXECUTOR_MAX_L3_GAS_PRICE=100" >> ~/.bashrc
+    echo -e "${CLR_INFO}▶ Создание конфигурационного файла...${CLR_RESET}"
+    CONFIG_FILE="$HOME/t3rn/executor/executor/bin/.t3rn"
+    cat <<EOF > $CONFIG_FILE
+ENVIRONMENT=testnet
+LOG_LEVEL=debug
+LOG_PRETTY=false
+EXECUTOR_PROCESS_BIDS_ENABLED=true
+EXECUTOR_PROCESS_ORDERS_ENABLED=true
+EXECUTOR_PROCESS_CLAIMS_ENABLED=true
+EXECUTOR_MAX_L3_GAS_PRICE=100
+ENABLED_NETWORKS='arbitrum-sepolia,base-sepolia,optimism-sepolia,l2rn'
+RPC_ENDPOINTS='{
+    "l2rn": ["https://b2n.rpc.caldera.xyz/http"],
+    "arbt": ["https://arbitrum-sepolia.drpc.org", "https://sepolia-rollup.arbitrum.io/rpc"],
+    "bast": ["https://base-sepolia-rpc.publicnode.com", "https://base-sepolia.drpc.org"],
+    "opst": ["https://sepolia.optimism.io", "https://optimism-sepolia.drpc.org"],
+    "unit": ["https://unichain-sepolia.drpc.org", "https://sepolia.unichain.org"]
+}'
+EOF
 
-    read -p "Введите ваш PRIVATE_KEY_LOCAL: " private_key
-    echo "export PRIVATE_KEY_LOCAL=${private_key}" >> ~/.bashrc
+    # Запрашиваем приватный ключ у пользователя
+    echo -e "${CLR_INFO}▶ Введите ваш PRIVATE_KEY_LOCAL:${CLR_RESET}"
+    read PRIVATE_KEY
+    echo "PRIVATE_KEY_LOCAL=$PRIVATE_KEY" >> $CONFIG_FILE
 
-    echo "Введите список сетей через запятую (по умолчанию: arbitrum-sepolia,base-sepolia,optimism-sepolia,l2rn):"
-    read -p "ENABLED_NETWORKS: " enabled_networks
-    enabled_networks=${enabled_networks:-"arbitrum-sepolia,base-sepolia,optimism-sepolia,l2rn"}
-    echo "export ENABLED_NETWORKS='${enabled_networks}'" >> ~/.bashrc
+    echo -e "${CLR_INFO}▶ Создание systemd-сервиса...${CLR_RESET}"
+    sudo bash -c "cat <<EOT > /etc/systemd/system/t3rn.service
+[Unit]
+Description=t3rn Executor Node
+After=network.target
 
-    echo "Введите RPC-эндпоинты в формате JSON или нажмите Enter для значений по умолчанию:"
-    read -p "RPC_ENDPOINTS: " rpc_endpoints
-    rpc_endpoints=${rpc_endpoints:-'{
-        "l2rn": ["https://b2n.rpc.caldera.xyz/http"],
-        "arbt": ["https://arbitrum-sepolia.drpc.org", "https://sepolia-rollup.arbitrum.io/rpc"],
-        "bast": ["https://base-sepolia-rpc.publicnode.com", "https://base-sepolia.drpc.org"],
-        "opst": ["https://sepolia.optimism.io", "https://optimism-sepolia.drpc.org"],
-        "unit": ["https://unichain-sepolia.drpc.org", "https://sepolia.unichain.org"]
-    }'}
-    echo "export RPC_ENDPOINTS='${rpc_endpoints}'" >> ~/.bashrc
-    echo "export EXECUTOR_PROCESS_PENDING_ORDERS_FROM_API=true" >> ~/.bashrc
-    source ~/.bashrc
+[Service]
+EnvironmentFile=$CONFIG_FILE
+ExecStart=$HOME/t3rn/executor/executor/bin/executor
+WorkingDirectory=$HOME/t3rn/executor/executor/bin/
+Restart=on-failure
+User=$(whoami)
 
+[Install]
+WantedBy=multi-user.target
+EOT"
+
+    # Перезагрузка и запуск сервиса
+    sudo systemctl daemon-reload
+    sudo systemctl enable t3rn
     echo -e "${CLR_SUCCESS}✅ Установка завершена! Теперь вы можете запустить ноду.${CLR_RESET}"
 }
 
-
 # Функция запуска ноды
 function start_node() {
-    echo -e "${CLR_INFO}▶ Запуск t3rn-executor в screen-сессии...${CLR_RESET}"
-
-    # Проверяем, запущена ли уже screen-сессия
-    if screen -list | grep -q "t3rn-executor"; then
-        echo -e "${CLR_WARNING}⚠ Нода уже запущена в screen-сессии 't3rn-executor'.${CLR_RESET}"
-        return
-    fi
-
-    # Создаём screen-сессию и запускаем процесс ноды в нужной директории
-    screen -dmS t3rn-executor bash -c "cd $HOME/t3rn/executor/executor/bin && ./executor"
-
+    echo -e "${CLR_INFO}▶ Запуск t3rn-executor через systemd...${CLR_RESET}"
+    sudo systemctl start t3rn
 
     # Проверяем, успешно ли запущена нода
     sleep 2
-    if screen -list | grep -q "t3rn-executor"; then
-        echo -e "${CLR_SUCCESS}✅ Нода успешно запущена в screen-сессии 't3rn-executor'!${CLR_RESET}"
-        echo -e "${CLR_INFO}▶ Чтобы подключиться, используйте: screen -r t3rn-executor${CLR_RESET}"
-        echo -e "${CLR_INFO}▶ Чтобы отсоединиться, нажмите: Ctrl + A, затем D${CLR_RESET}"
+    if systemctl is-active --quiet t3rn; then
+        echo -e "${CLR_SUCCESS}✅ Нода успешно запущена!${CLR_RESET}"
+        echo -e "${CLR_INFO}▶ Логи ноды: sudo journalctl -fu t3rn${CLR_RESET}"
     else
-        echo -e "${CLR_ERROR}❌ Ошибка запуска ноды! Проверьте путь или попробуйте запустить вручную.${CLR_RESET}"
+        echo -e "${CLR_ERROR}❌ Ошибка запуска ноды! Проверьте конфигурацию и попробуйте вручную.${CLR_RESET}"
     fi
 }
 
+# Функция перезапуска ноды
+function restart_node() {
+    echo -e "${CLR_INFO}▶ Перезапуск t3rn-executor...${CLR_RESET}"
+    sudo systemctl restart t3rn
+    echo -e "${CLR_SUCCESS}✅ Нода перезапущена!${CLR_RESET}"
+}
 
 # Функция удаления ноды (с подтверждением)
 function remove_node() {
-    echo -e "${CLR_WARNING}⚠ Вы уверены, что хотите удалить ноду t3rn-executor? (y/n)${CLR_RESET}"
-    read -p "Введите y для подтверждения или n для отмены: " confirmation
-    if [[ $confirmation == "y" || $confirmation == "Y" ]]; then
+    echo -e "${CLR_WARNING}⚠ Вы уверены, что хотите удалить ноду t3rn? (y/n)${CLR_RESET}"
+    read -p "Введите y для удаления: " confirm
+    if [[ "$confirm" == "y" ]]; then
         echo -e "${CLR_INFO}▶ Остановка и удаление ноды...${CLR_RESET}"
-        screen -S t3rn-executor -X quit
-        rm -rf $HOME/t3rn new_t3rn.sh
-        sed -i '/EXECUTOR_PROCESS_BIDS_ENABLED/d' ~/.bashrc
-        sed -i '/EXECUTOR_PROCESS_ORDERS_ENABLED/d' ~/.bashrc
-        sed -i '/EXECUTOR_PROCESS_CLAIMS_ENABLED/d' ~/.bashrc
-        sed -i '/EXECUTOR_MAX_L3_GAS_PRICE/d' ~/.bashrc
-        sed -i '/PRIVATE_KEY_LOCAL/d' ~/.bashrc
-        sed -i '/ENABLED_NETWORKS/d' ~/.bashrc
-        sed -i '/RPC_ENDPOINTS/d' ~/.bashrc
-        sed -i '/EXECUTOR_PROCESS_PENDING_ORDERS_FROM_API/d' ~/.bashrc
-        source ~/.bashrc
+        sudo systemctl stop t3rn
+        sudo systemctl disable t3rn
+        sudo rm -rf /etc/systemd/system/t3rn.service
+        sudo systemctl daemon-reload
+        rm -rf $HOME/t3rn
         echo -e "${CLR_SUCCESS}✅ Нода успешно удалена.${CLR_RESET}"
     else
-        echo -e "${CLR_INFO}▶ Удаление отменено.${CLR_RESET}"
+        echo -e "${CLR_INFO}▶ Отмена удаления.${CLR_RESET}"
     fi
 }
 
@@ -118,9 +123,9 @@ function show_menu() {
     show_logo
     echo -e "${CLR_INFO}Выберите действие:${CLR_RESET}"
     echo -e "${CLR_SUCCESS}1) 🚀 Установить ноду${CLR_RESET}"
-    echo -e "${CLR_SUCCESS}2)  ▶ Запустить ноду${CLR_RESET}"
+    echo -e "${CLR_SUCCESS}2) ▶ Запустить ноду${CLR_RESET}"
     echo -e "${CLR_SUCCESS}3) 🔄 Перезапустить ноду${CLR_RESET}"
-    echo -e "${CLR_WARNING}4)  🗑 Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_WARNING}4) 🗑 Удалить ноду${CLR_RESET}"
     echo -e "${CLR_ERROR}5) ❌ Выйти${CLR_RESET}"
     
     read -p "Введите номер действия: " choice
@@ -130,7 +135,7 @@ function show_menu() {
         2) start_node ;;
         3) restart_node ;;
         4) remove_node ;;
-        5) echo -e "${CLR_ERROR}Выход...${CLR_RESET}" ;;
+        5) echo -e "${CLR_ERROR}Выход...${CLR_RESET}"; exit 0 ;;
         *) echo -e "${CLR_WARNING}Неверный ввод, попробуйте снова.${CLR_RESET}" ;;
     esac
 }
