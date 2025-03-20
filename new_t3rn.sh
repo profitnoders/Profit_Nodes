@@ -141,7 +141,7 @@ function show_menu() {
         1) install_node ;;
         2) start_node ;;
         3) restart_node ;;
-        4) logs_node() ;;
+        4) logs_node ;;
         5) remove_node ;;
         6) echo -e "${CLR_ERROR}Выход...${CLR_RESET}"; exit 0 ;;
         *) echo -e "${CLR_WARNING}Неверный ввод, попробуйте снова.${CLR_RESET}" ;;
