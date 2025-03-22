@@ -23,12 +23,14 @@ function install_node() {
     echo -e "${CLR_INFO}▶ Создание директории t3rn...${CLR_RESET}"
     mkdir -p $HOME/t3rn && cd $HOME/t3rn
 
-    echo -e "${CLR_INFO}▶ Загрузка последней версии executor...${CLR_RESET}"
-    LATEST_VERSION=$(curl -s https://api.github.com/repos/t3rn/executor-release/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
-    wget https://github.com/t3rn/executor-release/releases/download/${LATEST_VERSION}/executor-linux-${LATEST_VERSION}.tar.gz
+    echo -e "${CLR_INFO}▶ Загрузка  executor...${CLR_RESET}"
+    # LATEST_VERSION=$(curl -s https://api.github.com/repos/t3rn/executor-release/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+    # wget https://github.com/t3rn/executor-release/releases/download/${LATEST_VERSION}/executor-linux-${LATEST_VERSION}.tar.gz
+    wget https://github.com/t3rn/executor-release/releases/download/v0.53.1/executor-linux-v0.53.1.tar.gz
 
     echo -e "${CLR_INFO}▶ Распаковка executor...${CLR_RESET}"
-    tar -xzf executor-linux-*.tar.gz
+    # tar -xzf executor-linux-*.tar.gz
+    tar -xzf executor-linux-v0.53.1.tar.gz
     cd executor/executor/bin
 
     echo -e "${CLR_INFO}▶ Создание конфигурационного файла...${CLR_RESET}"
