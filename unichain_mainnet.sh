@@ -44,7 +44,7 @@ function restart_node() {
 function change_ports() {
     echo -e "${CLR_INFO}▶ Изменение портов для предотвращения конфликта...${CLR_RESET}"
     sed -i 's|30303:30303|31313:31313|' "$NODE_DIR/docker-compose.yml"
-    sed -i 's|8545:8545|8645:8645|' "$NODE_DIR/docker-compose.yml"
+    sed -i 's|8545:8545|8647:8647|' "$NODE_DIR/docker-compose.yml"
     sed -i 's|8546:8546|8646:8646|' "$NODE_DIR/docker-compose.yml"
     sed -i 's|8551|8651|' "$NODE_DIR/.env.mainnet"
     sed -i 's|9222:9222|9332:9332|' "$NODE_DIR/docker-compose.yml"
