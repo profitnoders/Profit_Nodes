@@ -8,8 +8,13 @@ CLR_ERROR='\033[1;31m'
 CLR_RESET='\033[0m'
 
 NODE_DIR="$HOME/unichain-node"
+function show_logo() {
+    echo -e "${CLR_INFO}     Добро пожаловать в скрипт управления нодой Unichain mainnet     ${CLR_RESET}"
+    curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
+}
 
 function install_node() {
+    sudo apt update && sudo apt upgrade -y
     echo -e "${CLR_INFO}▶ Установка Docker и Docker Compose...${CLR_RESET}"
     sudo apt update && sudo apt install docker.io -y
     sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -65,6 +70,7 @@ function remove_node() {
 }
 
 function show_menu() {
+    show_logo
     echo -e "${CLR_INFO}Выберите действие:${CLR_RESET}"
     echo -e "${CLR_SUCCESS}1) 🚀 Установить ноду${CLR_RESET}"
     echo -e "${CLR_SUCCESS}2) ▶ Запустить ноду${CLR_RESET}"
