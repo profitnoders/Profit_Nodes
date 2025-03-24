@@ -26,11 +26,11 @@ function install_node() {
     echo -e "${CLR_INFO}▶ Загрузка  executor...${CLR_RESET}"
     # LATEST_VERSION=$(curl -s https://api.github.com/repos/t3rn/executor-release/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
     # wget https://github.com/t3rn/executor-release/releases/download/${LATEST_VERSION}/executor-linux-${LATEST_VERSION}.tar.gz
-    wget https://github.com/t3rn/executor-release/releases/download/v0.53.1/executor-linux-v0.53.1.tar.gz
+    wget https://github.com/t3rn/executor-release/releases/download/v0.57.0/executor-linux-v0.57.0.tar.gz
 
     echo -e "${CLR_INFO}▶ Распаковка executor...${CLR_RESET}"
-    # tar -xzf executor-linux-*.tar.gz
-    tar -xzf executor-linux-v0.53.1.tar.gz
+    tar -xzf executor-linux-*.tar.gz
+    # tar -xzf executor-linux-v0.57.0.tar.gz
     cd executor/executor/bin
 
     echo -e "${CLR_INFO}▶ Создание конфигурационного файла...${CLR_RESET}"
@@ -120,6 +120,7 @@ function remove_node() {
         sudo rm -rf /etc/systemd/system/t3rn.service
         sudo systemctl daemon-reload
         rm -rf $HOME/t3rn
+        rm new_t3rn.sh
         echo -e "${CLR_SUCCESS}✅ Нода успешно удалена.${CLR_RESET}"
     else
         echo -e "${CLR_INFO}▶ Отмена удаления.${CLR_RESET}"
