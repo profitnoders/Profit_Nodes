@@ -27,10 +27,10 @@ function install_node() {
 
     echo -e "${CLR_INFO}▶ Распаковка executor...${CLR_RESET}"
     tar -xzf executor-linux-v0.57.0.tar.gz
-    cd executor/executor/bin
+    cd executor/bin  # путь к бинарнику и файлу конфигурации
 
     echo -e "${CLR_INFO}▶ Создание конфигурационного файла .t3rn...${CLR_RESET}"
-    CONFIG_FILE="$HOME/t3rn/executor/executor/bin/.t3rn"
+    CONFIG_FILE="$HOME/t3rn/executor/bin/.t3rn"
 
     cat <<EOF > $CONFIG_FILE
 ENVIRONMENT=testnet
@@ -58,8 +58,8 @@ After=network.target
 
 [Service]
 EnvironmentFile=$CONFIG_FILE
-ExecStart=$HOME/t3rn/executor/executor/bin/executor
-WorkingDirectory=$HOME/t3rn/executor/executor/bin/
+ExecStart=$HOME/t3rn/executor/bin/executor
+WorkingDirectory=$HOME/t3rn/executor/bin/
 Restart=on-failure
 User=$(whoami)
 
@@ -72,8 +72,9 @@ EOT"
     sudo systemctl daemon-reload
     sudo systemctl enable t3rn
 
-    echo -e "${CLR_SUCCESS}✅ Установка завершена! Теперь вы можете запустить ноду с помощью 'sudo systemctl start t3rn'.${CLR_RESET}"
+    echo -e "${CLR_SUCCESS}✅ Установка завершена! Запусти ноду командой: sudo systemctl start t3rn${CLR_RESET}"
 }
+
 
 
 # Функция запуска ноды
