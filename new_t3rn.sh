@@ -27,10 +27,10 @@ function install_node() {
 
     echo -e "${CLR_INFO}▶ Распаковка executor...${CLR_RESET}"
     tar -xzf executor-linux-v0.57.0.tar.gz
-    cd executor/bin  # путь к бинарнику и файлу конфигурации
+    cd executor/executor/bin
 
     echo -e "${CLR_INFO}▶ Создание конфигурационного файла .t3rn...${CLR_RESET}"
-    CONFIG_FILE="$HOME/t3rn/executor/bin/.t3rn"
+    CONFIG_FILE="$HOME/t3rn/executor/executor/bin/.t3rn"
 
     cat <<EOF > $CONFIG_FILE
 ENVIRONMENT=testnet
@@ -39,6 +39,7 @@ LOG_PRETTY=false
 EXECUTOR_PROCESS_BIDS_ENABLED=true
 EXECUTOR_PROCESS_ORDERS_ENABLED=true
 EXECUTOR_PROCESS_CLAIMS_ENABLED=true
+EXECUTOR_PROCESS_PENDING_ORDERS_FROM_API=false
 EXECUTOR_MAX_L3_GAS_PRICE=100
 ENABLED_NETWORKS='arbitrum-sepolia,base-sepolia,optimism-sepolia,l2rn'
 
@@ -58,8 +59,8 @@ After=network.target
 
 [Service]
 EnvironmentFile=$CONFIG_FILE
-ExecStart=$HOME/t3rn/executor/bin/executor
-WorkingDirectory=$HOME/t3rn/executor/bin/
+ExecStart=$HOME/t3rn/executor/executor/bin/executor
+WorkingDirectory=$HOME/t3rn/executor/executor/bin/
 Restart=on-failure
 User=$(whoami)
 
