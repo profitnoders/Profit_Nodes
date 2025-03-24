@@ -13,7 +13,6 @@ function show_logo() {
     curl -s https://raw.githubusercontent.com/profitnoders/Profit_Nodes/refs/heads/main/logo_new.sh | bash
 }
 
-# Функция установки ноды
 function install_node() {
     show_logo
     echo -e "${CLR_INFO}▶ Обновление системы и установка зависимостей...${CLR_RESET}"
@@ -23,18 +22,16 @@ function install_node() {
     echo -e "${CLR_INFO}▶ Создание директории t3rn...${CLR_RESET}"
     mkdir -p $HOME/t3rn && cd $HOME/t3rn
 
-    echo -e "${CLR_INFO}▶ Загрузка  executor...${CLR_RESET}"
-    # LATEST_VERSION=$(curl -s https://api.github.com/repos/t3rn/executor-release/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
-    # wget https://github.com/t3rn/executor-release/releases/download/${LATEST_VERSION}/executor-linux-${LATEST_VERSION}.tar.gz
+    echo -e "${CLR_INFO}▶ Загрузка executor...${CLR_RESET}"
     wget https://github.com/t3rn/executor-release/releases/download/v0.57.0/executor-linux-v0.57.0.tar.gz
 
     echo -e "${CLR_INFO}▶ Распаковка executor...${CLR_RESET}"
-    tar -xzf executor-linux-*.tar.gz
-    # tar -xzf executor-linux-v0.57.0.tar.gz
+    tar -xzf executor-linux-v0.57.0.tar.gz
     cd executor/executor/bin
 
-    echo -e "${CLR_INFO}▶ Создание конфигурационного файла...${CLR_RESET}"
+    echo -e "${CLR_INFO}▶ Создание конфигурационного файла .t3rn...${CLR_RESET}"
     CONFIG_FILE="$HOME/t3rn/executor/executor/bin/.t3rn"
+
     cat <<EOF > $CONFIG_FILE
 ENVIRONMENT=testnet
 LOG_LEVEL=debug
@@ -44,21 +41,16 @@ EXECUTOR_PROCESS_ORDERS_ENABLED=true
 EXECUTOR_PROCESS_CLAIMS_ENABLED=true
 EXECUTOR_MAX_L3_GAS_PRICE=100
 ENABLED_NETWORKS='arbitrum-sepolia,base-sepolia,optimism-sepolia,l2rn'
-RPC_ENDPOINTS='{
-    "l2rn": ["https://b2n.rpc.caldera.xyz/http"],
-    "arbt": ["https://arbitrum-sepolia.drpc.org", "https://sepolia-rollup.arbitrum.io/rpc"],
-    "bast": ["https://base-sepolia-rpc.publicnode.com", "https://base-sepolia.drpc.org"],
-    "opst": ["https://sepolia.optimism.io", "https://optimism-sepolia.drpc.org"],
-    "unit": ["https://unichain-sepolia.drpc.org", "https://sepolia.unichain.org"]
-}'
+
+# Однострочный JSON — обязательно!
+RPC_ENDPOINTS='{"l2rn":["https://b2n.rpc.caldera.xyz/http"],"arbt":["https://1rpc.io/arb","https://arb-pokt.nodies.app"],"bast":["https://1rpc.io/base","https://base.llamarpc.com"],"opst":["https://1rpc.io/op","https://op-pokt.nodies.app"],"unit":["https://unichain.drpc.org","https://unichain-rpc.publicnode.com"]}'
 EOF
 
-    # Запрашиваем приватный ключ у пользователя
     echo -e "${CLR_INFO}▶ Введите ваш PRIVATE_KEY_LOCAL:${CLR_RESET}"
     read PRIVATE_KEY
     echo "PRIVATE_KEY_LOCAL=$PRIVATE_KEY" >> $CONFIG_FILE
 
-    echo -e "${CLR_INFO}▶ Создание systemd-сервиса...${CLR_RESET}"
+    echo -e "${CLR_INFO}▶ Создание systemd-сервиса t3rn...${CLR_RESET}"
     sudo bash -c "cat <<EOT > /etc/systemd/system/t3rn.service
 [Unit]
 Description=t3rn Executor Node
@@ -75,11 +67,14 @@ User=$(whoami)
 WantedBy=multi-user.target
 EOT"
 
-    # Перезагрузка и запуск сервиса
+    echo -e "${CLR_INFO}▶ Активация systemd-сервиса...${CLR_RESET}"
+    sudo systemctl daemon-reexec
     sudo systemctl daemon-reload
     sudo systemctl enable t3rn
-    echo -e "${CLR_SUCCESS}✅ Установка завершена! Теперь вы можете запустить ноду.${CLR_RESET}"
+
+    echo -e "${CLR_SUCCESS}✅ Установка завершена! Теперь вы можете запустить ноду с помощью 'sudo systemctl start t3rn'.${CLR_RESET}"
 }
+
 
 # Функция запуска ноды
 function start_node() {
