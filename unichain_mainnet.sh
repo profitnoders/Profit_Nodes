@@ -54,7 +54,7 @@ function change_ports() {
 
 function logs_node() {
     echo -e "${CLR_INFO}▶ Просмотр логов...${CLR_RESET}"
-    docker-compose -f "$NODE_DIR/docker-compose.yml" logs -f
+    docker-compose -f "$NODE_DIR/docker-compose.yml" logs --tail 100
 }
 
 function remove_node() {
