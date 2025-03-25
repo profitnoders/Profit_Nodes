@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Цвета оформления
-CLR_SUCCESS='\033[1;32m'  # Зеленый
-CLR_INFO='\033[1;34m'  # Синий
-CLR_WARNING='\033[1;33m'  # Желтый
-CLR_ERROR='\033[1;31m'  # Красный
-CLR_RESET='\033[0m'  # Сброс цвета
+CLR_SUCCESS='\033[1;32m'  
+CLR_INFO='\033[1;34m'  
+CLR_WARNING='\033[1;33m'  
+CLR_ERROR='\033[1;31m'  
+CLR_RESET='\033[0m'  
 
 # Функция вывода логотипа
 function show_logo() {
@@ -23,10 +23,13 @@ function install_node() {
     mkdir -p $HOME/t3rn && cd $HOME/t3rn
 
     echo -e "${CLR_INFO}▶ Загрузка executor...${CLR_RESET}"
-    wget https://github.com/t3rn/executor-release/releases/download/v0.57.0/executor-linux-v0.57.0.tar.gz
-
+    # wget https://github.com/t3rn/executor-release/releases/download/v0.57.0/executor-linux-v0.57.0.tar.gz
+    LATEST_VERSION=$(curl -s https://api.github.com/repos/t3rn/executor-release/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+    wget https://github.com/t3rn/executor-release/releases/download/${LATEST_VERSION}/executor-linux-${LATEST_VERSION}.tar.gz
+    
     echo -e "${CLR_INFO}▶ Распаковка executor...${CLR_RESET}"
-    tar -xzf executor-linux-v0.57.0.tar.gz
+    tar -xzf executor-linux-*.tar.gz
+    # tar -xzf executor-linux-v0.57.0.tar.gz
     cd executor/executor/bin
 
     echo -e "${CLR_INFO}▶ Создание конфигурационного файла .t3rn...${CLR_RESET}"
