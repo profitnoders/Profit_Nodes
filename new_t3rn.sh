@@ -37,17 +37,28 @@ function install_node() {
 
     cat <<EOF > $CONFIG_FILE
 ENVIRONMENT=testnet
-LOG_LEVEL=debug
+LOG_LEVEL=info
 LOG_PRETTY=false
+
 EXECUTOR_PROCESS_BIDS_ENABLED=true
 EXECUTOR_PROCESS_ORDERS_ENABLED=true
 EXECUTOR_PROCESS_CLAIMS_ENABLED=true
-EXECUTOR_PROCESS_PENDING_ORDERS_FROM_API=false
 EXECUTOR_MAX_L3_GAS_PRICE=100
-ENABLED_NETWORKS='arbitrum-sepolia,base-sepolia,optimism-sepolia,l2rn'
+NETWORKS_DISABLED='blast-sepolia'
+ENABLED_NETWORKS='arbitrum-sepolia,base-sepolia,optimism-sepolia,l2rn,unichain-sepolia'
 
 # Однострочный JSON — обязательно!
-RPC_ENDPOINTS='{"l2rn":["https://b2n.rpc.caldera.xyz/http"],"arbt":["https://1rpc.io/arb","https://arb-pokt.nodies.app"],"bast":["https://1rpc.io/base","https://base.llamarpc.com"],"opst":["https://1rpc.io/op","https://op-pokt.nodies.app"],"unit":["https://unichain.drpc.org","https://unichain-rpc.publicnode.com"]}'
+RPC_ENDPOINTS='{
+    "l2rn": ["https://b2n.rpc.caldera.xyz/http"],
+    "arbt": ["https://arbitrum-sepolia.drpc.org/", "https://sepolia-rollup.arbitrum.io/rpc"],
+    "bast": ["https://base-sepolia-rpc.publicnode.com/", "https://base-sepolia.drpc.org/"],
+    "opst": ["https://sepolia.optimism.io/", "https://optimism-sepolia.drpc.org/"],
+    "unit": ["https://unichain-sepolia.drpc.org/", "https://sepolia.unichain.org/"]
+}'
+
+EXECUTOR_PROCESS_ORDERS_API_ENABLED=false
+EXECUTOR_ENABLE_BATCH_BIDDING=true
+EXECUTOR_PROCESS_PENDING_ORDERS_FROM_API=true
 EOF
 
     echo -e "${CLR_INFO}▶ Введите ваш PRIVATE_KEY_LOCAL:${CLR_RESET}"
