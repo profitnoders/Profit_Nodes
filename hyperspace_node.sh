@@ -2,8 +2,8 @@
 
 # Оформление текста: цвета и фоны
 CLR_INFO='\033[1;97;44m'  # Белый текст на синем фоне
-CLR_SUCCESS='\033[1;30;42m'  # Зеленый текст на черном фоне
-CLR_ERROR='\033[1;31;40m'  # Красный текст на черном фоне
+CLR_SUCCESS='\033[1;97;42m'  # Зеленый текст на черном фоне
+CLR_ERROR='\033[1;97;41m'  # Красный текст на черном фоне
 CLR_RESET='\033[0m'  # Сброс форматирования
 
 SERVICE_FILE="/etc/systemd/system/aios.service"
@@ -151,7 +151,7 @@ show_menu() {
         echo -e "${CLR_ERROR}6) Удалить ноду${CLR_RESET}"
         echo -e "${CLR_ERROR}7) Выход${CLR_RESET}"
 
-        read -r "Введите номер: " choice
+        read -p "Введите номер действия: " choice
 
         case $choice in
             1) install_node ;;
