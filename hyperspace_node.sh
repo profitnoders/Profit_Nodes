@@ -143,13 +143,13 @@ delete_node() {
 show_menu() {
         show_logo
         echo -e "${CLR_INFO}Выберите действие:${CLR_RESET}"
-        echo "${CLR_SUCCESS}1) Установить ноду${CLR_RESET}"
-        echo "${CLR_SUCCESS}2) Перезапустить ноду${CLR_RESET}"
-        echo "${CLR_SUCCESS}3) Показать логи${CLR_RESET}"
-        echo "${CLR_SUCCESS}4) Показать Hive ID${CLR_RESET}"
-        echo "${CLR_SUCCESS}5) Показать поинты${CLR_RESET}"
-        echo "${CLR_ERROR}6) Удалить ноду${CLR_RESET}"
-        echo "${CLR_ERROR}7) Выход${CLR_RESET}"
+        echo -e "${CLR_SUCCESS}1) Установить ноду${CLR_RESET}"
+        echo -e "${CLR_SUCCESS}2) Перезапустить ноду${CLR_RESET}"
+        echo -e "${CLR_SUCCESS}3) Показать логи${CLR_RESET}"
+        echo -e "${CLR_SUCCESS}4) Показать Hive ID${CLR_RESET}"
+        echo -e "${CLR_SUCCESS}5) Показать поинты${CLR_RESET}"
+        echo -e "${CLR_ERROR}6) Удалить ноду${CLR_RESET}"
+        echo -e "${CLR_ERROR}7) Выход${CLR_RESET}"
 
         read -r "Введите номер: " choice
 
