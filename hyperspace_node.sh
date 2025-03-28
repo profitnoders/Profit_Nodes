@@ -1,9 +1,10 @@
 #!/bin/bash
 
-CLR_INFO='\033[1;36m'  # Голубой цвет
-CLR_SUCCESS='\033[1;32m'  # Зеленый цвет
-CLR_ERROR='\033[1;31m'  # Красный цвет
-CLR_RESET='\033[0m'  # Сброс цвета
+# Оформление текста: цвета и фоны
+CLR_INFO='\033[1;97;44m'  # Белый текст на синем фоне
+CLR_SUCCESS='\033[1;30;42m'  # Зеленый текст на черном фоне
+CLR_ERROR='\033[1;31;40m'  # Красный текст на черном фоне
+CLR_RESET='\033[0m'  # Сброс форматирования
 
 SERVICE_FILE="/etc/systemd/system/aios.service"
 PRIVATE_KEY_FILE="$HOME/.aios/private_key.pem"
