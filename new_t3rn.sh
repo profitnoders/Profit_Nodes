@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Цвета оформления
-CLR_SUCCESS='\033[1;32m'  # Зеленый
-CLR_INFO='\033[1;34m'  # Синий
-CLR_WARNING='\033[1;33m'  # Желтый
-CLR_ERROR='\033[1;31m'  # Красный
-CLR_RESET='\033[0m'  # Сброс цвета
+CLR_SUCCESS='\033[1;32m' 
+CLR_INFO='\033[1;34m'  
+CLR_WARNING='\033[1;33m'  
+CLR_ERROR='\033[1;31m'  
+CLR_RESET='\033[0m'  
 
 # Функция вывода логотипа
 function show_logo() {
@@ -41,10 +41,17 @@ EXECUTOR_PROCESS_ORDERS_ENABLED=true
 EXECUTOR_PROCESS_CLAIMS_ENABLED=true
 EXECUTOR_PROCESS_PENDING_ORDERS_FROM_API=false
 EXECUTOR_MAX_L3_GAS_PRICE=100
-ENABLED_NETWORKS='arbitrum-sepolia,base-sepolia,optimism-sepolia,l2rn'
+ENABLED_NETWORKS='arbitrum-sepolia,base-sepolia,optimism-sepolia,l2rn,blast-sepolia,unichain-sepolia'
 
-# Однострочный JSON — обязательно!
-RPC_ENDPOINTS='{"l2rn":["https://b2n.rpc.caldera.xyz/http"],"arbt":["https://1rpc.io/arb","https://arb-pokt.nodies.app"],"bast":["https://1rpc.io/base","https://base.llamarpc.com"],"opst":["https://1rpc.io/op","https://op-pokt.nodies.app"],"unit":["https://unichain.drpc.org","https://unichain-rpc.publicnode.com"]}'
+RPC_ENDPOINTS='{
+    "l2rn": ["https://b2n.rpc.caldera.xyz/http"],
+    "arbt": ["https://1rpc.io/arb","https://arb-pokt.nodies.app"],
+    "bast": ["https://1rpc.io/base","https://base.llamarpc.com"],
+    "blst": ["https://sepolia.blast.io", "https://blast-sepolia.drpc.org"],
+    "opst": ["https://1rpc.io/op","https://op-pokt.nodies.app"],
+    "unit": ["https://unichain.drpc.org","https://unichain-rpc.publicnode.com"]
+}'
+
 EOF
 
     echo -e "${CLR_INFO}▶ Введите ваш PRIVATE_KEY_LOCAL:${CLR_RESET}"
