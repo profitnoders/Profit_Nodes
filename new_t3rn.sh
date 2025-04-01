@@ -23,10 +23,11 @@ function install_node() {
     mkdir -p $HOME/t3rn && cd $HOME/t3rn
 
     echo -e "${CLR_INFO}▶ Загрузка executor...${CLR_RESET}"
-    wget https://github.com/t3rn/executor-release/releases/download/v0.57.0/executor-linux-v0.57.0.tar.gz
+    LATEST_VERSION=$(curl -s https://api.github.com/repos/t3rn/executor-release/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+    wget https://github.com/t3rn/executor-release/releases/download/${LATEST_VERSION}/executor-linux-${LATEST_VERSION}.tar.gz
 
     echo -e "${CLR_INFO}▶ Распаковка executor...${CLR_RESET}"
-    tar -xzf executor-linux-v0.57.0.tar.gz
+    tar -xzf executor-linux-*.tar.gz
     cd executor/executor/bin
 
     echo -e "${CLR_INFO}▶ Создание конфигурационного файла .t3rn...${CLR_RESET}"
