@@ -46,11 +46,11 @@ ENABLED_NETWORKS='arbitrum-sepolia,base-sepolia,optimism-sepolia,l2rn,blast-sepo
 
 RPC_ENDPOINTS='{
     "l2rn": ["https://b2n.rpc.caldera.xyz/http"],
-    "arbt": ["https://1rpc.io/arb","https://arb-pokt.nodies.app"],
-    "bast": ["https://1rpc.io/base","https://base.llamarpc.com"],
+    "arbt": ["https://arbitrum-sepolia.drpc.org", "https://sepolia-rollup.arbitrum.io/rpc"],
+    "bast": ["https://base-sepolia-rpc.publicnode.com", "https://base-sepolia.drpc.org"],
     "blst": ["https://sepolia.blast.io", "https://blast-sepolia.drpc.org"],
-    "opst": ["https://1rpc.io/op","https://op-pokt.nodies.app"],
-    "unit": ["https://unichain.drpc.org","https://unichain-rpc.publicnode.com"]
+    "opst": ["https://sepolia.optimism.io", "https://optimism-sepolia.drpc.org"],
+    "unit": ["https://unichain-sepolia.drpc.org", "https://sepolia.unichain.org"]
 }'
 
 EOF
