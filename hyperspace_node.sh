@@ -15,7 +15,6 @@ show_logo() {
 }
 
 install_node() {
-    show_logo
     echo -e "${CLR_INFO}▶ Обновление системы и установка зависимостей...${CLR_RESET}"
     sudo apt update && sudo apt upgrade -y
     sudo apt install -y mc git netcat net-tools unzip lz4 jq build-essential protobuf-compiler ncdu tmux make cmake pkg-config libssl-dev clang bc
