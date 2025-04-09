@@ -41,15 +41,16 @@ EXECUTOR_PROCESS_ORDERS_ENABLED=true
 EXECUTOR_PROCESS_CLAIMS_ENABLED=true
 EXECUTOR_PROCESS_PENDING_ORDERS_FROM_API=false
 EXECUTOR_MAX_L3_GAS_PRICE=100
-ENABLED_NETWORKS='arbitrum-sepolia,base-sepolia,optimism-sepolia,l2rn,blast-sepolia,unichain-sepolia'
+ENABLED_NETWORKS='arbitrum-sepolia,base-sepolia,optimism-sepolia,l2rn,blast-sepolia,unichain-sepolia,monad-testnet'
 
 RPC_ENDPOINTS='{
     "l2rn": ["https://t3rn-b2n.blockpi.network/v1/rpc/public", "https://b2n.rpc.caldera.xyz/http"],
-    "arbt": ["https://arbitrum-sepolia.drpc.org/", "https://sepolia-rollup.arbitrum.io/rpc", "https://arbitrum-sepolia-rpc.publicnode.com"],
-    "bast": ["https://base-sepolia-rpc.publicnode.com/", "https://base-sepolia.drpc.org/", "https://sepolia.base.org"],
+    "arbt": ["https://arbitrum-sepolia.drpc.org", "https://sepolia-rollup.arbitrum.io/rpc"],
+    "bast": ["https://base-sepolia-rpc.publicnode.com", "https://base-sepolia.drpc.org"],
     "blst": ["https://sepolia.blast.io", "https://blast-sepolia.drpc.org"],
-    "opst": ["https://endpoints.omniatech.io/v1/op/sepolia/public", "https://sepolia.optimism.io/", "https://optimism-sepolia.drpc.org/"],
-    "unit": ["https://unichain-sepolia.drpc.org/", "https://sepolia.unichain.org/"]
+    "mont": ["https://testnet-rpc.monad.xyz"],
+    "opst": ["https://sepolia.optimism.io", "https://optimism-sepolia.drpc.org"],
+    "unit": ["https://unichain-sepolia.drpc.org", "https://sepolia.unichain.org"]
 }'
 EOF
 # uid: 1358841871
