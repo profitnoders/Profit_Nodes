@@ -120,6 +120,7 @@ function remove_node() {
         sudo systemctl daemon-reload
         rm -rf $HOME/t3rn
         rm new_t3rn.sh
+        rm new_t3rn_v3.sh
         echo -e "${CLR_SUCCESS}✅ Нода удалена.${CLR_RESET}"
     else
         echo -e "${CLR_INFO}▶ Отмена удаления.${CLR_RESET}"
