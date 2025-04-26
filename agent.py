@@ -115,13 +115,19 @@ def mark_alert(name: str, status: bool):
 
 # === Stats ===
 
+def get_real_cpu_cores():
+    try:
+        return int(os.popen("nproc --all").read().strip())
+    except Exception:
+        return psutil.cpu_count()
+
 def get_system_stats():
     mem = psutil.virtual_memory()
-    disk = psutil.disk_usage("/")  # Только root
+    disk = psutil.disk_usage("/")
 
     return {
         "cpu_percent": psutil.cpu_percent(interval=1),
-        "cpu_cores": psutil.cpu_count(),
+        "cpu_cores": get_real_cpu_cores(),
         "memory": {
             "percent": mem.percent,
             "used": mem.used,
@@ -133,7 +139,6 @@ def get_system_stats():
             "total": disk.total
         }
     }
-
 
 def get_docker_status():
     try:
