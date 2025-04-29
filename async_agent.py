@@ -331,7 +331,7 @@ async def monitor_nodes():
             j += 1
             await asyncio.sleep(CHECK_INTERVAL)
             
-    except Exceptions as e:
+    except Exception as e:
         print(f"❌ Ошибка в monitor_nodes: {e}")
         await asyncio.sleep(10)
 
@@ -398,8 +398,7 @@ async def monitor_disk():
 
             k += 1
             await asyncio.sleep(CHECK_INTERVAL)
-    except Exceptions as e:
-        except Exceptions as e:
+    except Exception as e:
         print(f"❌ Ошибка в monitor_nodes: {e}")
         await asyncio.sleep(10)
 
