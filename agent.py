@@ -8,7 +8,7 @@ app = FastAPI()
 CHECK_INTERVAL = 60
 ALERTS_ENABLED = False
 ALERT_SENT = False
-BOT_ALERT_URL = "http://84.247.188.192:8080/alert"
+BOT_ALERT_URL = "http://91.108.246.138:8080/alert"
 ALERT_DB_PATH = os.path.join(os.path.dirname(__file__), "alerts.db")
 COMPOSE_PATH = os.path.expanduser("~/infernet-container-starter/deploy/docker-compose.yaml")
 print("📁 Current working dir:", os.getcwd())
