@@ -51,7 +51,7 @@ function remove_node() {
     if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
         docker-compose -f "$NODE_DIR/docker-compose.yml" down -v
         rm -rf "$NODE_DIR"
-        rm unichain_mainnet.sh
+        rm unichain_sub.sh
         echo -e "${CLR_SUCCESS}✅ Нода полностью удалена.${CLR_RESET}"
     else
         echo -e "${CLR_INFO}Удаление отменено.${CLR_RESET}"
