@@ -25,6 +25,17 @@ function install_node() {
 
     echo -e "${CLR_INFO}▶ Активируем конфигурацию mainnet в docker-compose.yml...${CLR_RESET}"
     sed -i 's|^[[:space:]]*#\s*- .env\.mainnet|      - .env.mainnet|' "$NODE_DIR/docker-compose.yml"
+
+    read -rp "Введите новый URL для ETH Mainnet RPC (Execution endpoint): " new_eth_rpc
+    read -rp "Введите новый URL для ETH Mainnet Beacon RPC (Consensus endpoint): " new_beacon_rpc
+    
+    # Экранируем слеши в переменных для sed
+    escaped_eth_rpc=$(printf '%s\n' "$new_eth_rpc" | sed 's/[\/&]/\\&/g')
+    escaped_beacon_rpc=$(printf '%s\n' "$new_beacon_rpc" | sed 's/[\/&]/\\&/g')
+    
+    sed -i "s|^OP_NODE_L1_ETH_RPC=.*|OP_NODE_L1_ETH_RPC=$escaped_eth_rpc|" ~/unichain-node/.env.mainnet
+    sed -i "s|^OP_NODE_L1_BEACON=.*|OP_NODE_L1_BEACON=$escaped_beacon_rpc|" ~/unichain-node/.env.mainnet
+
     docker-compose -f "$NODE_DIR/docker-compose.yml" up -d
     echo -e "${CLR_SUCCESS}✅ Установка завершена. Нода запущена!${CLR_RESET}"
 }
