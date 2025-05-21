@@ -1,0 +1,26 @@
+[Unit]
+Description=Prysm Beacon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5s
+User=root
+ExecStart=${HOME}/beacon/bin/prysm.sh beacon-chain \
+  --sepolia \
+  --http-modules=beacon,config,node,validator \
+  --rpc-host=0.0.0.0 \
+  --rpc-port=4000 \
+  --grpc-gateway-host=0.0.0.0 \
+  --grpc-gateway-port=3500 \
+  --datadir ${HOME}/beacon/data \
+  --execution-endpoint=http://127.0.0.1:8551 \
+  --checkpoint-sync-url=https://checkpoint-sync.sepolia.ethpandaops.io/ \
+  --genesis-beacon-api-url=https://checkpoint-sync.sepolia.ethpandaops.io/ \
+  --jwt-secret=/var/lib/secrets/jwt.hex \
+  --accept-terms-of-use
+
+[Install]
+WantedBy=multi-user.target
