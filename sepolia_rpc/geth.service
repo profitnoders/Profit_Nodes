@@ -1,0 +1,27 @@
+[Unit]
+Description=Geth
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5s
+User=root
+WorkingDirectory=${HOME}/geth
+ExecStart=$(which geth) \
+  --sepolia \
+  --syncmode snap \
+  --http \
+  --http.addr "0.0.0.0" \
+  --http.port 9999 \
+  --authrpc.addr "127.0.0.1" \
+  --authrpc.port 8551 \
+  --http.api "eth,net,engine,admin" \
+  --http.corsdomain "*" \
+  --http.vhosts "*" \
+  --datadir ${HOME}/geth/data \
+  --authrpc.jwtsecret /var/lib/secrets/jwt.hex
+
+[Install]
+WantedBy=multi-user.target
