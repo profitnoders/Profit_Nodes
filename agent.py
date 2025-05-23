@@ -19,7 +19,7 @@ NODE_SYSTEMD = {
     "Cysic": "cysic.service",
     "Initverse": "initverse.service",
     "t3rn": "t3rn.service",
-    "Pipe": "pipe-node.service",
+    "Pipe-Devnet": "pipe-node.service",
     "0G": "zgs.service",
     "Drosera": "drosera.service",  # ✅ Новая нода
     "Hyperspace": "aios.service"   # ✅ Новая нода
@@ -41,6 +41,7 @@ NODE_DOCKER_CONTAINERS = {
     "Biconomy": {"mee-node-deployment-node-1", "mee-node-deployment-redis-1"},
     "Unichain": {"unichain-node-op-node-1", "unichain-node-execution-client-1"},
     "Spheron": {"fizz-node"},
+    "Pipe-Testnet": {"pipe"},
     "Waku": {
         "nwaku-compose-waku-frontend-1",
         "nwaku-compose-grafana-1",
@@ -52,7 +53,8 @@ NODE_DOCKER_CONTAINERS = {
 }
 
 NODE_DOCKER_IMAGES = {
-    "Titan": "nezha123/titan-edge"
+    "Titan": "nezha123/titan-edge",
+    "Aztec": "aztecprotocol/aztec"
 }
 
 # === Вспомогательные ===
