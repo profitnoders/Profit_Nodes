@@ -99,18 +99,35 @@ function remove_script() {
     fi
 }
 
+# === Просмотр логов ===
+function show_logs() {
+    echo -e "${CLR_GREEN}1) 📜 Показать последние 50 строк лога${CLR_RESET}"
+    echo -e "${CLR_GREEN}2) 🎥 Следить за логом в реальном времени${CLR_RESET}"
+    echo -e "${CLR_GREEN}3) 🔙 Назад${CLR_RESET}"
+    echo -en "${CLR_INFO}Выберите действие:${CLR_RESET} "
+    read -r log_choice
+    case $log_choice in
+        1) journalctl -u auto-t3rn.service -n 50 --no-pager ;;
+        2) journalctl -u auto-t3rn.service -f ;;
+        3) show_menu ;;
+        *) echo -e "${CLR_WARNING}Неверный выбор. Попробуйте снова.${CLR_RESET}" && show_logs ;;
+    esac
+}
+
 # === Меню ===
 function show_menu() {
     show_logo
     echo -e "${CLR_GREEN}1) ⚙️  Установить скрипт и запустить как сервис${CLR_RESET}"
     echo -e "${CLR_GREEN}2) 🗑 Удалить скрипт и сервис${CLR_RESET}"
-    echo -e "${CLR_GREEN}3) ❌ Выйти${CLR_RESET}"
+    echo -e "${CLR_GREEN}3) 📜 Логи скрипта${CLR_RESET}"
+    echo -e "${CLR_GREEN}4) ❌ Выйти${CLR_RESET}"
     echo -en "${CLR_INFO}Выберите действие:${CLR_RESET} "
     read -r choice
     case $choice in
         1) install_dependencies && install_and_run_script ;;
         2) remove_script ;;
-        3) echo -e "${CLR_ERROR}Выход...${CLR_RESET}" ;;
+        3) show_logs ;;
+        4) echo -e "${CLR_ERROR}Выход...${CLR_RESET}" ;;
         *) echo -e "${CLR_WARNING}Неверный выбор. Попробуйте снова.${CLR_RESET}" && show_menu ;;
     esac
 }
