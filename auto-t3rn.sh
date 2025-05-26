@@ -56,7 +56,7 @@ function install_and_run_script() {
         return
     fi
 
-    read -p "🔑 Введите приватный ключ: " PRIVATE_KEY
+    read -p "🔑 Введите приватный ключ (с 0x в начале): " PRIVATE_KEY
     sed -i "s/your_private_key/$PRIVATE_KEY/" "$SCRIPT_NAME"
 
     cat > "$SERVICE_FILE" << EOF
