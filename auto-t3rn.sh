@@ -118,15 +118,15 @@ function show_logs() {
 function show_menu() {
     show_logo
     echo -e "${CLR_GREEN}1) ⚙️  Установить скрипт и запустить как сервис${CLR_RESET}"
-    echo -e "${CLR_GREEN}2) 🗑 Удалить скрипт и сервис${CLR_RESET}"
-    echo -e "${CLR_GREEN}3) 📜 Логи скрипта${CLR_RESET}"
+    echo -e "${CLR_GREEN}2) 📜 Логи скрипта${CLR_RESET}"
+    echo -e "${CLR_GREEN}3)  🗑 Удалить скрипт и сервис${CLR_RESET}"
     echo -e "${CLR_GREEN}4) ❌ Выйти${CLR_RESET}"
     echo -en "${CLR_INFO}Выберите действие:${CLR_RESET} "
     read -r choice
     case $choice in
         1) install_dependencies && install_and_run_script ;;
-        2) remove_script ;;
-        3) show_logs ;;
+        2) show_logs ;;
+        3) remove_script ;;
         4) echo -e "${CLR_ERROR}Выход...${CLR_RESET}" ;;
         *) echo -e "${CLR_WARNING}Неверный выбор. Попробуйте снова.${CLR_RESET}" && show_menu ;;
     esac
