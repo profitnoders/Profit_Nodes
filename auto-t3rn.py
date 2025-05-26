@@ -1,6 +1,7 @@
 import time
 from web3 import Web3
 from eth_account import Account
+import random
 
 # 🔐 Вставь свой приватный ключ (ОСТОРОЖНО: не делись им с другими)
 PRIVATE_KEY = 'your_private_key'
@@ -35,9 +36,9 @@ def send_tx(w3: Web3, name: str):
 
         signed_tx = w3.eth.account.sign_transaction(tx, PRIVATE_KEY)
         tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
-        print(f"[{name}] Tx sent: {tx_hash.hex()}")
+        print(f"[{name}] ✅ Транзакция отправлена, хэш: {tx_hash.hex()}")
     except Exception as e:
-        print(f"[{name}] Error: {e}")
+        print(f"[{name}] ❌ Ошибка: {e}")
 
 def main():
     w3_clients = {name: Web3(Web3.HTTPProvider(rpc)) for name, rpc in NETWORKS.items()}
@@ -48,7 +49,9 @@ def main():
                 send_tx(w3, name)
             else:
                 print(f"[{name}] Not connected")
-        time.sleep(90)
+        sl = random.randint(60,120)
+        print(f"⏱️ Жду {sl} секунд")
+        time.sleep(sl)
 
 if __name__ == "__main__":
     main()
