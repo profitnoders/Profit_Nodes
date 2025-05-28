@@ -1,0 +1,14 @@
+{
+  "name": "Ethereum",
+  "rpc": "RPC_URL",
+  "isTestChain": false,
+  "chainId": "1",
+  "type": "evm",
+  "eip1559": true,
+  "price": {
+    "chainId": "1",
+    "oracle": "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
+  },
+  "handleOpsDeposit": "0.0001",
+  "paymentTokens": []
+}
