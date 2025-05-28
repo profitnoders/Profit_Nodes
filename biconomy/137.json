@@ -1,0 +1,87 @@
+{
+    "name": "Polygon",
+    "rpc": "RPC_URL",
+    "isTestChain": false,
+    "chainId": "137",
+    "type": "evm",
+    "eip1559": true,
+    "price": {
+        "chainId": "1",
+        "oracle": "0x7bAC85A8a13A4BcD8abb3eB7d6b4d632c5a57676"
+    },
+    "handleOpsDeposit": "5",
+    "paymentTokens": [
+        {
+            "name": "MATIC",
+            "address": "0x0000000000000000000000000000000000000000",
+            "symbol": "MATIC",
+            "decimals": 18,
+            "price": {
+                "chainId": "1",
+                "oracle": "0x7bAC85A8a13A4BcD8abb3eB7d6b4d632c5a57676"
+            }
+        },
+        {
+            "name": "Wrapped Matic",
+            "address": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+            "symbol": "WMATIC",
+            "decimals": 18,
+            "price": {
+                "chainId": "1",
+                "oracle": "0x7bAC85A8a13A4BcD8abb3eB7d6b4d632c5a57676"
+            }
+        },
+        {
+            "name": "ChainLink Token",
+            "address": "0xb0897686c545045aFc77CF20eC7A532E3120E0F1",
+            "symbol": "LINK",
+            "decimals": 18,
+            "price": {
+                "chainId": "1",
+                "oracle": "0x2c1d072e956AFFC0D435Cb7AC38EF18d24d9127c"
+            }
+        },
+        {
+            "name": "USDC",
+            "address": "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
+            "symbol": "USDC",
+            "decimals": 6,
+            "price": {
+                "value": "1",
+                "decimals": "0"
+            },
+            "permitEnabled": true
+        },
+        {
+            "name": "USDC (Bridged)",
+            "address": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+            "symbol": "USDC",
+            "decimals": 6,
+            "price": {
+                "value": "1",
+                "decimals": "0"
+            },
+            "permitEnabled": true
+        },
+        {
+            "name": "Staked Matic",
+            "address": "0x3a58a54c066fdc0f2d55fc9c89f0415c92ebf3c4",
+            "symbol": "stMATIC",
+            "decimals": 18,
+            "price": {
+                "chainId": "1",
+                "oracle": "0x7bAC85A8a13A4BcD8abb3eB7d6b4d632c5a57676"
+            }
+        },
+        {
+            "name": "Tether USD",
+            "address": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+            "symbol": "USDT",
+            "decimals": 6,
+            "price": {
+                "value": "1",
+                "decimals": "0"
+            }
+        }
+    ]
+}
