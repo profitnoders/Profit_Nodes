@@ -17,11 +17,10 @@ function create_operator() {
     export PATH="$HOME/.foundry-drosera/bin:$PATH"
     cd $HOME/my-drosera-trap
     read -p "Введите EVM адрес: " WALLET
-    read -p "Введите ваш кастомный Ethereum RPC: " CUSTOM_RPC
+    read -p "Введите ваш Ethereum Holesky RPC: " CUSTOM_RPC
     sed -i "s|^ethereum_rpc = \".*\"|ethereum_rpc = \"$CUSTOM_RPC\"|" "$HOME/my-drosera-trap/drosera.toml"
     sed -i 's/^[[:space:]]*private = true/private_trap = true/' "$HOME/my-drosera-trap/drosera.toml"
     sed -i "/^whitelist/c\whitelist = [\"$WALLET\"]" "$HOME/my-drosera-trap/drosera.toml"
-    sed -i 's|^drosera_rpc = "https://1rpc.io/holesky"|drosera_rpc = "https://relay.testnet.drosera.io/"|' "$HOME/my-drosera-trap/drosera.toml"
     read -p "Введите приватный ключ: " PRIV_KEY
     export PATH="$HOME/.drosera/bin:$PATH"
     cd $HOME/my-drosera-trap && DROSERA_PRIVATE_KEY="$PRIV_KEY" drosera apply
