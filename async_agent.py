@@ -19,13 +19,16 @@ NODE_SYSTEMD = {
     "Cysic": "cysic.service",
     "Initverse": "initverse.service",
     "t3rn": "t3rn.service",
-    "Pipe": "pipe-node.service",
-    "0G": "zgs.service"
+    "Pipe-Devnet": "pipe-node.service",
+    "0G": "zgs.service",
+    "Drosera": "drosera.service",  # ✅ Новая нода
+    "Hyperspace": "aios.service"   # ✅ Новая нода
 }
+
 NODE_PROCESSES = {
     "Multiple": "multiple-node",
-    "Dill Light Validator": "--light",
-    "Dill Full Validator": "/root/dill/dill-node",
+    "Dill Light Validator": "dill/light_node/data/beacondata",
+    "Dill Full Validator": "dill/full_node/data/beacondata",
     "Gaia": "wasmedge",
     "Gensyn": "python -m hivemind_exp.gsm8k"
 }
@@ -37,10 +40,21 @@ NODE_DOCKER_CONTAINERS = {
     "Ritual": {"hello-world", "infernet-anvil", "infernet-fluentbit", "infernet-redis", "infernet-node"},
     "Biconomy": {"mee-node-deployment-node-1", "mee-node-deployment-redis-1"},
     "Unichain": {"unichain-node-op-node-1", "unichain-node-execution-client-1"},
-    "Spheron": {"fizz-node"}
+    "Spheron": {"fizz-node"},
+    "Pipe-Testnet": {"pipe"},
+    "Waku": {
+        "nwaku-compose-waku-frontend-1",
+        "nwaku-compose-grafana-1",
+        "nwaku-compose-prometheus-1",
+        "nwaku-compose-postgres-exporter-1",
+        "nwaku-compose-nwaku-1",
+        "nwaku-compose-postgres-1"
+    }  # ✅ Новая нода
 }
+
 NODE_DOCKER_IMAGES = {
-    "Titan": "nezha123/titan-edge"
+    "Titan": "nezha123/titan-edge",
+    "Aztec": "aztecprotocol/aztec"
 }
 
 # === Вспомогательные ===
