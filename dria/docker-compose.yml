@@ -1,0 +1,61 @@
+version: '3.8'
+services:
+  dria-node-1:
+    build: .
+    container_name: dria_node_1
+    volumes:
+      - ./nodes/node1/.dria:/root/.dria
+    ports:
+      - "4001:4001"
+    environment:
+      - http_proxy=proxy_1
+      - https_proxy=proxy_1
+    command: bash -c "./.dria/bin/dkn-compute-launcher start"
+
+  dria-node-2:
+    build: .
+    container_name: dria_node_2
+    volumes:
+      - ./nodes/node2/.dria:/root/.dria
+    ports:
+      - "4002:4002"
+    environment:
+      - http_proxy=proxy_1
+      - https_proxy=proxy_1
+    command: bash -c "./.dria/bin/dkn-compute-launcher start"
+
+  dria-node-3:
+    build: .
+    container_name: dria_node_3
+    volumes:
+      - ./nodes/node3/.dria:/root/.dria
+    ports:
+      - "4003:4003"
+    environment:
+      - http_proxy=proxy_1
+      - https_proxy=proxy_1
+    command: bash -c "./.dria/bin/dkn-compute-launcher start"
+
+  dria-node-4:
+    build: .
+    container_name: dria_node_4
+    volumes:
+      - ./nodes/node4/.dria:/root/.dria
+    ports:
+      - "4004:4004"
+    environment:
+      - http_proxy=proxy_1
+      - https_proxy=proxy_1
+    command: bash -c "./.dria/bin/dkn-compute-launcher start"
+
+  dria-node-5:
+    build: .
+    container_name: dria_node_5
+    volumes:
+      - ./nodes/node5/.dria:/root/.dria
+    ports:
+      - "4005:4005"
+    environment:
+      - http_proxy=proxy_1
+      - https_proxy=proxy_1
+    command: bash -c "./.dria/bin/dkn-compute-launcher start"
