@@ -182,7 +182,11 @@ def get_background_processes():
     found = set()
     for proc in psutil.process_iter(['cmdline']):
         try:
-            cmd = " ".join(proc.info['cmdline'])
+            cmdline = proc.info.get('cmdline')
+            if isinstance(cmdline, (list, tuple)):
+                cmd = " ".join(cmdline)
+            else:
+                cmd = str(cmdline) if cmdline else ''
             for name, match in NODE_PROCESSES.items():
                 if match in cmd:
                     found.add(name)
