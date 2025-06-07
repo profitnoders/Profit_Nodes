@@ -53,9 +53,9 @@ NODE_DOCKER_CONTAINERS = {
         "nwaku-compose-nwaku-1",
         "nwaku-compose-postgres-1"
     },  # ✅ Новая нода
-    "Multiple_Mult": {multiple-node-1, multiple-node-2},
-    "Dria_Mult": {dria_node_1, dria_node_2},
-    "Titan_Mult": {titan-node-1, titan-node-2, titan-node-3, titan-node-4, titan-node-5}
+    "Multiple_Mult": {"multiple-node-1", "multiple-node-2"},
+    "Dria_Mult": {"dria_node_1", "dria_node_2"},
+    "Titan_Mult": {"titan-node-1", "titan-node-2", "titan-node-3", "titan-node-4", "titan-node-5"}
 }
 
 NODE_DOCKER_IMAGES = {
