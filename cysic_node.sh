@@ -53,6 +53,22 @@ function view_logs() {
     fi
 }
 
+function backup_mnemonic() {
+    MNEMONIC_DIR="$HOME/.cysic/keys"
+    BACKUP_DIR="$HOME/cysic_mnemonic_backup"
+
+    if [ -d "$MNEMONIC_DIR" ]; then
+        mkdir -p "$BACKUP_DIR"
+        cp -a "$MNEMONIC_DIR/"* "$BACKUP_DIR/"
+
+        echo -e "${GREEN}Файлы мнемоники скопированы в: ${BACKUP_DIR}${NC}"
+        echo -e "${YELLOW}❗ Обязательно сохраните эти файлы в безопасном месте! Без них вы не сможете запустить ноду повторно.${NC}"
+    else
+        echo -e "${RED}Папка с мнемоникой не найдена: $MNEMONIC_DIR${NC}"
+    fi
+}
+
+
 function remove_node() {
     echo -e "${CLR_WARNING}Удаление ноды Cysic...${CLR_RESET}"
 
@@ -76,25 +92,27 @@ function remove_node() {
 
 function show_menu() {
     show_logo
-    echo -e "${CLR_INFO}1) 🚀 Установить ноду${CLR_RESET}"
-    echo -e "${CLR_INFO}2) 🔁 Перезапустить ноду${CLR_RESET}"
-    echo -e "${CLR_INFO}3) 📄 Просмотреть логи ноды${CLR_RESET}"
-    echo -e "${CLR_INFO}4) 🗑️  Удалить ноду${CLR_RESET}"
-    echo -e "${CLR_INFO}5) ❌ Выйти${CLR_RESET}"
-    echo -e "${CLR_INFO}Введите номер действия:${CLR_RESET}"
-    read -p "Выбор: " choice
+    echo -e "${CYAN}1) 🚀 Установить ноду${NC}"
+    echo -e "${CYAN}2) 🔁 Перезапустить ноду${NC}"
+    echo -e "${CYAN}3) 📄 Просмотреть логи ноды${NC}"
+    echo -e "${CYAN}4) 🗑️  Удалить ноду${NC}"
+    echo -e "${CYAN}5) 💾 Сделать бэкап мнемонического файла${NC}"
+    echo -e "${CYAN}6) ❌ Выйти${NC}"
+    echo -e "${YELLOW}Введите номер действия:${NC}"
+    read -r choice
 
     case $choice in
         1) install_node ;;
         2) restart_node ;;
         3) view_logs ;;
         4) remove_node ;;
-        5)
-            echo -e "${CLR_SUCCESS}Выход...${CLR_RESET}"
+        5) backup_mnemonic ;;
+        6)
+            echo -e "${GREEN}Выход...${NC}"
             exit 0
             ;;
         *) 
-            echo -e "${CLR_ERROR}Неверный выбор! Пожалуйста, выберите пункт из меню.${CLR_RESET}"
+            echo -e "${RED}Неверный выбор! Пожалуйста, выберите пункт из меню.${NC}"
             show_menu
             ;;
     esac
