@@ -61,10 +61,10 @@ function backup_mnemonic() {
         mkdir -p "$BACKUP_DIR"
         cp -a "$MNEMONIC_DIR/"* "$BACKUP_DIR/"
 
-        echo -e "${GREEN}Файлы мнемоники скопированы в: ${BACKUP_DIR}${NC}"
-        echo -e "${YELLOW}❗ Обязательно сохраните эти файлы в безопасном месте! Без них вы не сможете запустить ноду повторно.${NC}"
+        echo -e "${CLR_SUCCESS}Файлы мнемоники скопированы в: ${BACKUP_DIR}${CLR_RESET}"
+        echo -e "${CLR_WARNING}❗ Обязательно сохраните эти файлы в безопасном месте! Без них вы не сможете запустить ноду повторно.${CLR_RESET}"
     else
-        echo -e "${RED}Папка с мнемоникой не найдена: $MNEMONIC_DIR${NC}"
+        echo -e "${CLR_ERROR}Папка с мнемоникой не найдена: $MNEMONIC_DIR${CLR_RESET}"
     fi
 }
 
