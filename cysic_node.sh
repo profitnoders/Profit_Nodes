@@ -30,44 +30,49 @@ function install_node() {
         echo -e "${CLR_ERROR}Установка завершилась с ошибкой.${CLR_RESET}"
         exit 1
     fi
+
+    echo -e "${CLR_INFO}Создание systemd-сервиса...${CLR_RESET}"
+
+    sudo tee /etc/systemd/system/cysic.service > /dev/null <<EOF
+[Unit]
+Description=Cysic Verifier Node
+After=network.target
+
+[Service]
+Type=simple
+User=$USER
+WorkingDirectory=$HOME/cysic-verifier
+ExecStart=/bin/bash $HOME/cysic-verifier/start.sh
+Restart=always
+RestartSec=5
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    sudo systemctl daemon-reexec
+    sudo systemctl daemon-reload
+    sudo systemctl enable cysic
+    sudo systemctl start cysic
+
+    echo -e "${CLR_SUCCESS}✅ Cysic-нода успешно запущена как systemd-сервис.${CLR_RESET}"
+    echo -e "${CLR_INFO}Статус: sudo systemctl status cysic${CLR_RESET}"
+
 }
 
 function restart_node() {
-    echo -e "${CLR_WARNING}Перезапуск ноды Cysic...${CLR_RESET}"
-    if [ -f "$HOME/cysic-verifier/start.sh" ]; then
-        cd "$HOME/cysic-verifier" || exit
-        bash start.sh
-        echo -e "${CLR_SUCCESS}Нода перезапущена.${CLR_RESET}"
+    if systemctl list-units --type=service --all | grep -q cysic.service; then
+        sudo systemctl restart cysic
+        echo -e "${CLR_SUCCESS}Нода Cysic перезапущена.${CLR_RESET}"
     else
-        echo -e "${CLR_ERROR}Файл start.sh не найден. Убедитесь, что нода установлена.${CLR_RESET}"
+        echo -e "${CLR_ERROR}Служба Cysic не найдена. Установите ноду сначала.${CLR_RESET}"
     fi
 }
 
 function view_logs() {
-    LOGFILE="$HOME/cysic-verifier/logs.txt"
-    if [ -f "$LOGFILE" ]; then
-        echo -e "${CLR_WARNING}Показ последних 100 строк логов:${CLR_RESET}"
-        tail -n 100 "$LOGFILE"
-    else
-        echo -e "${CLR_ERROR}Файл логов не найден: $LOGFILE${CLR_RESET}"
-    fi
+    journalctl -u cysic -f
 }
-
-function backup_mnemonic() {
-    MNEMONIC_DIR="$HOME/.cysic/keys"
-    BACKUP_DIR="$HOME/cysic_mnemonic_backup"
-
-    if [ -d "$MNEMONIC_DIR" ]; then
-        mkdir -p "$BACKUP_DIR"
-        cp -a "$MNEMONIC_DIR/"* "$BACKUP_DIR/"
-
-        echo -e "${CLR_SUCCESS}Файлы мнемоники скопированы в: ${BACKUP_DIR}${CLR_RESET}"
-        echo -e "${CLR_WARNING}❗ Обязательно сохраните эти файлы в безопасном месте! Без них вы не сможете запустить ноду повторно.${CLR_RESET}"
-    else
-        echo -e "${CLR_ERROR}Папка с мнемоникой не найдена: $MNEMONIC_DIR${CLR_RESET}"
-    fi
-}
-
 
 function remove_node() {
     echo -e "${CLR_WARNING}Удаление ноды Cysic...${CLR_RESET}"
@@ -76,15 +81,17 @@ function remove_node() {
         rm -rf "$HOME/cysic-verifier"
         echo -e "${CLR_SUCCESS}Директория ноды Cysic успешно удалена.${CLR_RESET}"
     else
-        echo -e "${CLR_ERROR}Директория ноды Cysic не найдена.${CLR_RESET}"
+        echo -e "${CLR_WARNING}Директория ноды Cysic не найдена.${CLR_RESET}"
     fi
 
-    if sudo systemctl is-active --quiet cysic; then
+    if systemctl list-units --type=service --all | grep -q cysic.service; then
         sudo systemctl stop cysic
         sudo systemctl disable cysic
-        sudo rm /etc/systemd/system/cysic.service
+        sudo rm -f /etc/systemd/system/cysic.service
         sudo systemctl daemon-reload
         echo -e "${CLR_SUCCESS}Служба Cysic успешно удалена.${CLR_RESET}"
+    else
+        echo -e "${CLR_WARNING}Служба Cysic не найдена или уже удалена.${CLR_RESET}"
     fi
 
     echo -e "${CLR_SUCCESS}Нода Cysic успешно удалена!${CLR_RESET}"
@@ -96,8 +103,7 @@ function show_menu() {
     echo -e "${CLR_INFO}2) 🔁 Перезапустить ноду${CLR_RESET}"
     echo -e "${CLR_INFO}3) 📄 Просмотреть логи ноды${CLR_RESET}"
     echo -e "${CLR_INFO}4) 🗑️  Удалить ноду${CLR_RESET}"
-    echo -e "${CLR_INFO}5) 💾 Сделать бэкап мнемонического файла${CLR_RESET}"
-    echo -e "${CLR_INFO}6) ❌ Выйти${CLR_RESET}"
+    echo -e "${CLR_INFO}5) ❌ Выйти${CLR_RESET}"
     echo -e "${CLR_WARNING}Введите номер действия:${CLR_RESET}"
     read -r choice
 
@@ -106,12 +112,10 @@ function show_menu() {
         2) restart_node ;;
         3) view_logs ;;
         4) remove_node ;;
-        5) backup_mnemonic ;;
-        6)
-            echo -e "${CLR_SUCCESS}Выход...${CLR_RESET}"
+        5) echo -e "${CLR_SUCCESS}Выход...${CLR_RESET}"
             exit 0
             ;;
-        *) 
+        *)
             echo -e "${CLR_ERROR}Неверный выбор! Пожалуйста, выберите пункт из меню.${CLR_RESET}"
             show_menu
             ;;
