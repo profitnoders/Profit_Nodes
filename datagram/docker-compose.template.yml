@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  datagram_node_{{NODE_INDEX}}:
+    container_name: datagram_node_{{NODE_INDEX}}
+    image: datagramgroup/datagram-cli:latest
+    command: ["run", "--key", "{{LICENSE_KEY}}"]
+    restart: unless-stopped
