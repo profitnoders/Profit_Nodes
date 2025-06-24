@@ -19,7 +19,7 @@ After=network.target
 [Service]
 User=$(logname)
 WorkingDirectory=$NODE_DIR
-ExecStart=$NODE_DIR/datagram-cli run --key ${NODE_KEYS[$i]}
+ExecStart=$NODE_DIR/datagram-cli run -- -key ${NODE_KEYS[$i]}
 Restart=always
 RestartSec=5
 
