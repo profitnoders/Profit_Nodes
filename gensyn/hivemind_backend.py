@@ -6,8 +6,8 @@ from typing import Any, Dict, List
 import torch.distributed as dist
 from hivemind import DHT, get_dht_time
 
-from genrl_swarm.communication.communication import Communication
-from genrl_swarm.serialization.game_tree import from_bytes, to_bytes
+from genrl.communication.communication import Communication
+from genrl.serialization.game_tree import from_bytes, to_bytes
 
 
 class HivemindRendezvouz:
@@ -35,7 +35,6 @@ class HivemindRendezvouz:
 
     @classmethod
     def set_initial_peers(cls, initial_peers):
-        pass
         if cls._STORE is None and cls._IS_LAMBDA:
             cls.init()
         if cls._IS_LAMBDA:
@@ -56,24 +55,24 @@ class HivemindBackend(Communication):
         self,
         initial_peers: List[str] | None = None,
         timeout: int = 600,
-        disable_caching: bool = False,  
-        beam_size: int = 1000, 
+        disable_caching: bool = False,
+        beam_size: int = 1000,
         **kwargs,
     ):
         self.world_size = int(os.environ.get("HIVEMIND_WORLD_SIZE", 1))
         self.timeout = timeout
         self.bootstrap = HivemindRendezvouz.is_bootstrap()
-        self.beam_size = beam_size 
+        self.beam_size = beam_size
         self.dht = None
-        
+
         if disable_caching:
-            kwargs['cache_locally'] = False
-            kwargs['cache_on_store'] = False
-            
+            kwargs["cache_locally"] = False
+            kwargs["cache_on_store"] = False
+
         if self.bootstrap:
             self.dht = DHT(
                 start=True,
-                host_maddrs=[f"/ip4/0.0.0.0/tcp/0", "/ip4/0.0.0.0/udp/0/quic"],
+                host_maddrs=["/ip4/0.0.0.0/tcp/0", "/ip4/0.0.0.0/udp/0/quic"],
                 initial_peers=initial_peers,
                 **kwargs,
             )
@@ -81,47 +80,52 @@ class HivemindBackend(Communication):
             HivemindRendezvouz.set_initial_peers(dht_maddrs)
         else:
             initial_peers = initial_peers or HivemindRendezvouz.get_initial_peers()
-            # Фильтруем "мертвые" пиры
             if initial_peers:
-                initial_peers = [p for p in initial_peers if not p.startswith('/ip4/38.101.215.15')]
+                initial_peers = [
+                    p for p in initial_peers if not p.startswith("/ip4/38.101.215.15")
+                ]
             self.dht = DHT(
                 start=True,
-                host_maddrs=[f"/ip4/0.0.0.0/tcp/0", "/ip4/0.0.0.0/udp/0/quic"],
+                host_maddrs=["/ip4/0.0.0.0/tcp/0", "/ip4/0.0.0.0/udp/0/quic"],
                 initial_peers=initial_peers,
                 **kwargs,
             )
+
         self.step_ = 0
 
-    def all_gather_object(self, obj: Any) -> Dict[str| int, Any]:
+    def all_gather_object(self, obj: Any) -> Dict[str | int, Any]:
         key = str(self.step_)
-        _ = self.dht.get_visible_maddrs(latest=True)
-        obj_bytes = to_bytes(obj)
-        self.dht.store(
-            key,
-            subkey=str(self.dht.peer_id),
-            value=obj_bytes,
-            expiration_time=get_dht_time() + self.timeout,
-            beam_size=self.beam_size,  
-        )
-        
-        time.sleep(1)
-        t_ = time.monotonic()
-        while True:
-            output_, _ = self.dht.get(key, beam_size=self.beam_size, latest=True)
-            if len(output_) >= self.world_size:
-                break
-            else:
-                if time.monotonic() - t_ > self.timeout:
+        try:
+            _ = self.dht.get_visible_maddrs(latest=True)
+            obj_bytes = to_bytes(obj)
+            self.dht.store(
+                key,
+                subkey=str(self.dht.peer_id),
+                value=obj_bytes,
+                expiration_time=get_dht_time() + self.timeout,
+                beam_size=self.beam_size,
+            )
+
+            time.sleep(1)
+            t_ = time.monotonic()
+            while True:
+                output_, _ = self.dht.get(key, beam_size=self.beam_size, latest=True)
+                if len(output_) >= self.world_size:
+                    break
+                elif time.monotonic() - t_ > self.timeout:
                     raise RuntimeError(
                         f"Failed to obtain {self.world_size} values for {key} within timeout."
                     )
-        self.step_ += 1
 
-        tmp = sorted(
-            [(key, from_bytes(value.value)) for key, value in output_.items()],
-            key=lambda x: x[0],
-        )
-        return {key: value for key, value in tmp}
+            self.step_ += 1
+            tmp = sorted(
+                [(key, from_bytes(value.value)) for key, value in output_.items()],
+                key=lambda x: x[0],
+            )
+            return {key: value for key, value in tmp}
+
+        except (BlockingIOError, EOFError) as e:
+            return {str(self.dht.peer_id): obj}
 
     def get_id(self):
         return str(self.dht.peer_id)
