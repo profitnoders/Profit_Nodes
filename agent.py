@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 import psutil, docker, subprocess, threading, time, requests, os, socket, sqlite3
-from fastapi.responses import PlainTextResponse
 import asyncio
 
 app = FastAPI()
@@ -26,7 +25,8 @@ NODE_SYSTEMD = {
     "Pipe-Devnet": "pipe-node.service",
     "0G": "zgs.service",
     "Drosera": "drosera.service",  # ✅ Новая нода
-    "Hyperspace": "aios.service"   # ✅ Новая нода
+    "Hyperspace": "aios.service",   # ✅ Новая нода
+    "Datagram": "datagram-node@1.service"
 }
 
 NODE_PROCESSES = {
@@ -34,10 +34,14 @@ NODE_PROCESSES = {
     "Dill Light Validator": "dill/light_node/data/beacondata",
     "Dill Full Validator": "dill/full_node/data/beacondata",
     "Gaia": "gaianet",
-    "Gensyn": "python -m hivemind_exp.gsm8k"
+    "Gensyn": "python -m rgym_exp.runner.swarm_launcher",
+    "Cysic_Prover": "./prover",
+    "Inference": "inference-launcher",
+    "Nexus": "./nexus-network"
 }
 NODE_SCREENS = {
-    "Dria": "dria_node"
+    "Dria": "dria_node",
+    "Cysic_Prover": "prover"
 }
 NODE_DOCKER_CONTAINERS = {
     "Ritual": {"hello-world", "infernet-anvil", "infernet-fluentbit", "infernet-redis", "infernet-node"},
@@ -53,6 +57,7 @@ NODE_DOCKER_CONTAINERS = {
         "nwaku-compose-nwaku-1",
         "nwaku-compose-postgres-1"
     },  # ✅ Новая нода
+    "Cysic_Mult": {"verifier_1", "verifier_2"},
     "Multiple_Mult": {"multiple-node-1", "multiple-node-2"},
     "Dria_Mult": {"dria_node_1", "dria_node_2"},
     "Titan_Mult": {"titan-node-1", "titan-node-2", "titan-node-3", "titan-node-4", "titan-node-5"}
@@ -341,6 +346,11 @@ def monitor_nodes():
                 session = NODE_SCREENS[name]
                 if session not in screens:
                     failed.add(name)
+        
+        # === Особый случай: Gaia
+        if "Gaia" in installed_nodes:
+            if NODE_SCREENS["Gaia"] not in screens:
+                failed.add("Gaia")
 
 
         # === Отправка алертов с проверкой повторного запуска
@@ -351,7 +361,19 @@ def monitor_nodes():
                     print(f"⚠️ Нода {name} упала, жду {FAILURE_CONFIRMATION} сек")
                 elif now - failure_times[name] >= FAILURE_CONFIRMATION:
                     if ALERTS_ENABLED and not was_already_reported(name):
-                        send_alert(name)
+                        if name == "Cysic_Prover":
+                            send_alert(name, "❌ Cysic Prover упал! Перезапускаю...")
+                            try:
+                                subprocess.call(
+                                    "screen -dmS prover bash -c 'cd ~/cysic-prover/ && bash start.sh'",
+                                    shell=True
+                                )
+                                send_alert(name, "✅ Cysic Prover перезапущен.")
+                            except Exception as e:
+                                send_alert(name, f"❌ Ошибка перезапуска Cysic Prover: {e}")
+                            failure_times[name] = now
+                        else:
+                            send_alert(name)
                         mark_alert(name, True)
                         print(f"❌ Нода {name} упала! Алерт отправлен")
             else:
@@ -378,7 +400,7 @@ def monitor_disk():
         except Exception as e:
             print("Ошибка проверки Docker:", e)
 
-        # 🔁 Перезапуск Ritual если диск > 95%
+        # 🔁 Перезапуск Ritual если диск > 95% и Ritual найден
         if ritual_detected and percent > 95:
             try:
                 print("📦 Диск > 95% и Ritual найден — перезапуск...")
@@ -405,13 +427,21 @@ def monitor_disk():
 
         # 🔔 Алерт по диску
         if percent >= 95 and not ALERT_SENT:
+            message = (
+                f"Диск почти заполнен: {percent}%"
+            )
+            if ritual_detected:
+                message += "\n⏳ Перезапущен docker-compose Ritual"
             try:
-                requests.post(BOT_ALERT_URL, json={
-                    "token": get_token(),
-                    "ip": get_ip_address(),
-                    "percent": percent,
-                    "alert_id": f"{get_ip_address()}-{int(time.time())}"
-                })
+                requests.post(
+                    BOT_ALERT_URL,
+                    json={
+                        "token": get_token(),
+                        "ip": get_ip_address(),
+                        "message": message,
+                        "alert_id": f"{get_ip_address()}-{int(time.time())}"
+                    }
+                )
                 ALERT_SENT = True
             except Exception as e:
                 print("Ошибка отправки алерта:", e)
@@ -459,9 +489,11 @@ async def get_service_logs(request: Request):
 @app.post("/update_token")
 async def update_token(request: Request):
     data = await request.json()
+    if data.get("token") != get_token():
+        return JSONResponse(content={"error": "unauthorized"}, status_code=403)
     new_token = data.get("new_token")
     if not new_token:
-        return {"status": "missing new_token"}
+        return JSONResponse(content={"status": "missing new_token"}, status_code=400)
     with open("token.txt", "w") as f:
         f.write(new_token.strip())
     return {"status": "updated"}
@@ -475,7 +507,6 @@ async def nodes_info(request: Request):
     nodes = get_installed_nodes()
     return {"nodes": nodes}
 
-from fastapi.responses import PlainTextResponse
 
 @app.post("/logs_docker")
 async def get_docker_logs(request: Request):
@@ -501,6 +532,8 @@ async def get_docker_logs(request: Request):
 async def set_alert_mode(request: Request):
     global ALERTS_ENABLED
     data = await request.json()
+    if data.get("token") != get_token():
+        return JSONResponse(content={"error": "unauthorized"}, status_code=403)
     enabled = data.get("enabled", True)
     ALERTS_ENABLED = bool(enabled)
     save_alerts_enabled(ALERTS_ENABLED)
