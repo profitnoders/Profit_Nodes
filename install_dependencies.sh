@@ -67,7 +67,7 @@ sudo apt install -y git jq make tmux screen
 
 # 8️⃣ Установка сетевых утилит
 echo -e "${CLR_INFO}🌐 Устанавливаем утилиты для работы с сетью...${CLR_RESET}"
-sudo apt install -y net-tools dnsutils iputils-ping traceroute nmap ufw iptables
+sudo apt install -y net-tools dnsutils iputils-ping traceroute nmap iptables
 
 # 9️⃣ Установка инструментов мониторинга
 echo -e "${CLR_INFO}📊 Устанавливаем утилиты для мониторинга ресурсов...${CLR_RESET}"
