@@ -1,0 +1,17 @@
+[Unit]
+Description=Synchronizer CLI Web Dashboard
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+Restart=always
+RestartSec=10
+WorkingDirectory=/root
+ExecStart=/usr/bin/npx synchronize web -p 3020 -m 3021
+Environment=NODE_ENV=production
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+[Install]
+WantedBy=multi-user.target
