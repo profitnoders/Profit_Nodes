@@ -9,7 +9,7 @@ User=root
 Restart=always
 RestartSec=10
 WorkingDirectory=/root
-ExecStart=/usr/bin/npx synchronize web -p 3020 -m 3021
+ExecStart=/usr/bin/npx synchronize web -p 3335 -m 3336
 Environment=NODE_ENV=production
 Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
