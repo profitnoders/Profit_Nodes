@@ -1,10 +1,8 @@
 #!/bin/bash
 
-# Подгружаем конфиг
 source ~/.aztec_node_config
 
 while true; do
-  # Проверяем наличие контейнера aztec
   if ! docker ps --format '{{.Image}} {{.Names}}' | grep -q aztec; then
     echo "[`date`] 🔁 Контейнер Aztec не найден — перезапускаем..." >> ~/aztec_watchdog.log
 
@@ -20,5 +18,5 @@ while true; do
     echo "[`date`] ✅ Контейнер работает"
   fi
   echo "[`date`] ❌ Aztec завершился — перезапуск через 30 сек" >> ~/aztec_watchdog.log
-  sleep 30  # Ждём 2 минуты
+  sleep 30 
 done
