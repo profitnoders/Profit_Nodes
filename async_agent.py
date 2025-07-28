@@ -377,7 +377,10 @@ def monitor_nodes():
                         elif name == "Aztec":
                             send_alert(name, "❌ Aztec нода упала! Перезапускаю...")
                             try:
-                                subprocess.call("echo 2 | bash aztec_node.sh", shell=True)
+                                subprocess.call(
+                                    "bash -c 'cd ~ && echo 2 | bash aztec_node.sh'",
+                                    shell=True,
+                                )
                                 send_alert(name, "✅ Aztec нода перезапущена.")
                             except Exception as e:
                                 send_alert(name, f"❌ Ошибка перезапуска Aztec: {e}")
