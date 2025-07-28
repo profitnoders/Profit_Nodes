@@ -5,7 +5,7 @@ import asyncio
 
 app = FastAPI()
 CHECK_INTERVAL = 60
-FAILURE_CONFIRMATION = 120  # время подтверждения падения ноды (сек)
+FAILURE_CONFIRMATION = 300  # время подтверждения падения ноды (сек)
 ALERTS_ENABLED = False
 ALERT_SENT = False
 BOT_ALERT_URL = "http://31.220.92.247:8079/alert"
@@ -280,6 +280,38 @@ def send_alert(name: str, custom_message: str = None):
     except Exception as e:
         print("Ошибка отправки алерта:", e)
 
+
+def restart_aztec() -> bool:
+    """Попытаться перезапустить Aztec. Возвращает True при успехе."""
+    try:
+        ret = subprocess.call(
+            "bash -c 'cd ~ && echo 2 | bash aztec_node.sh'",
+            shell=True,
+        )
+        if ret == 0:
+            return True
+    except Exception as e:
+        print("Aztec restart via script failed:", e)
+
+    fallback_cmd = (
+        "bash -c 'cd ~ && "
+        "source ~/.aztec_node_config >/dev/null 2>&1 && "
+        "screen -dmS aztec bash -c \"aztec start --node --archiver --sequencer "
+        "--network alpha-testnet "
+        "--l1-rpc-urls $ETHEREUM_HOSTS "
+        "--l1-consensus-host-urls $L1_CONSENSUS_HOST_URLS "
+        "--sequencer.validatorPrivateKeys \\\"$VALIDATOR_PRIVATE_KEYS\\\" "
+        "--sequencer.publisherPrivateKey \\\"$PUBLISHER_PRIVATE_KEY\\\" "
+        "--sequencer.coinbase \\\"$COINBASE\\\" "
+        "--p2p.p2pIp $P2P_IP\"'"
+    )
+    try:
+        subprocess.call(fallback_cmd, shell=True)
+        return True
+    except Exception as e:
+        print("Aztec fallback restart failed:", e)
+        return False
+
 def monitor_nodes():
     print("🔍 Запускаю мониторинг нод...")
     installed_nodes = set(get_installed_nodes())
@@ -376,14 +408,10 @@ def monitor_nodes():
                             failure_times[name] = now
                         elif name == "Aztec":
                             send_alert(name, "❌ Aztec нода упала! Перезапускаю...")
-                            try:
-                                subprocess.call(
-                                    "bash -c 'cd ~ && echo 2 | bash aztec_node.sh'",
-                                    shell=True,
-                                )
+                            if restart_aztec():
                                 send_alert(name, "✅ Aztec нода перезапущена.")
-                            except Exception as e:
-                                send_alert(name, f"❌ Ошибка перезапуска Aztec: {e}")
+                            else:
+                                send_alert(name, "❌ Ошибка перезапуска Aztec")
                             failure_times[name] = now
                         else:
                             send_alert(name)
