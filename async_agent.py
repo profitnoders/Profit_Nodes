@@ -1,18 +1,21 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 import psutil, docker, subprocess, threading, time, requests, os, socket, sqlite3
-from fastapi.responses import PlainTextResponse
 import asyncio
 
 app = FastAPI()
 CHECK_INTERVAL = 60
+FAILURE_CONFIRMATION = 120  # время подтверждения падения ноды (сек)
 ALERTS_ENABLED = False
 ALERT_SENT = False
-BOT_ALERT_URL = "http://91.108.246.138:8080/alert"
+BOT_ALERT_URL = "http://31.220.92.247:8079/alert"
 ALERT_DB_PATH = os.path.join(os.path.dirname(__file__), "alerts.db")
 COMPOSE_PATH = os.path.expanduser("~/infernet-container-starter/deploy/docker-compose.yaml")
 print("📁 Current working dir:", os.getcwd())
 print("📄 Full DB path:", ALERT_DB_PATH)
+
+# словарь времени первого падения ноды
+failure_times = {}
 
 # === Ноды ===
 NODE_SYSTEMD = {
@@ -22,19 +25,25 @@ NODE_SYSTEMD = {
     "Pipe-Devnet": "pipe-node.service",
     "0G": "zgs.service",
     "Drosera": "drosera.service",  # ✅ Новая нода
-    "Hyperspace": "aios.service"   # ✅ Новая нода
+    "Hyperspace": "aios.service",   # ✅ Новая нода
+    "Datagram": "datagram-node@1.service",
+    "Multisynq": "synchronizer-cli.service"
 }
 
 NODE_PROCESSES = {
     "Multiple": "multiple-node",
     "Dill Light Validator": "dill/light_node/data/beacondata",
     "Dill Full Validator": "dill/full_node/data/beacondata",
-    "Gaia": "wasmedge",
-    "Gensyn": "python -m hivemind_exp.gsm8k"
+    "Gaia": "gaianet",
+    "Gensyn": "python -m rgym_exp.runner.swarm_launcher",
+    "Cysic_Prover": "./prover",
+    "Inference": "inference-launcher",
+    "Nexus": "./nexus-network",
+    "Nous Bot": "nousbot"
 }
 NODE_SCREENS = {
-    "Gaia": "gaia_bot",
-    "Dria": "dria_node"
+    "Dria": "dria_node",
+    "Cysic_Prover": "prover"
 }
 NODE_DOCKER_CONTAINERS = {
     "Ritual": {"hello-world", "infernet-anvil", "infernet-fluentbit", "infernet-redis", "infernet-node"},
@@ -49,12 +58,16 @@ NODE_DOCKER_CONTAINERS = {
         "nwaku-compose-postgres-exporter-1",
         "nwaku-compose-nwaku-1",
         "nwaku-compose-postgres-1"
-    }  # ✅ Новая нода
+    },  # ✅ Новая нода
+    "Cysic_Mult": {"verifier_1", "verifier_2"},
+    "Multiple_Mult": {"multiple-node-1", "multiple-node-2"},
+    "Dria_Mult": {"dria_node_1", "dria_node_2"},
+    "Titan_Mult": {"titan-node-1", "titan-node-2", "titan-node-3", "titan-node-4", "titan-node-5"}
 }
 
 NODE_DOCKER_IMAGES = {
     "Titan": "nezha123/titan-edge",
-    "Aztec": "aztecprotocol/aztec"
+    "Aztec": "aztecprotocol"
 }
 
 # === Вспомогательные ===
@@ -182,7 +195,11 @@ def get_background_processes():
     found = set()
     for proc in psutil.process_iter(['cmdline']):
         try:
-            cmd = " ".join(proc.info['cmdline'])
+            cmdline = proc.info.get('cmdline')
+            if isinstance(cmdline, (list, tuple)):
+                cmd = " ".join(cmdline)
+            else:
+                cmd = str(cmdline) if cmdline else ''
             for name, match in NODE_PROCESSES.items():
                 if match in cmd:
                     found.add(name)
@@ -204,7 +221,8 @@ def get_installed_nodes():
     # 2. processes
     for proc in psutil.process_iter(['cmdline']):
         try:
-            cmd = " ".join(proc.info['cmdline'])
+            cmdline = proc.info.get('cmdline') or []
+            cmd = " ".join(cmdline)
             for name, keyword in NODE_PROCESSES.items():
                 if keyword in cmd:
                     result.append(name)
@@ -252,169 +270,197 @@ def send_alert(name: str, custom_message: str = None):
             "alert_id": f"{name}-{int(time.time())}",
             "message": custom_message or f"❌ Упала нода: {name}"
         }
-        requests.post(BOT_ALERT_URL, json=payload)
-        print(f"🔔 Алерт отправлен: {name}")
+        resp = requests.post(BOT_ALERT_URL, json=payload)
+        if resp.status_code == 200:
+            print(f"🔔 Алерт отправлен: {name}")
+        else:
+            print(
+                f"❌ Не удалось отправить алерт {name}: {resp.status_code} {resp.text}"
+            )
     except Exception as e:
         print("Ошибка отправки алерта:", e)
 
-async def monitor_nodes():
+def monitor_nodes():
     print("🔍 Запускаю мониторинг нод...")
     installed_nodes = set(get_installed_nodes())
     print(f"🧩 Установленные ноды для мониторинга: {installed_nodes}")
-    j = 0
-    try:
-        while True:
-            print(f"Мониторинг нод - цикл {j}")
-            failed = set()
-    
-            # === Systemd
-            for name in installed_nodes:
-                if name in NODE_SYSTEMD:
-                    service = NODE_SYSTEMD[name]
-                    try:
-                        status = subprocess.check_output(["systemctl", "is-active", service], text=True).strip()
-                        if status != "active":
-                            failed.add(name)
-                    except subprocess.CalledProcessError:
-                        failed.add(name)
-    
-            # === Docker
-            try:
-                client = docker.from_env()
-                containers = client.containers.list()
-                running = {c.name for c in containers}
-                tags = [tag for c in containers for tag in c.image.tags if c.image.tags]
-    
-                for name in installed_nodes:
-                    if name in NODE_DOCKER_CONTAINERS:
-                        expected = NODE_DOCKER_CONTAINERS[name]
-                        if not expected.issubset(running):
-                            failed.add(name)
-    
-                    if name in NODE_DOCKER_IMAGES:
-                        pattern = NODE_DOCKER_IMAGES[name]
-                        if not any(pattern in tag for tag in tags):
-                            failed.add(name)
-    
-            except Exception as e:
-                print("⚠️ Docker check failed:", e)
-    
-            # === Процессы
-            active = set()
-            for p in psutil.process_iter(['cmdline']):
-                try:
-                    cmd = " ".join(p.info['cmdline'])
-                    for proc_name, keyword in NODE_PROCESSES.items():
-                        if proc_name in installed_nodes and keyword in cmd:
-                            active.add(proc_name)
-                except Exception:
-                    continue
-    
-            for name in installed_nodes:
-                if name in NODE_PROCESSES and name not in active:
-                    failed.add(name)
-    
-            # === Screen-сессии
-            try:
-                screens = subprocess.check_output(["screen", "-ls"], text=True, stderr=subprocess.DEVNULL)
-            except subprocess.CalledProcessError:
-                screens = ""
-            
-            for name in installed_nodes:
-                if name in NODE_SCREENS:
-                    session = NODE_SCREENS[name]
-                    if session not in screens:
-                        failed.add(name)
-            
-            # === Особый случай: Gaia
-            if "Gaia" in installed_nodes:
-                if NODE_SCREENS["Gaia"] not in screens:
-                    failed.add("Gaia")
-    
-    
-            # === Отправка алертов
-            for name in failed:
-                if ALERTS_ENABLED and not was_already_reported(name):
-                    send_alert(name)
-                    mark_alert(name, True)
-    
-            for name in installed_nodes:
-                if name not in failed:
-                    mark_alert(name, False)
-                    
-            j += 1
-            await asyncio.sleep(CHECK_INTERVAL)
-            
-    except Exception as e:
-        print(f"❌ Ошибка в monitor_nodes: {e}")
-        await asyncio.sleep(10)
 
-async def monitor_disk():
-    global ALERT_SENT
-    print("Стартую мониторинг диска...")
-    k = 0
-    try:
-        while True:
-            print(f"Мониторинг диска - цикл {k}")
-            disk = psutil.disk_usage("/")
-            percent = disk.percent
-    
-            # ⚠️ Проверка наличия ноды Ritual
-            ritual_detected = False
+    while True:
+        failed = set()
+        now = time.time()
+
+        # === Systemd
+        for name in installed_nodes:
+            if name in NODE_SYSTEMD:
+                service = NODE_SYSTEMD[name]
+                try:
+                    status = subprocess.check_output(["systemctl", "is-active", service], text=True).strip()
+                    if status != "active":
+                        failed.add(name)
+                except subprocess.CalledProcessError:
+                    failed.add(name)
+
+        # === Docker
+        try:
+            client = docker.from_env()
+            containers = client.containers.list()
+            running = {c.name for c in containers}
+            tags = [tag for c in containers for tag in c.image.tags if c.image.tags]
+
+            for name in installed_nodes:
+                if name in NODE_DOCKER_CONTAINERS:
+                    expected = NODE_DOCKER_CONTAINERS[name]
+                    if not expected.issubset(running):
+                        failed.add(name)
+
+                if name in NODE_DOCKER_IMAGES:
+                    pattern = NODE_DOCKER_IMAGES[name]
+                    if not any(pattern in tag for tag in tags):
+                        failed.add(name)
+
+        except Exception as e:
+            print("⚠️ Docker check failed:", e)
+
+        # === Процессы
+        active = set()
+        for p in psutil.process_iter(['cmdline']):
             try:
-                client = docker.from_env()
-                containers = {c.name for c in client.containers.list()}
-                ritual_containers = {"hello-world", "infernet-node", "infernet-anvil", "infernet-fluentbit", "infernet-redis"}
-                ritual_detected = len(ritual_containers & containers) >= 3
+                cmdline = p.info.get('cmdline') or []
+                cmd = " ".join(cmdline)
+                for proc_name, keyword in NODE_PROCESSES.items():
+                    if proc_name in installed_nodes and keyword in cmd:
+                        active.add(proc_name)
+            except Exception:
+                continue
+
+        for name in installed_nodes:
+            if name in NODE_PROCESSES and name not in active:
+                failed.add(name)
+
+        # === Screen-сессии
+        try:
+            screens = subprocess.check_output(["screen", "-ls"], text=True, stderr=subprocess.DEVNULL)
+        except subprocess.CalledProcessError:
+            screens = ""
+        
+        for name in installed_nodes:
+            if name in NODE_SCREENS:
+                session = NODE_SCREENS[name]
+                if session not in screens:
+                    failed.add(name)
+        
+        # === Особый случай: Gaia
+        if "Gaia" in installed_nodes:
+            if NODE_SCREENS["Gaia"] not in screens:
+                failed.add("Gaia")
+
+
+        # === Отправка алертов с проверкой повторного запуска
+        for name in installed_nodes:
+            if name in failed:
+                if name not in failure_times:
+                    failure_times[name] = now
+                    print(f"⚠️ Нода {name} упала, жду {FAILURE_CONFIRMATION} сек")
+                elif now - failure_times[name] >= FAILURE_CONFIRMATION:
+                    if ALERTS_ENABLED and not was_already_reported(name):
+                        if name == "Cysic_Prover":
+                            send_alert(name, "❌ Cysic Prover упал! Перезапускаю...")
+                            try:
+                                subprocess.call(
+                                    "screen -dmS prover bash -c 'cd ~/cysic-prover/ && bash start.sh'",
+                                    shell=True
+                                )
+                                send_alert(name, "✅ Cysic Prover перезапущен.")
+                            except Exception as e:
+                                send_alert(name, f"❌ Ошибка перезапуска Cysic Prover: {e}")
+                            failure_times[name] = now
+                        elif name == "Aztec":
+                            send_alert(name, "❌ Aztec нода упала! Перезапускаю...")
+                            try:
+                                subprocess.call("echo 2 | bash aztec_node.sh", shell=True)
+                                send_alert(name, "✅ Aztec нода перезапущена.")
+                            except Exception as e:
+                                send_alert(name, f"❌ Ошибка перезапуска Aztec: {e}")
+                            failure_times[name] = now
+                        else:
+                            send_alert(name)
+                        mark_alert(name, True)
+                        print(f"❌ Нода {name} упала! Алерт отправлен")
+            else:
+                if name in failure_times:
+                    failure_times.pop(name, None)
+                if was_already_reported(name):
+                    mark_alert(name, False)
+
+        time.sleep(CHECK_INTERVAL)
+
+def monitor_disk():
+    global ALERT_SENT
+    while True:
+        disk = psutil.disk_usage("/")
+        percent = disk.percent
+
+        # ⚠️ Проверка наличия ноды Ritual
+        ritual_detected = False
+        try:
+            client = docker.from_env()
+            containers = {c.name for c in client.containers.list()}
+            ritual_containers = {"hello-world", "infernet-node", "infernet-anvil", "infernet-fluentbit", "infernet-redis"}
+            ritual_detected = len(ritual_containers & containers) >= 3
+        except Exception as e:
+            print("Ошибка проверки Docker:", e)
+
+        # 🔁 Перезапуск Ritual если диск > 95% и Ritual найден
+        if ritual_detected and percent > 95:
+            try:
+                print("📦 Диск > 95% и Ritual найден — перезапуск...")
+
+                # Остановка docker-compose
+                down_result = subprocess.call(["docker-compose", "-f", COMPOSE_PATH, "down"])
+
+                time.sleep(80)
+                # Завершение всех screen-сессий с именем 'ritual'
+                subprocess.call("for s in $(screen -ls | grep ritual | awk '{print $1}'); do screen -S $s -X quit; done", shell=True)
+
+                # Запуск docker-compose в новой screen-сессии
+                up_result = subprocess.call(
+                    ["screen", "-dmS", "ritual", "bash", "-c", f"docker-compose -f {COMPOSE_PATH} up"]
+                )
+                time.sleep(20)
+                if down_result == 0 and up_result == 0:
+                    print("✅ Ritual перезапущен успешно.")
+                else:
+                    print("⚠️ Перезапуск Ritual завершился с ошибками.")
+
             except Exception as e:
-                print("Ошибка проверки Docker:", e)
-    
-            # 🔁 Перезапуск Ritual если диск > 80%
-            if ritual_detected and percent > 80:
-                try:
-                    print("📦 Диск > 80% и Ritual найден — перезапуск...")
-    
-                    # Остановка docker-compose
-                    down_result = subprocess.call(["docker-compose", "-f", COMPOSE_PATH, "down"])
-    
-                    await asyncio.sleep(80)
-                    # Завершение всех screen-сессий с именем 'ritual'
-                    subprocess.call("for s in $(screen -ls | grep ritual | awk '{print $1}'); do screen -S $s -X quit; done", shell=True)
-    
-                    # Запуск docker-compose в новой screen-сессии
-                    up_result = subprocess.call(
-                        ["screen", "-dmS", "ritual", "bash", "-c", f"docker-compose -f {COMPOSE_PATH} up"]
-                    )
-                    await asyncio.sleep(20)
-                    if down_result == 0 and up_result == 0:
-                        print("✅ Ritual перезапущен успешно.")
-                    else:
-                        print("⚠️ Перезапуск Ritual завершился с ошибками.")
-    
-                except Exception as e:
-                    print("❌ Ошибка перезапуска Ritual:", e)
-    
-            # 🔔 Алерт по диску
-            if percent >= 80 and not ALERT_SENT:
-                try:
-                    requests.post(BOT_ALERT_URL, json={
+                print("❌ Ошибка перезапуска Ritual:", e)
+
+        # 🔔 Алерт по диску
+        if percent >= 95 and not ALERT_SENT:
+            message = (
+                f"Диск почти заполнен: {percent}%"
+            )
+            if ritual_detected:
+                message += "\n⏳ Перезапущен docker-compose Ritual"
+            try:
+                requests.post(
+                    BOT_ALERT_URL,
+                    json={
                         "token": get_token(),
                         "ip": get_ip_address(),
-                        "percent": percent,
+                        "message": message,
                         "alert_id": f"{get_ip_address()}-{int(time.time())}"
-                    })
-                    ALERT_SENT = True
-                except Exception as e:
-                    print("Ошибка отправки алерта:", e)
-    
-            elif percent < 78 and ALERT_SENT:
-                ALERT_SENT = False
+                    }
+                )
+                ALERT_SENT = True
+            except Exception as e:
+                print("Ошибка отправки алерта:", e)
 
-            k += 1
-            await asyncio.sleep(CHECK_INTERVAL)
-    except Exception as e:
-        print(f"❌ Ошибка в monitor_nodes: {e}")
-        await asyncio.sleep(10)
+        elif percent < 93 and ALERT_SENT:
+            ALERT_SENT = False
+
+        time.sleep(CHECK_INTERVAL)
+
 
 # === Эндпоинты ===
 @app.post("/ping")
@@ -453,9 +499,11 @@ async def get_service_logs(request: Request):
 @app.post("/update_token")
 async def update_token(request: Request):
     data = await request.json()
+    if data.get("token") != get_token():
+        return JSONResponse(content={"error": "unauthorized"}, status_code=403)
     new_token = data.get("new_token")
     if not new_token:
-        return {"status": "missing new_token"}
+        return JSONResponse(content={"status": "missing new_token"}, status_code=400)
     with open("token.txt", "w") as f:
         f.write(new_token.strip())
     return {"status": "updated"}
@@ -469,7 +517,6 @@ async def nodes_info(request: Request):
     nodes = get_installed_nodes()
     return {"nodes": nodes}
 
-from fastapi.responses import PlainTextResponse
 
 @app.post("/logs_docker")
 async def get_docker_logs(request: Request):
@@ -495,6 +542,8 @@ async def get_docker_logs(request: Request):
 async def set_alert_mode(request: Request):
     global ALERTS_ENABLED
     data = await request.json()
+    if data.get("token") != get_token():
+        return JSONResponse(content={"error": "unauthorized"}, status_code=403)
     enabled = data.get("enabled", True)
     ALERTS_ENABLED = bool(enabled)
     save_alerts_enabled(ALERTS_ENABLED)
@@ -538,8 +587,8 @@ async def restart_ritual_endpoint(request: Request):
 async def startup_event():
     init_alert_db()
     load_alerts_enabled()
-    asyncio.create_task(monitor_nodes())
-    asyncio.create_task(monitor_disk())
+    threading.Thread(target=monitor_nodes, daemon=True).start()
+    threading.Thread(target=monitor_disk, daemon=True).start()
 
 if __name__ == "__main__":
     import uvicorn
