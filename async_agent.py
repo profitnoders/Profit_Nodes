@@ -281,36 +281,28 @@ def send_alert(name: str, custom_message: str = None):
         print("Ошибка отправки алерта:", e)
 
 
-def restart_aztec() -> bool:
-    """Попытаться перезапустить Aztec. Возвращает True при успехе."""
-    try:
-        ret = subprocess.call(
-            "bash -c 'cd ~ && echo 2 | bash aztec_node.sh'",
-            shell=True,
-        )
-        if ret == 0:
-            return True
-    except Exception as e:
-        print("Aztec restart via script failed:", e)
 
-    fallback_cmd = (
-        "bash -c 'cd ~ && "
-        "source ~/.aztec_node_config >/dev/null 2>&1 && "
-        "screen -dmS aztec bash -c \"aztec start --node --archiver --sequencer "
-        "--network alpha-testnet "
-        "--l1-rpc-urls $ETHEREUM_HOSTS "
-        "--l1-consensus-host-urls $L1_CONSENSUS_HOST_URLS "
-        "--sequencer.validatorPrivateKeys \\\"$VALIDATOR_PRIVATE_KEYS\\\" "
-        "--sequencer.publisherPrivateKey \\\"$PUBLISHER_PRIVATE_KEY\\\" "
-        "--sequencer.coinbase \\\"$COINBASE\\\" "
-        "--p2p.p2pIp $P2P_IP\"'"
-    )
-    try:
-        subprocess.call(fallback_cmd, shell=True)
-        return True
-    except Exception as e:
-        print("Aztec fallback restart failed:", e)
-        return False
+# def restart_aztec() -> bool:
+#     """Попытаться перезапустить Aztec. Возвращает True при успехе."""
+#     fallback_cmd = (
+#         "bash -c 'cd ~ && "
+#         "source ~/.aztec_node_config >/dev/null 2>&1 && "
+#         "screen -dmS aztec bash -c \"aztec start --node --archiver --sequencer "
+#         "--network alpha-testnet "
+#         "--l1-rpc-urls $ETHEREUM_HOSTS "
+#         "--l1-consensus-host-urls $L1_CONSENSUS_HOST_URLS "
+#         "--sequencer.validatorPrivateKeys \\\"$VALIDATOR_PRIVATE_KEYS\\\" "
+#         "--sequencer.publisherPrivateKey \\\"$PUBLISHER_PRIVATE_KEY\\\" "
+#         "--sequencer.coinbase \\\"$COINBASE\\\" "
+#         "--p2p.p2pIp $P2P_IP\"'"
+#     )
+#     try:
+#         subprocess.call(fallback_cmd, shell=True)
+#         return True
+#     except Exception as e:
+#         print("Неудачный перезапуск ноды Aztec:", e)
+#         return False
+
 
 def monitor_nodes():
     print("🔍 Запускаю мониторинг нод...")
@@ -406,12 +398,14 @@ def monitor_nodes():
                             except Exception as e:
                                 send_alert(name, f"❌ Ошибка перезапуска Cysic Prover: {e}")
                             failure_times[name] = now
-                        elif name == "Aztec":
-                            send_alert(name, "❌ Aztec нода упала! Перезапускаю...")
-                            if restart_aztec():
-                                send_alert(name, "✅ Aztec нода перезапущена.")
-                            else:
-                                send_alert(name, "❌ Ошибка перезапуска Aztec")
+                        elif name == "Drosera":
+                            send_alert(name, "❌ Drosera упала! Перезапускаю...")
+                            try:
+                                subprocess.call(["sudo", "systemctl", "daemon-reload"])
+                                subprocess.call(["sudo", "systemctl", "restart", "drosera"])
+                                send_alert(name, "✅ Drosera перезапущена.")
+                            except Exception as e:
+                                send_alert(name, f"❌ Ошибка перезапуска Drosera: {e}")
                             failure_times[name] = now
                         else:
                             send_alert(name)
