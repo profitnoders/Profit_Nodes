@@ -4,7 +4,7 @@ source ~/.aztec_node_config
 
 while true; do
   if ! docker ps --format '{{.Image}} {{.Names}}' | grep -q aztec; then
-    echo "[`date`] 🔁 Контейнер Aztec не найден — перезапускаем..." >> ~/aztec_watchdog.log
+    echo "[`date`] 🔁 Контейнер Aztec не найден — перезапускаем..."
 
     aztec start --node --archiver --sequencer \
       --network alpha-testnet \
@@ -13,10 +13,10 @@ while true; do
       --sequencer.validatorPrivateKeys "$VALIDATOR_PRIVATE_KEYS" \
       --sequencer.publisherPrivateKey "$PUBLISHER_PRIVATE_KEY" \
       --sequencer.coinbase "$COINBASE" \
-      --p2p.p2pIp "$P2P_IP" >> ~/aztec_watchdog.log 2>&1
+      --p2p.p2pIp "$P2P_IP"
   else
     echo "[`date`] ✅ Контейнер работает"
   fi
-  echo "[`date`] ❌ Aztec завершился — перезапуск через 30 сек" >> ~/aztec_watchdog.log
+  echo "[`date`] ❌ Aztec завершился — перезапуск через 30 сек" 
   sleep 30 
 done
