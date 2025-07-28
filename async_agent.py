@@ -5,7 +5,7 @@ import asyncio
 
 app = FastAPI()
 CHECK_INTERVAL = 60
-FAILURE_CONFIRMATION = 300  # время подтверждения падения ноды (сек)
+FAILURE_CONFIRMATION = 240  # время подтверждения падения ноды (сек)
 ALERTS_ENABLED = False
 ALERT_SENT = False
 BOT_ALERT_URL = "http://31.220.92.247:8079/alert"
