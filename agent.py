@@ -5,7 +5,7 @@ import asyncio
 
 app = FastAPI()
 CHECK_INTERVAL = 60
-FAILURE_CONFIRMATION = 120  # время подтверждения падения ноды (сек)
+FAILURE_CONFIRMATION = 2400  # время подтверждения падения ноды (сек)
 ALERTS_ENABLED = False
 ALERT_SENT = False
 BOT_ALERT_URL = "http://91.108.246.138:8080/alert"
@@ -26,7 +26,8 @@ NODE_SYSTEMD = {
     "0G": "zgs.service",
     "Drosera": "drosera.service",  # ✅ Новая нода
     "Hyperspace": "aios.service",   # ✅ Новая нода
-    "Datagram": "datagram-node@1.service"
+    "Datagram": "datagram-node@1.service",
+    "Multisynq": "synchronizer-cli.service"
 }
 
 NODE_PROCESSES = {
@@ -37,7 +38,8 @@ NODE_PROCESSES = {
     "Gensyn": "python -m rgym_exp.runner.swarm_launcher",
     "Cysic_Prover": "./prover",
     "Inference": "inference-launcher",
-    "Nexus": "./nexus-network"
+    "Nexus": "./nexus-network",
+    "Nous Bot": "nousbot"
 }
 NODE_SCREENS = {
     "Dria": "dria_node",
@@ -278,6 +280,30 @@ def send_alert(name: str, custom_message: str = None):
     except Exception as e:
         print("Ошибка отправки алерта:", e)
 
+
+
+# def restart_aztec() -> bool:
+#     """Попытаться перезапустить Aztec. Возвращает True при успехе."""
+#     fallback_cmd = (
+#         "bash -c 'cd ~ && "
+#         "source ~/.aztec_node_config >/dev/null 2>&1 && "
+#         "screen -dmS aztec bash -c \"aztec start --node --archiver --sequencer "
+#         "--network alpha-testnet "
+#         "--l1-rpc-urls $ETHEREUM_HOSTS "
+#         "--l1-consensus-host-urls $L1_CONSENSUS_HOST_URLS "
+#         "--sequencer.validatorPrivateKeys \\\"$VALIDATOR_PRIVATE_KEYS\\\" "
+#         "--sequencer.publisherPrivateKey \\\"$PUBLISHER_PRIVATE_KEY\\\" "
+#         "--sequencer.coinbase \\\"$COINBASE\\\" "
+#         "--p2p.p2pIp $P2P_IP\"'"
+#     )
+#     try:
+#         subprocess.call(fallback_cmd, shell=True)
+#         return True
+#     except Exception as e:
+#         print("Неудачный перезапуск ноды Aztec:", e)
+#         return False
+
+
 def monitor_nodes():
     print("🔍 Запускаю мониторинг нод...")
     installed_nodes = set(get_installed_nodes())
@@ -346,6 +372,12 @@ def monitor_nodes():
                 session = NODE_SCREENS[name]
                 if session not in screens:
                     failed.add(name)
+        
+        # === Особый случай: Gaia
+        if "Gaia" in installed_nodes:
+            if NODE_SCREENS["Gaia"] not in screens:
+                failed.add("Gaia")
+
 
         # === Отправка алертов с проверкой повторного запуска
         for name in installed_nodes:
@@ -365,6 +397,15 @@ def monitor_nodes():
                                 send_alert(name, "✅ Cysic Prover перезапущен.")
                             except Exception as e:
                                 send_alert(name, f"❌ Ошибка перезапуска Cysic Prover: {e}")
+                            failure_times[name] = now
+                        elif name == "Drosera":
+                            send_alert(name, "❌ Drosera упала! Перезапускаю...")
+                            try:
+                                subprocess.call(["sudo", "systemctl", "daemon-reload"])
+                                subprocess.call(["sudo", "systemctl", "restart", "drosera"])
+                                send_alert(name, "✅ Drosera перезапущена.")
+                            except Exception as e:
+                                send_alert(name, f"❌ Ошибка перезапуска Drosera: {e}")
                             failure_times[name] = now
                         else:
                             send_alert(name)
