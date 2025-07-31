@@ -156,12 +156,12 @@ function delete_node() {
 
 function show_menu() {
     show_logo
-    echo -e "${CLR_GREEN}1)🖥️ Создание оператора${CLR_RESET}"
+    echo -e "${CLR_GREEN}1)🖥️  Создание оператора${CLR_RESET}"
     echo -e "${CLR_GREEN}2)🚀 Запуск CLI и systemd${CLR_RESET}"
-    echo -e "${CLR_GREEN}3)✈️ Миграция в сеть Hoodi${CLR_RESET}"
+    echo -e "${CLR_GREEN}3)✈️  Миграция в сеть Hoodi${CLR_RESET}"
     echo -e "${CLR_GREEN}4)🔄 Перезапуск ноды${CLR_RESET}"
     echo -e "${CLR_GREEN}5)📜 Просмотр логов${CLR_RESET}"
-    echo -e "${CLR_GREEN}6)🗑️ Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}6)🗑️  Удалить ноду${CLR_RESET}"
     echo -e "${CLR_GREEN}7)❌ Выйти${CLR_RESET}"
     read -p "Выберите пункт: " choice
     case $choice in
