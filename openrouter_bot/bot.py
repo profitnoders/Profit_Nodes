@@ -54,15 +54,19 @@ def main():
         print("[!] Файл prompts.txt пуст.")
         return
 
-    model = config.get("model", "openai/gpt-3.5-turbo")
+    models = config.get("models", ["openai/gpt-3.5-turbo"])
     min_delay = config.get("min_delay", 10)
     max_delay = config.get("max_delay", 30)
 
     while True:
         key = choose_random(keys)
         prompt = choose_random(prompts)
+        model = choose_random(models)
 
-        print(f"\n=== 🔑 Ключ: {key[:8]}... | 📝 Промпт: {prompt} ===")
+        # Укороченный ключ (первые 14 символов)
+        short_key = key[:14] + "..." if len(key) > 14 else key
+
+        print(f"\n=== 🔑 Ключ: {short_key} | 🤖 Модель: {model} | 📝 Промпт: {prompt} ===")
         try:
             reply = call_openrouter(key, model, prompt)
             if reply:
