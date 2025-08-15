@@ -3,6 +3,7 @@ import json
 import random
 import requests
 import time
+import threading
 
 WORKDIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(WORKDIR, "config.json")
@@ -42,41 +43,45 @@ def call_openrouter(api_key, model, prompt):
         print(f"[!] Ошибка {response.status_code}: {response.text}")
         return None
 
+def worker(api_key):
+    while True:
+        model = choose_random(models)
+        prompt = choose_random(prompts)
+        short_key = api_key[:14] + "..."
+        print(f"\n=== 🔑 Ключ: {short_key} | 🤖 Модель: {model} | 📝 Промпт: {prompt} ===")
+        try:
+            reply = call_openrouter(api_key, model, prompt)
+            if reply:
+                print(f"📩 Ответ: {reply}\n")
+        except Exception as e:
+            print(f"[!] Ошибка: {e}")
+
+        delay = random.randint(min_delay, max_delay)
+        print(f"⏳ [{short_key}] Ждёт {delay} сек...")
+        time.sleep(delay)
+
 def main():
     config = load_config()
     keys = load_keys()
     prompts = load_prompts()
-
-    if not keys:
-        print("[!] Нет доступных API ключей.")
-        return
-    if not prompts:
-        print("[!] Файл prompts.txt пуст.")
-        return
-
+    global models, min_delay, max_delay
     models = config.get("models", ["openai/gpt-3.5-turbo"])
     min_delay = config.get("min_delay", 10)
     max_delay = config.get("max_delay", 30)
 
+    if not keys:
+        print("[!] Нет ключей.")
+        return
+    if not prompts:
+        print("[!] Нет промптов.")
+        return
+
+    print(f"▶️ Запуск потоков для {len(keys)} ключей...\n")
+    for key in keys:
+        threading.Thread(target=worker, args=(key,), daemon=True).start()
+
     while True:
-        key = choose_random(keys)
-        prompt = choose_random(prompts)
-        model = choose_random(models)
-
-        # Укороченный ключ (первые 14 символов)
-        short_key = key[:14] + "..." if len(key) > 14 else key
-
-        print(f"\n=== 🔑 Ключ: {short_key} | 🤖 Модель: {model} | 📝 Промпт: {prompt} ===")
-        try:
-            reply = call_openrouter(key, model, prompt)
-            if reply:
-                print(f"📩 Ответ: {reply}\n")
-        except Exception as e:
-            print(f"[!] Ошибка при обработке: {e}")
-
-        delay = random.randint(min_delay, max_delay)
-        print(f"⏳ Ждём {delay} секунд до следующего запроса...")
-        time.sleep(delay)
+        time.sleep(9999)  
 
 if __name__ == "__main__":
     main()
