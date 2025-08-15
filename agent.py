@@ -372,11 +372,6 @@ def monitor_nodes():
                 session = NODE_SCREENS[name]
                 if session not in screens:
                     failed.add(name)
-        
-        # === Особый случай: Gaia
-        if "Gaia" in installed_nodes:
-            if NODE_SCREENS["Gaia"] not in screens:
-                failed.add("Gaia")
 
 
         # === Отправка алертов с проверкой повторного запуска
