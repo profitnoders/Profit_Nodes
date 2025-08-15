@@ -43,10 +43,10 @@ def call_openrouter(api_key, model, prompt):
         print(f"[!] Ошибка {response.status_code}: {response.text}")
         return None
 
-def worker(api_key):
+def worker(api_key, prompts):
     while True:
         model = choose_random(models)
-        prompt = choose_random(prompts)
+        prompt = choose_random(prompts)  # теперь работает
         short_key = api_key[:14] + "..."
         print(f"\n=== 🔑 Ключ: {short_key} | 🤖 Модель: {model} | 📝 Промпт: {prompt} ===")
         try:
@@ -78,7 +78,7 @@ def main():
 
     print(f"▶️ Запуск потоков для {len(keys)} ключей...\n")
     for key in keys:
-        threading.Thread(target=worker, args=(key,), daemon=True).start()
+        threading.Thread(target=worker, args=(key, prompts), daemon=True).start()
 
     while True:
         time.sleep(9999)  
