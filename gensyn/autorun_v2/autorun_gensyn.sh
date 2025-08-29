@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# v2.3
+# v2.4
 # ======================================
 # Пути и базовые настройки
 # ======================================
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-RUN_SCRIPT="$SCRIPT_DIR/run_rl_swarm.sh"   # целевой раннер
+RUN_SCRIPT="$SCRIPT_DIR/run_rl_swarm_new.sh"   # целевой раннер
 LOG_DIR="$SCRIPT_DIR/logs"
 LOG_FILE="$LOG_DIR/autorun.log"
 PID_FILE="$LOG_DIR/autorun.pid"
@@ -17,10 +17,10 @@ CHECK_INTERVAL=60
 mkdir -p "$LOG_DIR"
 
 # ======================================
-# Флаги для обработки сигналов
+# Флаги
 # ======================================
-INT_COUNT=0      # 1-е Ctrl+C гасит swarm, 2-е — завершает autorun
-SIGNAL_BUSY=0    # защита от реэнтранса
+INT_FIRED=0       # было ли первое Ctrl+C
+BUSY=0            # защита от реэнтранса
 
 # ======================================
 # Утилиты
@@ -30,7 +30,7 @@ echo_ts(){ echo "[$(date +'%F %T')] $*"; }
 kill_group_by_pgid(){
   # $1 = PGID, $2 = имя для лога
   local pg="$1" name="${2:-group}"
-  if [ -z "$pg" ]; then return; fi
+  [ -z "$pg" ] && return
   echo_ts ">> Завершаю процесс-группу $name PGID=$pg (TERM)"
   kill -TERM -"$pg" 2>/dev/null || true
   for _ in 1 2 3; do
@@ -44,11 +44,9 @@ kill_group_by_pgid(){
 }
 
 kill_by_pattern(){
-  local pat="$1"
-  local timeout="${2:-10}"
-  local pids
+  local pat="$1" timeout="${2:-10}" pids
   pids="$(pgrep -f "$pat" || true)"
-  if [ -n "${pids}" ]; then
+  if [ -n "$pids" ]; then
     echo_ts ">> SIGTERM по '$pat' (PIDs: ${pids})"
     kill ${pids} 2>/dev/null || true
     for _ in $(seq 1 "$timeout"); do
@@ -96,16 +94,13 @@ load_config(){
 # ======================================
 stop_all(){
   echo_ts "== Останавливаю авторан и все процессы с 'swarm'/'autorun' =="
-  # 1) по сохранённому PGID
   if [ -f "$PID_FILE" ]; then
     pgid="$(cat "$PID_FILE" 2>/dev/null || true)"
     [ -n "$pgid" ] && kill_group_by_pgid "$pgid" "swarm"
     rm -f "$PID_FILE" || true
   fi
-  # 2) прицельно по шаблонам
   kill_by_pattern "$CMD_PATTERN"
   kill_by_pattern "$RUN_SCRIPT"
-  # 3) широкий гребень (на случай залипших хвостов)
   pkill -f 'swarm|autorun' 2>/dev/null || true
   sleep 2
   if pgrep -f 'swarm|autorun' >/dev/null; then
@@ -116,7 +111,7 @@ stop_all(){
 }
 
 # ======================================
-# Интерактив ввода (модель, время, HF, PRG)
+# Интерактив (модель, время, HF, PRG)
 # ======================================
 select_model_interactive(){
   echo ">> Выберите модель:"
@@ -203,7 +198,6 @@ collect_or_load_settings(){
 # ======================================
 restart_node(){
   echo_ts ">>> Перезапуск RL-сворма..."
-  # при перезапуске гасим прошлый PGID (если был)
   if [ -f "$PID_FILE" ]; then
     pgid_old="$(cat "$PID_FILE" 2>/dev/null || true)"
     [ -n "$pgid_old" ] && kill_group_by_pgid "$pgid_old" "swarm"
@@ -212,8 +206,7 @@ restart_node(){
   kill_by_pattern "$CMD_PATTERN"
   kill_by_pattern "$RUN_SCRIPT"
 
-  # ответы в stdin для run_rl_swarm_new.sh:
-  # 1) HF push? (y/n) + токен; 2) модель; 3) PRG [Y/n]
+  # ответы для run_rl_swarm_new.sh: HF(y/n)+token, модель, PRG(Y/n)
   local answers=""
   if [ -n "${HF_TOKEN:-}" ]; then
     answers+="y"$'\n'"$HF_TOKEN"$'\n'
@@ -238,36 +231,32 @@ restart_node(){
 }
 
 # ======================================
-# Трапы сигналов
+# Обработка сигналов
 # ======================================
 on_int(){
-  # защита от реэнтранса
-  if [ "$SIGNAL_BUSY" -eq 1 ]; then return; fi
-  SIGNAL_BUSY=1
-  INT_COUNT=$((INT_COUNT+1))
+  # защита от повторного входа
+  if [ "$BUSY" -eq 1 ]; then return; fi
+  BUSY=1
 
-  if [ "$INT_COUNT" -eq 1 ]; then
-    # 1-е Ctrl+C: гасим ТОЛЬКО swarm
-    echo_ts "== Ctrl+C: останавливаю только swarm =="
+  if [ "$INT_FIRED" -eq 0 ]; then
+    INT_FIRED=1
+    # 2-е Ctrl+C должно завершить autorun немедленно — меняем ловушку
+    trap 'exit 0' INT
+    echo_ts "== Ctrl+C: останавливаю только swarm (ещё раз Ctrl+C — выйти) =="
     if [ -f "$PID_FILE" ]; then
       pgid="$(cat "$PID_FILE" 2>/dev/null || true)"
-      if [ -n "$pgid" ]; then
-        kill_group_by_pgid "$pgid" "swarm"
-      fi
+      [ -n "$pgid" ] && kill_group_by_pgid "$pgid" "swarm"
       rm -f "$PID_FILE" || true
     fi
-    echo_ts "== Нажмите Ctrl+C ещё раз, чтобы выйти из авторана =="
-    SIGNAL_BUSY=0
+    BUSY=0
     return
   fi
 
-  # 2-е и последующие Ctrl+C: выходим из авторана
-  echo_ts "== Повторный Ctrl+C: выхожу из авторана =="
+  # если почему-то сюда дошли — на всякий случай выходим
   exit 0
 }
 
 on_term(){
-  # TERM — немедленно завершаем всё
   echo_ts "== SIGTERM: полное завершение =="
   if [ -f "$PID_FILE" ]; then
     pgid="$(cat "$PID_FILE" 2>/dev/null || true)"
@@ -331,3 +320,4 @@ while true; do
   fi
   sleep "$CHECK_INTERVAL"
 done
+
