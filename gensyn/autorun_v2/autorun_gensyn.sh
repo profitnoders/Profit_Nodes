@@ -1,55 +1,57 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# v2.7
+# 2.8
 # ================== базовые пути ==================
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-RUN_SCRIPT="$SCRIPT_DIR/run_rl_swarm_new.sh"   # целевой раннер
+RUN_SCRIPT="$SCRIPT_DIR/run_rl_swarm.sh"    # целевой раннер
 LOG_DIR="$SCRIPT_DIR/logs"
 LOG_FILE="$LOG_DIR/autorun.log"
-PID_FILE="$LOG_DIR/autorun.pgid"               # тут именно PGID/leader PID
-CONFIG_FILE="$SCRIPT_DIR/.autorun_gensyn.conf" # модель/время/HF/PRG
+CONFIG_FILE="$SCRIPT_DIR/.autorun_gensyn.conf"  # модель/время/HF/PRG
 mkdir -p "$LOG_DIR"
 
+# Мониторим по этим шаблонам (живость)
 CMD_PATTERN="python -m rgym_exp.runner.swarm_launcher"
-CHECK_INTERVAL=60
-WARMUP_SEC=30
-COOLDOWN_SEC=20
+SELF_PATTERN="$RUN_SCRIPT"
+
+CHECK_INTERVAL=60             # период проверки
+WARMUP_SEC=25                 # не перезапускать сразу после старта
+COOLDOWN_SEC=15               # не перезапускать чаще, чем раз в N сек
 LAST_RESTART=0
 SUPPRESS_UNTIL=0
-
-# ================== флаги сигналов ==================
-INT_FIRED=0
-BUSY=0
 
 # ================== утилиты ==================
 echo_ts(){ echo "[$(date +'%F %T')] $*"; }
 mask_token(){ [ -n "${HF_TOKEN:-}" ] && echo "set" || echo "none"; }
 
-kill_group_by_pgid(){
-  local pg="$1" name="${2:-group}"
-  [ -z "$pg" ] && return
-  echo_ts ">> SIGTERM группе $name PGID=$pg"
-  kill -TERM -"$pg" 2>/dev/null || true
-  for _ in 1 2 3; do ps -o pgid= -p "$pg" >/dev/null 2>&1 || break; sleep 1; done
-  if ps -o pgid= -p "$pg" >/dev/null 2>&1; then
-    echo_ts ">> SIGKILL группе $name PGID=$pg"
-    kill -KILL -"$pg" 2>/dev/null || true
+list_swarm_autorun(){
+  # список сторонних процессов со словами swarm|autorun (кроме этого скрипта и grep)
+  pgrep -af 'swarm|autorun' 2>/dev/null | grep -v -E "(grep|autorun_gensyn\.sh)" || true
+}
+
+kill_soft_then_hard(){
+  local pat="$1" timeout="${2:-10}" pids
+  pids="$(pgrep -f "$pat" || true)"
+  [ -z "$pids" ] && return
+  echo_ts ">> TERM по '$pat' (PIDs: $pids)"
+  kill $pids 2>/dev/null || true
+  for _ in $(seq 1 "$timeout"); do pgrep -f "$pat" >/dev/null || break; sleep 1; done
+  if pgrep -f "$pat" >/dev/null; then
+    echo_ts ">> KILL по '$pat'"
+    pkill -9 -f "$pat" 2>/dev/null || true
   fi
 }
 
-kill_by_pattern(){
-  local pat="$1" timeout="${2:-10}"
-  local pids; pids="$(pgrep -f "$pat" || true)"
-  if [ -n "$pids" ]; then
-    echo_ts ">> TERM по '$pat' (PIDs: $pids)"
-    kill $pids 2>/dev/null || true
-    for _ in $(seq 1 "$timeout"); do pgrep -f "$pat" >/dev/null || break; sleep 1; done
-    pgrep -f "$pat" >/dev/null && { echo_ts ">> KILL по '$pat'"; pkill -9 -f "$pat" 2>/dev/null || true; }
-  fi
+stop_all(){
+  echo_ts "== Полная остановка: swarm/autorun =="
+  kill_soft_then_hard "$CMD_PATTERN"
+  kill_soft_then_hard "$SELF_PATTERN"
+  # широкий гребень напоследок — на случай залипших хвостов
+  kill_soft_then_hard 'swarm|autorun' 5
+  echo_ts "== Готово =="
 }
 
-# ================== память настроек ==================
+# ================== «память» настроек ==================
 save_config(){
   umask 177
   {
@@ -67,22 +69,6 @@ load_config(){
   export MODEL_NAME IDLE_MIN HF_TOKEN PRG_GAME
   if [[ "${PRG_GAME:-true}" == "false" ]]; then PRG_ANSWER="n"; else PRG_ANSWER="Y"; PRG_GAME="true"; fi
   export PRG_ANSWER
-}
-
-# ================== меню стоп ==================
-stop_all(){
-  echo_ts "== Полная остановка autorun/swarm =="
-  if [ -f "$PID_FILE" ]; then
-    pg="$(cat "$PID_FILE" 2>/dev/null || true)"
-    [ -n "$pg" ] && kill_group_by_pgid "$pg" "swarm"
-    rm -f "$PID_FILE" || true
-  fi
-  kill_by_pattern "$CMD_PATTERN"
-  kill_by_pattern "$RUN_SCRIPT"
-  pkill -f 'swarm|autorun' 2>/dev/null || true
-  sleep 2
-  pgrep -f 'swarm|autorun' >/dev/null && pkill -9 -f 'swarm|autorun' 2>/dev/null || true
-  echo_ts "== Готово =="
 }
 
 # ================== интерактив ==================
@@ -119,6 +105,7 @@ select_prg(){
   if [[ "$prg" =~ ^[Nn]$ ]]; then PRG_GAME="false"; PRG_ANSWER="n"; else PRG_GAME="true"; PRG_ANSWER="Y"; fi
   export PRG_GAME PRG_ANSWER; echo_ts ">> PRG участие: $PRG_GAME"
 }
+
 collect_or_load(){
   if [ -f "$CONFIG_FILE" ]; then
     echo_ts ">> Найдены сохранённые настройки."
@@ -136,70 +123,78 @@ collect_or_load(){
   select_model; select_idle; select_hf; select_prg; save_config
 }
 
-# ================== запуск swarm (без tee!) ==================
+# ================== предварительная проверка ==================
+precheck_swarm_autorun(){
+  local existing
+  existing="$(list_swarm_autorun)"
+  if [ -n "$existing" ]; then
+    echo_ts "!!! Найдены уже запущенные процессы (swarm|autorun):"
+    echo "$existing"
+    read -r -p "Убить их сейчас и продолжить? [Y/n]: " ans; ans="${ans:-Y}"
+    if [[ "$ans" =~ ^[Yy]$ ]]; then
+      # сначала прицельно, потом широкий гребень
+      kill_soft_then_hard "$CMD_PATTERN"
+      kill_soft_then_hard "$SELF_PATTERN"
+      kill_soft_then_hard 'swarm|autorun' 5
+      echo_ts ">> Остатки убраны."
+    else
+      echo_ts ">> Выход без запуска."
+      exit 0
+    fi
+  fi
+}
+
+# ================== запуск swarm ==================
 restart_node(){
   local now; now=$(date +%s)
   if (( now - LAST_RESTART < COOLDOWN_SEC )); then echo_ts ">> Пропускаю перезапуск: cooldown ${COOLDOWN_SEC}s"; return; fi
 
   echo_ts ">>> Перезапуск RL-сворма…"
-  # гасим предыдущую группу, если была
-  if [ -f "$PID_FILE" ]; then
-    old="$(cat "$PID_FILE" 2>/dev/null || true)"; [ -n "$old" ] && kill_group_by_pgid "$old" "swarm"; rm -f "$PID_FILE" || true
-  fi
-  kill_by_pattern "$CMD_PATTERN"
-  kill_by_pattern "$RUN_SCRIPT"
+  # убираем потенциальные хвосты предыдущих запусков
+  kill_soft_then_hard "$CMD_PATTERN"
+  kill_soft_then_hard "$SELF_PATTERN"
 
   # ответы для интерактива run_rl_swarm_new.sh:
-  # HF (y/n) + token → модель → PRG [Y/n] — см. скрипт раннера :contentReference[oaicite:4]{index=4} :contentReference[oaicite:5]{index=5} :contentReference[oaicite:6]{index=6}
+  # HF(y/n)+token → модель → PRG [Y/n] (см. сам раннер: HF, модель и PRG спрашиваются по очереди):contentReference[oaicite:1]{index=1}
   local answers=""
   if [ -n "${HF_TOKEN:-}" ]; then answers+="y"$'\n'"$HF_TOKEN"$'\n'; else answers+="n"$'\n'; fi
   answers+="${MODEL_NAME}"$'\n'
   answers+="${PRG_ANSWER}"$'\n'
 
-  # ВАЖНО: создаём новую сессию и ПИШЕМ leader PID в $PID_FILE изнутри.
-  setsid bash -c '
-    echo $$ > '"$PID_FILE"';
-    # окружение для дочерних
-    export HUGGINGFACE_ACCESS_TOKEN='"'"$HF_TOKEN"'"' MODEL_NAME='"'"$MODEL_NAME"'"' PRG_GAME='"'"$PRG_GAME"'"';
-    # скармливаем ответы раннеру; лог — простым редиректом без tee
-    printf "%s" '"$(printf %q "$answers")"' | '"$RUN_SCRIPT"' >> '"$LOG_FILE"' 2>&1
-  ' &
+  # без setsid/tee — простое фоновое выполнение; лог редиректом
+  (
+    printf "%s" "$answers" | bash -lc "exec '$RUN_SCRIPT' >> '$LOG_FILE' 2>&1"
+  ) &
 
-  # отметим время и дадим «прогреться»
   LAST_RESTART=$now
   SUPPRESS_UNTIL=$(( now + WARMUP_SEC ))
-  echo_ts ">>> Процесс-группа swarm leader PID/PGID: $(cat "$PID_FILE" 2>/dev/null || echo unknown)"
+  echo_ts ">>> Запущено. Прогрев ${WARMUP_SEC}s…"
 }
 
-# ================== обработка сигналов ==================
-on_int(){
-  [ "$BUSY" -eq 1 ] && return; BUSY=1
-  if [ "$INT_FIRED" -eq 0 ]; then
-    INT_FIRED=1; trap 'exit 0' INT
-    echo_ts "== Ctrl+C: останавливаю только swarm (ещё раз Ctrl+C — выход) =="
-    [ -f "$PID_FILE" ] && { pg="$(cat "$PID_FILE" 2>/dev/null || true)"; [ -n "$pg" ] && kill_group_by_pgid "$pg" "swarm"; rm -f "$PID_FILE" || true; }
-    BUSY=0; return
-  fi
+# ================== трапы (одноразовые) ==================
+CLEANING_UP=0
+cleanup_once(){
+  [ "$CLEANING_UP" -eq 1 ] && exit 0
+  CLEANING_UP=1
+  trap - INT TERM
+  echo_ts "== Сигнал: останавливаю процессы (swarm/autorun) =="
+  stop_all
   exit 0
 }
-on_term(){
-  echo_ts "== SIGTERM: полное завершение =="
-  [ -f "$PID_FILE" ] && { pg="$(cat "$PID_FILE" 2>/dev/null || true)"; [ -n "$pg" ] && kill_group_by_pgid "$pg" "swarm"; rm -f "$PID_FILE" || true; }
-  exit 0
-}
-trap on_int INT
-trap on_term TERM
+trap cleanup_once INT TERM
 
 # ================== меню ==================
 echo ">> Что сделать?"
 echo "   [1] Запустить авторан"
 echo "   [2] Остановить авторан (убить все процессы swarm/autorun)"
 read -r -p "Выбор [1/2]: " ACTION; ACTION="${ACTION:-1}"
-[ "$ACTION" = "2" ] && { stop_all; exit 0; }
+if [ "$ACTION" = "2" ]; then stop_all; exit 0; fi
 
 # ================== запуск ==================
+precheck_swarm_autorun          # <— твоя новая логика
 collect_or_load
 IDLE_THRESHOLD=$((IDLE_MIN * 60))
+
 echo_ts "=== Запускаю цикл автозапуска ==="
 restart_node
 
@@ -210,30 +205,25 @@ while true; do
   # прогрев
   if (( now < SUPPRESS_UNTIL )); then sleep 1; continue; fi
 
-  # A) жив ли swarm (по PGID), иначе — перезапуск
-  if [ -f "$PID_FILE" ]; then
-    pg="$(cat "$PID_FILE" 2>/dev/null || true)"
-    if [ -z "$pg" ] || ! ps -o pgid= -p "$pg" >/dev/null 2>&1; then
-      echo_ts "!!! Swarm-группа не найдена — перезапуск."
-      restart_node; sleep "$CHECK_INTERVAL"; continue
-    fi
-  else
-    # нет PID_FILE — подождём до конца прогрева, потом перезапустим
-    echo_ts "!!! Нет $PID_FILE — ожидаю/перезапущу при следующей проверке."
-    restart_node; sleep "$CHECK_INTERVAL"; continue
+  # A) жив ли процесс (по паттернам)
+  if ! pgrep -f "$CMD_PATTERN" >/dev/null && ! pgrep -f "$SELF_PATTERN" >/dev/null; then
+    echo_ts "!!! Не вижу swarm — перезапуск"
+    restart_node
+    sleep "$CHECK_INTERVAL"
+    continue
   fi
 
   # B) активность лога
   if [ -f "$LOG_FILE" ]; then
-    last_mod=$(stat -c %Y "$LOG_FILE"); idle=$((now - last_mod))
+    last_mod=$(stat -c %Y "$LOG_FILE")
+    idle=$((now - last_mod))
     if [ "$idle" -ge "$IDLE_THRESHOLD" ]; then
-      echo_ts "!!! Лог не обновлялся $((idle/60)) мин — перезапуск."
+      echo_ts "!!! Лог не обновлялся $((idle/60)) мин — перезапуск"
       restart_node
     fi
   else
-    echo_ts "!!! Лог-файл отсутствует — жду появления."
+    echo_ts "!!! Лог-файл отсутствует — жду появления"
   fi
 
   sleep "$CHECK_INTERVAL"
 done
-
