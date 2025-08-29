@@ -5,7 +5,7 @@ set -euo pipefail
 # Пути и базовые настройки
 # =========================
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-RUN_SCRIPT="$SCRIPT_DIR/run_rl_swarm_new.sh"   # новый раннер
+RUN_SCRIPT="$SCRIPT_DIR/run_rl_swarm.sh"   # новый раннер
 LOG_DIR="$SCRIPT_DIR/logs"
 LOG_FILE="$LOG_DIR/autorun.log"
 PID_FILE="$LOG_DIR/autorun.pid"
