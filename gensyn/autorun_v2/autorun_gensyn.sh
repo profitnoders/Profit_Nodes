@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# v2.4
+# v2.6
 # ======================================
 # Пути и базовые настройки
 # ======================================
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-RUN_SCRIPT="$SCRIPT_DIR/run_rl_swarm_new.sh"   # целевой раннер
+RUN_SCRIPT="$SCRIPT_DIR/run_rl_swarm.sh"   # целевой раннер
 LOG_DIR="$SCRIPT_DIR/logs"
 LOG_FILE="$LOG_DIR/autorun.log"
 PID_FILE="$LOG_DIR/autorun.pid"
@@ -14,13 +14,18 @@ CONFIG_FILE="$SCRIPT_DIR/.autorun_gensyn.conf" # модель/время/HF/PRG
 
 CMD_PATTERN="python -m rgym_exp.runner.swarm_launcher"
 CHECK_INTERVAL=60
+WARMUP_SEC=30         # не мониторим сразу после запуска
+COOLDOWN_SEC=20       # не перезапускаем чаще, чем раз в N сек
+LAST_RESTART=0
+SUPPRESS_UNTIL=0
+
 mkdir -p "$LOG_DIR"
 
 # ======================================
-# Флаги
+# Флаги сигналов
 # ======================================
-INT_FIRED=0       # было ли первое Ctrl+C
-BUSY=0            # защита от реэнтранса
+INT_FIRED=0
+BUSY=0
 
 # ======================================
 # Утилиты
@@ -28,7 +33,6 @@ BUSY=0            # защита от реэнтранса
 echo_ts(){ echo "[$(date +'%F %T')] $*"; }
 
 kill_group_by_pgid(){
-  # $1 = PGID, $2 = имя для лога
   local pg="$1" name="${2:-group}"
   [ -z "$pg" ] && return
   echo_ts ">> Завершаю процесс-группу $name PGID=$pg (TERM)"
@@ -149,20 +153,11 @@ select_idle_threshold_interactive(){
   echo_ts ">> Порог простоя: $IDLE_MIN мин."
 }
 
-select_hf_token_interactive(){
-  read -r -s -p ">> Вставьте Hugging Face токен (или Enter, чтобы пропустить): " HF_TOKEN
-  echo
-  export HF_TOKEN
-}
-
+select_hf_token_interactive(){ read -r -s -p ">> Вставьте HF токен (или Enter, чтобы пропустить): " HF_TOKEN; echo; export HF_TOKEN; }
 select_prg_interactive(){
   read -r -p ">> Участвовать в AI Prediction Market? [Y/n]: " prg
   prg="${prg:-Y}"
-  if [[ "$prg" =~ ^[Nn]$ ]]; then
-    PRG_GAME="false"; PRG_ANSWER="n"
-  else
-    PRG_GAME="true";  PRG_ANSWER="Y"
-  fi
+  if [[ "$prg" =~ ^[Nn]$ ]]; then PRG_GAME="false"; PRG_ANSWER="n"; else PRG_GAME="true"; PRG_ANSWER="Y"; fi
   export PRG_GAME PRG_ANSWER
   echo_ts ">> PRG участие: $PRG_GAME"
 }
@@ -178,11 +173,7 @@ collect_or_load_settings(){
     echo "   4) PRG:    ${PRG_GAME:-unset}"
     read -r -p "Использовать сохранённые данные? [Y/n]: " use_saved
     use_saved="${use_saved:-Y}"
-    if [[ "$use_saved" =~ ^[Yy]$ ]]; then
-      load_config
-      echo_ts ">> Использую сохранённые (PRG=${PRG_GAME}, HF=$(mask_token))"
-      return
-    fi
+    if [[ "$use_saved" =~ ^[Yy]$ ]]; then load_config; echo_ts ">> Использую сохранённые (PRG=${PRG_GAME}, HF=$(mask_token))"; return; fi
   else
     echo_ts ">> Первый запуск — соберу настройки и сохраню."
   fi
@@ -194,9 +185,15 @@ collect_or_load_settings(){
 }
 
 # ======================================
-# Старт swarm (с перезапуском)
+# Старт swarm (с перезапуском) с WARMUP/COOLDOWN
 # ======================================
 restart_node(){
+  local now; now=$(date +%s)
+  if (( now - LAST_RESTART < COOLDOWN_SEC )); then
+    echo_ts ">> Перезапуск заблокирован (cooldown ${COOLDOWN_SEC}s)."
+    return
+  fi
+
   echo_ts ">>> Перезапуск RL-сворма..."
   if [ -f "$PID_FILE" ]; then
     pgid_old="$(cat "$PID_FILE" 2>/dev/null || true)"
@@ -208,11 +205,7 @@ restart_node(){
 
   # ответы для run_rl_swarm_new.sh: HF(y/n)+token, модель, PRG(Y/n)
   local answers=""
-  if [ -n "${HF_TOKEN:-}" ]; then
-    answers+="y"$'\n'"$HF_TOKEN"$'\n'
-  else
-    answers+="n"$'\n'
-  fi
+  if [ -n "${HF_TOKEN:-}" ]; then answers+="y"$'\n'"$HF_TOKEN"$'\n'; else answers+="n"$'\n'; fi
   answers+="${MODEL_NAME}"$'\n'
   answers+="${PRG_ANSWER}"$'\n'
 
@@ -228,20 +221,20 @@ restart_node(){
   pgid="$(ps -o pgid= -p "$child_pid" | tr -d ' ' || true)"
   [ -n "$pgid" ] && echo "$pgid" > "$PID_FILE"
   echo_ts ">>> Процесс-группа swarm: PGID=${pgid:-unknown}"
+
+  LAST_RESTART=$now
+  SUPPRESS_UNTIL=$(( now + WARMUP_SEC ))   # не трогаем проверки во время прогрева
 }
 
 # ======================================
 # Обработка сигналов
 # ======================================
 on_int(){
-  # защита от повторного входа
   if [ "$BUSY" -eq 1 ]; then return; fi
   BUSY=1
-
   if [ "$INT_FIRED" -eq 0 ]; then
     INT_FIRED=1
-    # 2-е Ctrl+C должно завершить autorun немедленно — меняем ловушку
-    trap 'exit 0' INT
+    trap 'exit 0' INT                    # второе Ctrl+C завершит autorun
     echo_ts "== Ctrl+C: останавливаю только swarm (ещё раз Ctrl+C — выйти) =="
     if [ -f "$PID_FILE" ]; then
       pgid="$(cat "$PID_FILE" 2>/dev/null || true)"
@@ -251,8 +244,6 @@ on_int(){
     BUSY=0
     return
   fi
-
-  # если почему-то сюда дошли — на всякий случай выходим
   exit 0
 }
 
@@ -277,10 +268,7 @@ echo "   [1] Запустить авторан"
 echo "   [2] Остановить авторан (убить все процессы swarm/autorun)"
 read -r -p "Выбор [1/2]: " ACTION
 ACTION="${ACTION:-1}"
-if [ "$ACTION" = "2" ]; then
-  stop_all
-  exit 0
-fi
+if [ "$ACTION" = "2" ]; then stop_all; exit 0; fi
 
 # ======================================
 # Сбор/загрузка настроек
@@ -299,6 +287,13 @@ restart_node
 # ======================================
 while true; do
   now=$(date +%s)
+
+  # пропускаем проверки, если идёт прогрев
+  if (( now < SUPPRESS_UNTIL )); then
+    sleep 1
+    continue
+  fi
+
   # A) жив ли процесс (python-раннер или сам run-скрипт)
   if ! pgrep -f "$CMD_PATTERN" >/dev/null && ! pgrep -f "$RUN_SCRIPT" >/dev/null; then
     echo_ts "!!! Процесс умер — перезапуск..."
@@ -306,6 +301,7 @@ while true; do
     sleep "$CHECK_INTERVAL"
     continue
   fi
+
   # B) активность лога
   if [ -f "$LOG_FILE" ]; then
     last_mod=$(stat -c %Y "$LOG_FILE")
@@ -315,9 +311,9 @@ while true; do
       restart_node
     fi
   else
-    echo_ts "!!! Лог-файл '$LOG_FILE' не найден — перезапуск."
-    restart_node
+    # если лога ещё нет, не перезапускаем мгновенно — ждём до SUPPRESS_UNTIL
+    echo_ts "!!! Лог-файл отсутствует — ожидаю появления."
   fi
+
   sleep "$CHECK_INTERVAL"
 done
-
