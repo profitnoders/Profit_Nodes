@@ -163,8 +163,10 @@ restart_node(){
 
   # без setsid/tee — простое фоновое выполнение; лог редиректом
   (
-    printf "%s" "$answers" | bash -lc "exec '$RUN_SCRIPT' >> '$LOG_FILE' 2>&1"
+    printf "%s" "$answers" | bash -lc \
+    "exec '$RUN_SCRIPT' 2>&1 | stdbuf -oL -eL tee -a '$LOG_FILE'"
   ) &
+
 
   LAST_RESTART=$now
   SUPPRESS_UNTIL=$(( now + WARMUP_SEC ))
