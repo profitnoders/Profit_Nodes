@@ -15,7 +15,7 @@ CMD_PATTERN="python -m rgym_exp.runner.swarm_launcher"
 SELF_PATTERN="$RUN_SCRIPT"
 
 CHECK_INTERVAL=60             # период проверки
-WARMUP_SEC=25                 # не перезапускать сразу после старта
+WARMUP_SEC=60                 # не перезапускать сразу после старта
 COOLDOWN_SEC=15               # не перезапускать чаще, чем раз в N сек
 LAST_RESTART=0
 SUPPRESS_UNTIL=0
