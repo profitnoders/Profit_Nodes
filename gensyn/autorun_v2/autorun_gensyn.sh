@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# 2.8
+# 2.9
 # ================== базовые пути ==================
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 RUN_SCRIPT="$SCRIPT_DIR/run_rl_swarm.sh"    # целевой раннер
