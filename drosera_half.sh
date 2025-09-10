@@ -132,6 +132,38 @@ function migrate_hoodi() {
     echo -e "${CLR_SUCCESS}✅ Миграция на сеть Hoodi завершена!${CLR_RESET}"
 }
 
+function update_node() {
+
+  curl -L https://app.drosera.io/install | bash
+  export PATH="$HOME/.drosera/bin:$PATH"
+  droseraup
+  
+  sudo systemctl stop drosera
+  sudo systemctl disable drosera
+  rm -rf drosera-operator-v*.tar.gz
+  cd ~
+  curl -LO https://github.com/drosera-network/releases/releases/download/v1.21.3/drosera-operator-v1.21.3-x86_64-unknown-linux-gnu.tar.gz
+  tar -xvf drosera-operator-v1.21.3-x86_64-unknown-linux-gnu.tar.gz
+
+  sudo cp drosera-operator /usr/bin
+  drosera-operator --version
+
+  docker pull ghcr.io/drosera-network/drosera-operator:latest
+
+  sed -i 's|^\s*drosera_rpc\s*=.*|drosera_rpc = "https://relay.hoodi.drosera.io"|' "$HOME/my-drosera-trap/drosera.toml"
+
+  read -p "Введите приватный ключ: " PRIV_KEY
+  export PATH="$HOME/.drosera/bin:$PATH"
+  cd $HOME/my-drosera-trap && DROSERA_PRIVATE_KEY="$PRIV_KEY" drosera apply
+
+  
+
+  cd ~
+  sudo systemctl daemon-reload
+  sudo systemctl enable drosera
+  sudo systemctl start drosera
+}
+
 
 function check_logs() {
     journalctl -u drosera.service -f
@@ -159,19 +191,21 @@ function show_menu() {
     echo -e "${CLR_GREEN}1)🖥️  Создание оператора${CLR_RESET}"
     echo -e "${CLR_GREEN}2)🚀 Запуск CLI и systemd${CLR_RESET}"
     echo -e "${CLR_GREEN}3)✈️  Миграция в сеть Hoodi${CLR_RESET}"
-    echo -e "${CLR_GREEN}4)🔄 Перезапуск ноды${CLR_RESET}"
-    echo -e "${CLR_GREEN}5)📜 Просмотр логов${CLR_RESET}"
-    echo -e "${CLR_GREEN}6)🗑️  Удалить ноду${CLR_RESET}"
-    echo -e "${CLR_GREEN}7)❌ Выйти${CLR_RESET}"
+    echo -e "${CLR_GREEN}4)🔧  Обновление версии ноды${CLR_RESET}"
+    echo -e "${CLR_GREEN}5)🔄 Перезапуск ноды${CLR_RESET}"
+    echo -e "${CLR_GREEN}6)📜 Просмотр логов${CLR_RESET}"
+    echo -e "${CLR_GREEN}7)🗑️  Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_GREEN}8)❌ Выйти${CLR_RESET}"
     read -p "Выберите пункт: " choice
     case $choice in
         1) create_operator;;
         2) install_cli;;
         3) migrate_hoodi;;
-        4) restart_node;;
-        5) check_logs;;
-        6) delete_node;;
-        7) echo -e "${CLR_SUCCESS}Выход...${CLR_RESET}" && exit 0 ;;
+        4) update_node ;;
+        5) restart_node;;
+        6) check_logs;;
+        7) delete_node;;
+        8) echo -e "${CLR_SUCCESS}Выход...${CLR_RESET}" && exit 0 ;;
         *) echo -e "${CLR_ERROR}Неверный выбор!${CLR_RESET}";;
     esac
 }
