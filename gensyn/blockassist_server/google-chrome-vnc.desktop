@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Google Chrome (VNC-safe)
+Comment=Chromium-based browser (uses --no-sandbox etc.)
+Exec=/usr/local/bin/google-chrome-vnc %U
+Terminal=false
+Type=Application
+Icon=google-chrome
+Categories=Network;WebBrowser;
+StartupWMClass=Google-chrome
+MimeType=text/html;x-scheme-handler/http;x-scheme-handler/https;
