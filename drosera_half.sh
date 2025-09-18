@@ -28,8 +28,8 @@ function create_operator() {
 
 function install_cli() {
     cd ~
-    curl -LO https://github.com/drosera-network/releases/releases/download/v1.21.3/drosera-operator-v1.21.3-x86_64-unknown-linux-gnu.tar.gz
-    tar -xvf drosera-operator-v1.21.3-x86_64-unknown-linux-gnu.tar.gz
+    curl -LO https://github.com/drosera-network/releases/releases/download/v1.23.0/drosera-operator-v1.23.0-x86_64-unknown-linux-gnu.tar.gz
+    tar -xvf drosera-operator-v1.23.0-x86_64-unknown-linux-gnu.tar.gz
     sudo cp drosera-operator /usr/bin
     docker pull ghcr.io/drosera-network/drosera-operator:latest
     read -p "Введите приватный ключ: " PRIV_KEY
@@ -142,8 +142,8 @@ function update_node() {
   sudo systemctl disable drosera
   rm -rf drosera-operator-v*.tar.gz
   cd ~
-  curl -LO https://github.com/drosera-network/releases/releases/download/v1.21.3/drosera-operator-v1.21.3-x86_64-unknown-linux-gnu.tar.gz
-  tar -xvf drosera-operator-v1.21.3-x86_64-unknown-linux-gnu.tar.gz
+  curl -LO https://github.com/drosera-network/releases/releases/download/v1.23.0/drosera-operator-v1.23.0-x86_64-unknown-linux-gnu.tar.gz
+  tar -xvf drosera-operator-v1.23.0-x86_64-unknown-linux-gnu.tar.gz
 
   sudo cp drosera-operator /usr/bin
   drosera-operator --version
