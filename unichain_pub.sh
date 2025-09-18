@@ -45,6 +45,18 @@ function logs_node() {
     docker-compose -f "$NODE_DIR/docker-compose.yml" logs --tail 100
 }
 
+function change_rpc() {
+    read -rp "Введите новый URL для ETH Mainnet RPC (Execution endpoint): " new_eth_rpc
+    read -rp "Введите новый URL для ETH Mainnet Beacon RPC (Consensus endpoint): " new_beacon_rpc
+
+    # Экранируем слеши в переменных для sed
+    escaped_eth_rpc=$(printf '%s\n' "$new_eth_rpc" | sed 's/[\/&]/\\&/g')
+    escaped_beacon_rpc=$(printf '%s\n' "$new_beacon_rpc" | sed 's/[\/&]/\\&/g')
+
+    sed -i "s|^OP_NODE_L1_ETH_RPC=.*|OP_NODE_L1_ETH_RPC=$escaped_eth_rpc|" ~/unichain-node/.env.mainnet
+    sed -i "s|^OP_NODE_L1_BEACON=.*|OP_NODE_L1_BEACON=$escaped_beacon_rpc|" ~/unichain-node/.env.mainnet
+}
+
 function remove_node() {
     echo -e "${CLR_WARNING}⚠ Вы уверены, что хотите удалить ноду Unichain? (y/n)${CLR_RESET}"
     read -p "Ваш выбор: " confirm
@@ -58,6 +70,13 @@ function remove_node() {
     fi
 }
 
+function restart_node() {
+    echo -e "${CLR_INFO}▶ Перезапуск ноды...${CLR_RESET}"
+    docker-compose -f "$NODE_DIR/docker-compose.yml" down
+    docker-compose -f "$NODE_DIR/docker-compose.yml" up -d
+    echo -e "${CLR_SUCCESS}✅ Нода перезапущена.${CLR_RESET}"
+}
+
 function show_nodekey() {
     cat ~/unichain-node/geth-data/geth/nodekey; echo
     echo -e "${CLR_SUCCESS}Запишите его себе в заметки${CLR_RESET}"
@@ -68,16 +87,20 @@ function show_menu() {
     echo -e "${CLR_INFO}Выберите действие:${CLR_RESET}"
     echo -e "${CLR_SUCCESS}1) 🚀 Установить ноду${CLR_RESET}"
     echo -e "${CLR_SUCCESS}2) 📜 Логи ноды${CLR_RESET}"
-    echo -e "${CLR_SUCCESS}3) 🔑 Показать nodekey${CLR_RESET}"
-    echo -e "${CLR_WARNING}4)  🗑 Удалить ноду${CLR_RESET}"
-    echo -e "${CLR_ERROR}5) ❌ Выход${CLR_RESET}"
+    echo -e "${CLR_SUCCESS}3) 🔄 Перезапустить ноду${CLR_RESET}"
+    echo -e "${CLR_SUCCESS}4) 🔑 Показать nodekey${CLR_RESET}"
+    echo -e "${CLR_SUCCESS}5) 📡  Заменить RPC${CLR_RESET}"
+    echo -e "${CLR_WARNING}6)  🗑 Удалить ноду${CLR_RESET}"
+    echo -e "${CLR_ERROR}7) ❌ Выход${CLR_RESET}"
     read -p "Введите номер действия: " choice
     case $choice in
         1) install_node ;;
         2) logs_node ;;
-        3) show_nodekey ;;
-        4) remove_node ;;
-        5) echo -e "${CLR_ERROR}Выход...${CLR_RESET}" && exit 0 ;;
+        3) restart_node ;;
+        4) show_nodekey ;;
+        5) change_rpc ;;
+        6) remove_node ;;
+        7) echo -e "${CLR_ERROR}Выход...${CLR_RESET}" && exit 0 ;;
         *) echo -e "${CLR_WARNING}Неверный выбор.${CLR_RESET}" ;;
     esac
 }
