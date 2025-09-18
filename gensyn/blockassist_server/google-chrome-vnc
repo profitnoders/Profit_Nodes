@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -e
+
+BIN="$(command -v google-chrome-stable || command -v google-chrome || echo /usr/bin/google-chrome-stable)"
+PROFILE="${HOME}/.chrome-vnc"
+
+ARGS=(
+  --no-sandbox
+  --disable-dev-shm-usage
+  --no-first-run
+  --no-default-browser-check
+  --password-store=basic
+  --user-data-dir="${PROFILE}"
+  --use-gl=desktop
+)
+
+# Пробуем обычный GL, если падает — включаем swiftshader
+"$BIN" "${ARGS[@]}" "$@" || "$BIN" "${ARGS[@]}" --use-gl=swiftshader "$@"
