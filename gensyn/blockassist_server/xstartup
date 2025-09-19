@@ -11,6 +11,7 @@ autocutsel -selection PRIMARY -fork
 xfce4-clipman &
 
 # Параметры ввода
+sleep 0.2
 xset r rate 200 40
 setxkbmap us
 
