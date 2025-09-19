@@ -14,5 +14,11 @@ xfce4-clipman &
 xset r rate 200 40
 setxkbmap us
 
+xset s off          
+xset s noblank        
+xset -dpms           
+
+pkill -9 xfce4-screensaver 2>/dev/null || true
+
 # Запуск окружения
 exec startxfce4
