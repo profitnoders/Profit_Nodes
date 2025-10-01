@@ -91,15 +91,15 @@ select_model(){
   echo_ts ">> Модель: $MODEL_NAME"
 }
 select_idle(){
-  echo ">> Интервал простоя лога (мин): [1]6 [2]7 [3]10* [4]12 [5]15"
-  read -r -p "Введите 1–5: " t; t="${t:-3}"
+  echo ">> Интервал простоя лога (мин): [1]6 [2]7 [3]10 [4]12 [5]15* [6]20 [7]25"
+  read -r -p "Введите 1–7: " t; t="${t:-5}"
   case "$t" in
-    1) IDLE_MIN=6;; 2) IDLE_MIN=7;; 3) IDLE_MIN=10;; 4) IDLE_MIN=12;; 5) IDLE_MIN=15;; *) IDLE_MIN=10;;
+    1) IDLE_MIN=6;; 2) IDLE_MIN=7;; 3) IDLE_MIN=10;; 4) IDLE_MIN=12;; 5) IDLE_MIN=15;; 6) IDLE_MIN=20;; 7) IDLE_MIN=25;; *) IDLE_MIN=15;;
   esac
   export IDLE_MIN
   echo_ts ">> Порог простоя: $IDLE_MIN мин."
 }
-select_hf(){ read -r -s -p ">> Вставьте HF токен (или Enter, чтобы пропустить): " HF_TOKEN; echo; export HF_TOKEN; }
+select_hf(){ read -r -p ">> Вставьте HF токен (или Enter, чтобы пропустить): " HF_TOKEN; echo; export HF_TOKEN; }
 select_prg(){
   read -r -p ">> Участвовать в AI Prediction Market? [Y/n]: " prg; prg="${prg:-Y}"
   if [[ "$prg" =~ ^[Nn]$ ]]; then PRG_GAME="false"; PRG_ANSWER="n"; else PRG_GAME="true"; PRG_ANSWER="Y"; fi
