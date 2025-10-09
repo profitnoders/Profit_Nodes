@@ -8,7 +8,7 @@ CHECK_INTERVAL = 60
 FAILURE_CONFIRMATION = 240  # время подтверждения падения ноды (сек)
 ALERTS_ENABLED = False
 ALERT_SENT = False
-BOT_ALERT_URL = "http://31.220.92.247:8079/alert"
+BOT_ALERT_URL = "http://84.247.190.8:8079/alert"
 ALERT_DB_PATH = os.path.join(os.path.dirname(__file__), "alerts.db")
 COMPOSE_PATH = os.path.expanduser("~/infernet-container-starter/deploy/docker-compose.yaml")
 print("📁 Current working dir:", os.getcwd())
