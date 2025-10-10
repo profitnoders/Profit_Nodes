@@ -53,7 +53,7 @@ NODE_DOCKER_CONTAINERS = {
     "Biconomy": {"mee-node-deployment-node-1", "mee-node-deployment-redis-1"},
     "Unichain": {"unichain-node-op-node-1", "unichain-node-execution-client-1"},
     "Spheron": {"fizz-node"},
-    "Mawari": {"mawari-node"}
+    "Mawari": {"mawari-node"},
     "Pipe_Mainnet": {"pipe-mainnet"},
     "Waku": {
         "nwaku-compose-waku-frontend-1",
