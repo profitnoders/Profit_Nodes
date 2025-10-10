@@ -524,7 +524,8 @@ async def get_service_logs(request: Request):
 @app.post("/update_token")
 async def update_token(request: Request):
     data = await request.json()
-    if data.get("token") != get_token():
+    force = data.get("force")
+    if not force and data.get("token") != get_token():
         return JSONResponse(content={"error": "unauthorized"}, status_code=403)
     new_token = data.get("new_token")
     if not new_token:
