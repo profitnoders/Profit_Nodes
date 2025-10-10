@@ -1,0 +1,20 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends \
+      ca-certificates \
+      curl \
+      screen \
+      libssl-dev && \
+  rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/pipe
+
+RUN curl -L https://pipe.network/p1-cdn/releases/latest/download/pop -o pop && \
+  chmod +x pop
+
+COPY .env .
+
+ENTRYPOINT ["/bin/bash", "-c", "source .env && ./pop"]
