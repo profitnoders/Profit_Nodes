@@ -8,7 +8,7 @@ CHECK_INTERVAL = 60
 FAILURE_CONFIRMATION = 240  # время подтверждения падения ноды (сек)
 ALERTS_ENABLED = False
 ALERT_SENT = False
-BOT_ALERT_URL = "http://91.108.246.138:8080/alert"
+BOT_ALERT_URL = "http://87.120.84.126:8079/alert"
 ALERT_DB_PATH = os.path.join(os.path.dirname(__file__), "alerts.db")
 COMPOSE_PATH = os.path.expanduser("~/infernet-container-starter/deploy/docker-compose.yaml")
 print("📁 Current working dir:", os.getcwd())
@@ -22,12 +22,12 @@ NODE_SYSTEMD = {
     "Cysic": "cysic.service",
     "Initverse": "initverse.service",
     "t3rn": "t3rn.service",
-    "Pipe-Devnet": "pipe-node.service",
     "0G": "zgs.service",
-    "Drosera": "drosera.service",  # ✅ Новая нода
-    "Hyperspace": "aios.service",   # ✅ Новая нода
+    "Drosera": "drosera.service",
+    "Hyperspace": "aios.service",
     "Datagram": "datagram-node@1.service",
-    "Multisynq": "synchronizer-cli.service"
+    "Multisynq": "synchronizer-cli.service",
+    "Netrum": "netrum-node.service"
 }
 
 NODE_PROCESSES = {
@@ -39,18 +39,22 @@ NODE_PROCESSES = {
     "Cysic_Prover": "./prover",
     "Inference": "inference-launcher",
     "Nexus": "./nexus-network",
-    "Nous Bot": "nousbot"
+    "Nous Bot": "nousbot",
+    "Openrouter Bot": "screen -dmS orbot"
 }
+
 NODE_SCREENS = {
     "Dria": "dria_node",
     "Cysic_Prover": "prover"
 }
+
 NODE_DOCKER_CONTAINERS = {
     "Ritual": {"hello-world", "infernet-anvil", "infernet-fluentbit", "infernet-redis", "infernet-node"},
     "Biconomy": {"mee-node-deployment-node-1", "mee-node-deployment-redis-1"},
     "Unichain": {"unichain-node-op-node-1", "unichain-node-execution-client-1"},
     "Spheron": {"fizz-node"},
-    "Pipe-Testnet": {"pipe"},
+    "Mawari": {"mawari-node"}
+    "Pipe_Mainnet": {"pipe-mainnet"},
     "Waku": {
         "nwaku-compose-waku-frontend-1",
         "nwaku-compose-grafana-1",
@@ -58,11 +62,12 @@ NODE_DOCKER_CONTAINERS = {
         "nwaku-compose-postgres-exporter-1",
         "nwaku-compose-nwaku-1",
         "nwaku-compose-postgres-1"
-    },  # ✅ Новая нода
+    },
     "Cysic_Mult": {"verifier_1", "verifier_2"},
     "Multiple_Mult": {"multiple-node-1", "multiple-node-2"},
     "Dria_Mult": {"dria_node_1", "dria_node_2"},
-    "Titan_Mult": {"titan-node-1", "titan-node-2", "titan-node-3", "titan-node-4", "titan-node-5"}
+    "Titan_Mult": {"titan-node-1", "titan-node-2", "titan-node-3", "titan-node-4", "titan-node-5"},
+    "Blockcast": {"beacond","control_proxy","blockcastd"}
 }
 
 NODE_DOCKER_IMAGES = {
