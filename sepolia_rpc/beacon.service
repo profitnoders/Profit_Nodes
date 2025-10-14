@@ -20,7 +20,7 @@ ExecStart=/root/beacon/bin/prysm.sh beacon-chain \
   --checkpoint-sync-url=https://checkpoint-sync.sepolia.ethpandaops.io/ \
   --genesis-beacon-api-url=https://checkpoint-sync.sepolia.ethpandaops.io/ \
   --jwt-secret=/var/lib/secrets/jwt.hex \
-  --accept-terms-of-use \ 
+  --accept-terms-of-use \
   --subscribe-all-data-subnets
 
 [Install]
