@@ -8,7 +8,7 @@ Type=simple
 Restart=always
 RestartSec=5s
 User=root
-ExecStart=${HOME}/beacon/bin/prysm.sh beacon-chain \
+ExecStart=/root/beacon/bin/prysm.sh beacon-chain \
   --sepolia \
   --http-modules=beacon,config,node,validator \
   --rpc-host=0.0.0.0 \
