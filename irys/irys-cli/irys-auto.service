@@ -2,5 +2,5 @@
 Description=Irys CLI Автоматизация
 
 [Service]
-ExecStart=$AUTO_SCRIPT
+ExecStart=/root/.irys/irys_auto.sh
 Restart=always
