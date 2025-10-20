@@ -58,8 +58,16 @@ while true; do
     esac
 
     log "[+] Создан файл: $FILE"
-    irys upload "$FILE" -n devnet -t ethereum -w "$PRIVATE_KEY" --tags "$FILE" "$EXT" --provider-url "$RPC_URL" >> "$LOG_FILE" 2>&1
+    UPLOAD_OUTPUT=$(irys upload "$FILE" -n devnet -t ethereum -w "$PRIVATE_KEY" --tags "$FILE" "$EXT" --provider-url "$RPC_URL" 2>&1)
+    GATEWAY_URL=$(echo "$UPLOAD_OUTPUT" | grep -oE 'https://gateway\.irys\.xyz/[a-zA-Z0-9]+')
+    
     log "[+] Загружено. Удаляем файл..."
+    if [[ -n "$GATEWAY_URL" ]]; then
+        log "[🔗] Ссылка: $GATEWAY_URL"
+    else
+        log "[⚠️] Не удалось получить ссылку на файл."
+    fi
+
     rm -f "$FILE"
 
     if (( COUNT % LONG_EVERY == 0 )); then
