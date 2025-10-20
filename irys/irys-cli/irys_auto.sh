@@ -1,43 +1,42 @@
 #!/bin/bash
 
-CONFIG_FILE="$ENV_FILE"
-source \$CONFIG_FILE
+source $HOME/.irys/.env
 
-LOG_FILE="$LOG_FILE"
+LOG_FILE="$HOME/.irys/irys_logs.log"
 
-log() {
-    echo "[\$(date '+%Y-%m-%d %H:%M:%S')] \$1" | tee -a "\$LOG_FILE"
+rand_range() {
+    base=$1
+    delta=$((base * 30 / 100))
+    echo $(( base - delta + RANDOM % (2 * delta + 1) ))
 }
 
-DELAY_MIN=$1
-LONG_DELAY=$2
-LONG_EVERY=$3
+EXTS=("txt" "jpg" "png" "doc")
 COUNT=0
 
-EXTS=("txt" "jpg" "png" "doc")
-
 while true; do
-    COUNT=\$((COUNT + 1))
-    EXT=\${EXTS[\$RANDOM % \${#EXTS[@]}]}
-    FILE="/tmp/file_\$(date +%s).\$EXT"
+    COUNT=$((COUNT + 1))
+    EXT=${EXTS[$RANDOM % ${#EXTS[@]}]}
+    FILE="/tmp/file_$(date +%s).$EXT"
 
-    case "\$EXT" in
-        txt) base64 /dev/urandom | head -c 100 > "\$FILE" ;;
-        jpg) convert -size 100x100 xc:gray "\$FILE" ;;
-        png) convert -size 100x100 xc:blue "\$FILE" ;;
-        doc) echo "Random Word DOC" > "\$FILE" ;;
+    case "$EXT" in
+        txt) base64 /dev/urandom | head -c 100 > "$FILE" ;;
+        jpg) convert -size 100x100 xc:gray "$FILE" ;;
+        png) convert -size 100x100 xc:blue "$FILE" ;;
+        doc) echo "Random Word DOC" > "$FILE" ;;
     esac
 
-    log "Создан файл: \$FILE"
-    irys upload "\$FILE" -n devnet -t ethereum -w "\$PRIVATE_KEY" --tags "\$FILE" "\$EXT" --provider-url "\$RPC_URL" >> "\$LOG_FILE" 2>&1
-    log "Файл загружен. Удаляем..."
-    rm -f "\$FILE"
+    echo "[+] Создан файл: $FILE" | tee -a "$LOG_FILE"
+    irys upload "$FILE" -n devnet -t ethereum -w "$PRIVATE_KEY" --tags "$FILE" "$EXT" --provider-url "$RPC_URL" >> "$LOG_FILE" 2>&1
+    echo "[+] Загружено. Удаляем файл..." | tee -a "$LOG_FILE"
+    rm -f "$FILE"
 
     if (( COUNT % LONG_EVERY == 0 )); then
-        log "Длинная пауза \$LONG_DELAY минут..."
-        sleep \$((LONG_DELAY * 60))
+        SLEEP_MIN=$(rand_range $LONG_DELAY)
+        echo "[~] Длинная пауза $SLEEP_MIN минут..." | tee -a "$LOG_FILE"
+        sleep $((SLEEP_MIN * 60))
     else
-        log "Пауза \$DELAY_MIN минут..."
-        sleep \$((DELAY_MIN * 60))
+        SLEEP_MIN=$(rand_range $DELAY_MIN)
+        echo "[~] Пауза $SLEEP_MIN минут..." | tee -a "$LOG_FILE"
+        sleep $((SLEEP_MIN * 60))
     fi
 done
