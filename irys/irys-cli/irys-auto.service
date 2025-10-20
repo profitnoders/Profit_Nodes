@@ -1,0 +1,6 @@
+[Unit]
+Description=Irys CLI Автоматизация
+
+[Service]
+ExecStart=$AUTO_SCRIPT
+Restart=always
