@@ -2,13 +2,25 @@
 
 source $HOME/.irys/.env
 
+# Значения по умолчанию, если вдруг не подставились
+DELAY_MIN=${DELAY_MIN:-10}
+LONG_DELAY=${LONG_DELAY:-5}
+LONG_EVERY=${LONG_EVERY:-5}
+
 LOG_FILE="$HOME/.irys/irys_logs.log"
+
+mkdir -p "$(dirname "$LOG_FILE")"
+touch "$LOG_FILE"
 
 rand_range() {
     base=$1
-    delta=$((base * 30 / 100))
+    delta=$(( base * 30 / 100 ))
+    if (( delta < 1 )); then
+        delta=1
+    fi
     echo $(( base - delta + RANDOM % (2 * delta + 1) ))
 }
+
 
 EXTS=("txt" "jpg" "png" "doc")
 COUNT=0
