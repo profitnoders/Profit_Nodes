@@ -1,0 +1,11 @@
+[Unit]
+Description=Запуск Irys CLI автоматизации при старте
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=10min
+Unit=irys-auto.service
+
+[Install]
+WantedBy=timers.target
+EOF
