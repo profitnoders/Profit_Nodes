@@ -42,7 +42,7 @@ rand_range() {
     echo $(( base - delta + RANDOM % (2 * delta + 1) ))
 }
 
-EXTS=("txt" "jpg" "png" "doc")
+EXTS=("txt" "jpg" "png" "docx")
 COUNT=0
 
 while true; do
