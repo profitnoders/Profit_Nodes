@@ -1,0 +1,11 @@
+{
+  "_comment_min_delay": "Задержка (в секундах) между отправкой промта ОТ",
+  "min_delay": 48,
+
+  "_comment_max_delay": "Задержка (в секундах) между отправкой промта ДО",
+  "max_delay": 108,
+
+  "_comment_model": "Название модели для использования. Доступные: openai/gpt-4o-mini, deepseek-chat, gemini-2.0-flash-exp, qwen-2.5-7b-instruct",
+  "model": "openai/gpt-4o-mini"
+}
+
