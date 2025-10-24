@@ -5,7 +5,11 @@
   "_comment_max_delay": "Задержка (в секундах) между отправкой промта ДО",
   "max_delay": 108,
 
-  "_comment_model": "Название модели для использования. Доступные: openai/gpt-4o-mini, deepseek-chat, gemini-2.0-flash-exp, qwen-2.5-7b-instruct",
-  "model": "openai/gpt-4o-mini"
+  "models": [
+    {"provider": "openai", "model": "gpt-4o-mini"},
+    {"provider": "gemini", "model": "gemini-2.0-flash-exp"},
+    {"provider": "nearai", "model": "qwen-2.5-7b-instruct"},
+    {"provider": "nearai", "model": "qwen3-30b-a3b-instruct-2507"},
+    {"provider": "nearai", "model": "qwen2.5-vl-72b-instruct"}
+  ]
 }
-
