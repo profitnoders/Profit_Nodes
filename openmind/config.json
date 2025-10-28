@@ -3,7 +3,7 @@
   "min_delay": 1500,
 
   "_comment_max_delay": "Задержка (в секундах) между отправкой промта ДО",
-  "max_delay": 2500,
+  "max_delay": 4500,
 
   "models": [
     {"provider": "openai", "model": "gpt-4o-mini"},
