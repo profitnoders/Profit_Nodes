@@ -22,12 +22,13 @@ NODE_SYSTEMD = {
     "Cysic": "cysic.service",
     "Initverse": "initverse.service",
     "t3rn": "t3rn.service",
+    "Pipe-Devnet": "pipe-node.service",
+    "Irys Auto-CLI": "irys-auto.service",
     "0G": "zgs.service",
-    "Drosera": "drosera.service",
-    "Hyperspace": "aios.service",
+    "Drosera": "drosera.service",  # ✅ Новая нода
+    "Hyperspace": "aios.service",   # ✅ Новая нода
     "Datagram": "datagram-node@1.service",
-    "Multisynq": "synchronizer-cli.service",
-    "Netrum": "netrum-node.service"
+    "Multisynq": "synchronizer-cli.service"
 }
 
 NODE_PROCESSES = {
@@ -40,21 +41,19 @@ NODE_PROCESSES = {
     "Inference": "inference-launcher",
     "Nexus": "./nexus-network",
     "Nous Bot": "nousbot",
-    "Openrouter Bot": "screen -dmS orbot"
+    "OpenMind Bot": "openmindbot"
 }
-
 NODE_SCREENS = {
     "Dria": "dria_node",
     "Cysic_Prover": "prover"
 }
-
 NODE_DOCKER_CONTAINERS = {
     "Ritual": {"hello-world", "infernet-anvil", "infernet-fluentbit", "infernet-redis", "infernet-node"},
     "Biconomy": {"mee-node-deployment-node-1", "mee-node-deployment-redis-1"},
     "Unichain": {"unichain-node-op-node-1", "unichain-node-execution-client-1"},
     "Spheron": {"fizz-node"},
-    "Mawari": {"mawari-node"},
-    "Pipe_Mainnet": {"pipe-mainnet"},
+    "Pipe Testnet": {"pipe"},
+    "Pipe Mainnet": {"pipe-mainnet"},
     "Waku": {
         "nwaku-compose-waku-frontend-1",
         "nwaku-compose-grafana-1",
@@ -62,12 +61,13 @@ NODE_DOCKER_CONTAINERS = {
         "nwaku-compose-postgres-exporter-1",
         "nwaku-compose-nwaku-1",
         "nwaku-compose-postgres-1"
-    },
+    },  # ✅ Новая нода
+    "Tashi": {"tashi-depin-node"},
+    "Arcium": {"arx-node"},
     "Cysic_Mult": {"verifier_1", "verifier_2"},
     "Multiple_Mult": {"multiple-node-1", "multiple-node-2"},
     "Dria_Mult": {"dria_node_1", "dria_node_2"},
-    "Titan_Mult": {"titan-node-1", "titan-node-2", "titan-node-3", "titan-node-4", "titan-node-5"},
-    "Blockcast": {"beacond","control_proxy","blockcastd"}
+    "Titan_Mult": {"titan-node-1", "titan-node-2", "titan-node-3", "titan-node-4", "titan-node-5"}
 }
 
 NODE_DOCKER_IMAGES = {
