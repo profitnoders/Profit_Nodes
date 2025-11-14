@@ -62,7 +62,7 @@ NODE_DOCKER_CONTAINERS = {
         "nwaku-compose-nwaku-1",
         "nwaku-compose-postgres-1"
     },  # ✅ Новая нода
-    "Tashi": {"tashi-depin-node"},
+    "Tashi": {"tashi-depin-worker"},
     "Arcium": {"arx-node"},
     "Cysic_Mult": {"verifier_1", "verifier_2"},
     "Multiple_Mult": {"multiple-node-1", "multiple-node-2"},
