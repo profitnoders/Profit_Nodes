@@ -232,17 +232,6 @@ if [ -n "$MODEL_NAME" ]; then
 else
     echo_green ">> Using default model from config"
 fi
-
-echo -en $GREEN_TEXT
-read -p ">> Would you like your model to participate in the AI Prediction Market? [Y/n] " yn
-if [ "$yn" = "n" ] || [ "$yn" = "N" ]; then
-    PRG_GAME=false
-    echo_green ">> Playing PRG game: false"
-else
-    PRG_GAME=true
-    echo_green ">> Playing PRG game: true"
-fi
-echo -en $RESET_TEXT
 # ----------------------------------------------
 
 #logout to prevent weird env issues, if it fails unset and try again
