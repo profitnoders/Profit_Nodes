@@ -71,7 +71,7 @@ load_config(){
 # ================== интерактив ==================
 select_model(){
   echo ">> Модель:"
-  echo "   [1] Gensyn/Qwen2.5-0.5B-Instruct (по умолчанию)"
+  echo "   [1] Qwen/Qwen2.5-Coder-0.5B-Instruct (по умолчанию)"
   echo "   [2] deepseek-ai/deepseek-coder-1.3b-instruct       ⚠️ требовательная"
   echo "   [3] Qwen/Qwen2.5-Coder-1.5B-Instruct   ⚠️ требовательная"
   read -r -p "Введите 1–5: " c; c="${c:-1}"
