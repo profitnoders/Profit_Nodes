@@ -76,8 +76,8 @@ select_model(){
   echo "   [3] Qwen/Qwen2.5-Coder-1.5B-Instruct   ⚠️ требовательная"
   read -r -p "Введите 1–5: " c; c="${c:-1}"
   case "$c" in
-    2) MODEL_NAME="nvidia/AceInstruct-1.5B" ;;
-    3) MODEL_NAME="deepseek-ai/deepseek-coder-1.3b-instruct " ;;
+    2) MODEL_NAME="deepseek-ai/deepseek-coder-1.3b-instruct " ;;
+    3) MODEL_NAME="Qwen/Qwen2.5-Coder-1.5B-Instruct " ;;
     *) MODEL_NAME="Qwen/Qwen2.5-Coder-0.5B-Instruct" ;;
   esac
   export MODEL_NAME
