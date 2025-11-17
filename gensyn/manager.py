@@ -8,7 +8,6 @@ import re
 from collections import defaultdict
 
 import ollama
-
 from hivemind import DHT
 
 from genrl.blockchain import SwarmCoordinator
@@ -27,7 +26,7 @@ from huggingface_hub import login, whoami
 from code_gen_exp.src.utils.name_utils import get_name_from_peer_id
 
 
-# приглушаем лишние логи hivemind
+# приглушаем шумные логи hivemind
 for _name in [
     "hivemind",
     "hivemind.dht",
@@ -61,11 +60,15 @@ class SwarmGameManager(BaseGameManager, DefaultGameManagerMixin):
         initial_peers = coordinator.get_bootnodes()
         communication_kwargs["initial_peers"] = initial_peers
         get_logger().info(f"bootnodes: {initial_peers}")
+
         rewards_ollama_model = kwargs.get(
             "rewards_ollama_model", "qwen2.5-coder:1.5b-instruct"
         )
 
         communication = HivemindBackend(**communication_kwargs)
+
+        # по умолчанию считаем, что p2pd локальный (мы его владелец)
+        self._external_p2pd = False
 
         super().__init__(
             max_stage=max_stage,
@@ -136,7 +139,13 @@ class SwarmGameManager(BaseGameManager, DefaultGameManagerMixin):
     # ---------- helpers для DHT/p2pd ----------
 
     def is_p2pd_alive(self) -> bool:
-        """Проверяем, жив ли p2pd: существует ли control socket."""
+        """Проверяем, жив ли p2pd: существует ли control socket.
+        Для внешнего p2pd эту проверку не делаем.
+        """
+        # если мы подключены к чужому демону, контрольный сокет не наш – не трогаем его
+        if getattr(self, "_external_p2pd", False):
+            return True
+
         try:
             p2p = self.communication.dht._p2p
             control_path = p2p.daemon.control_path
@@ -145,9 +154,8 @@ class SwarmGameManager(BaseGameManager, DefaultGameManagerMixin):
             return False
 
     def find_existing_p2pd(self):
-        """Попробовать найти порты уже запущенного p2pd по ss."""
+        """Попробовать найти порты уже запущенного p2pd по ss (tcp)."""
         try:
-            # TCP
             result_tcp = subprocess.run(
                 ["ss", "-tlpn"], capture_output=True, text=True, check=False
             )
@@ -167,7 +175,9 @@ class SwarmGameManager(BaseGameManager, DefaultGameManagerMixin):
         except Exception:
             return None
 
-    def _reconnect_dht(self, reconnect_attempts, max_reconnect_attempts, check_interval):
+    def _reconnect_dht(
+        self, reconnect_attempts: int, max_reconnect_attempts: int, check_interval: float
+    ):
         """Пытаемся пересоздать DHT (и при необходимости p2pd)."""
         if reconnect_attempts >= max_reconnect_attempts:
             return reconnect_attempts, False
@@ -181,11 +191,13 @@ class SwarmGameManager(BaseGameManager, DefaultGameManagerMixin):
                 host_maddrs = existing_maddrs
                 client_mode = True
                 start = False
+                external = True  # подключаемся к внешнему демону
             else:
                 get_logger().info("No existing p2pd found, starting a new one...")
                 host_maddrs = ["/ip4/0.0.0.0/tcp/0"]
                 client_mode = False
                 start = True
+                external = False  # поднимаем свой локальный демон
 
             new_dht = DHT(
                 start=start,
@@ -198,6 +210,7 @@ class SwarmGameManager(BaseGameManager, DefaultGameManagerMixin):
             # даём чуть времени на поднятие p2pd
             time.sleep(5)
             self.communication.dht = new_dht
+            self._external_p2pd = external
             get_logger().info("Successfully reconnected DHT/p2pd")
             return 0, True
         except Exception as e:
@@ -339,11 +352,14 @@ class SwarmGameManager(BaseGameManager, DefaultGameManagerMixin):
     # ---------- main loop blocking with авто-реконнектом ----------
 
     def agent_block(
-        self, check_interval: float = 5.0, log_timeout: float = 10.0, max_check_interval: float = 60.0 * 15
+        self,
+        check_interval: float = 5.0,
+        log_timeout: float = 10.0,
+        max_check_interval: float = 60.0 * 15,
     ):
         start_time = time.monotonic()
         fetch_log_time = start_time
-        check_backoff = check_interval  # Exponential backoff for already finished rounds.
+        check_backoff = check_interval  # Exponential backoff for finished rounds.
         reconnect_attempts = 0
         max_reconnect_attempts = 3
 
