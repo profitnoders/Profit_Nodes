@@ -36,7 +36,7 @@ NODE_PROCESSES = {
     "Dill Light Validator": "dill/light_node/data/beacondata",
     "Dill Full Validator": "dill/full_node/data/beacondata",
     "Gaia": "gaianet",
-    "Gensyn": "python -m rgym_exp.runner.swarm_launcher",
+    "Gensyn": "python -m code_gen_exp.runner.swarm_launcher",
     "Cysic_Prover": "./prover",
     "Inference": "inference-launcher",
     "Nexus": "./nexus-network",
