@@ -11,7 +11,7 @@ CONFIG_FILE="$SCRIPT_DIR/.autorun_gensyn.conf"
 mkdir -p "$LOG_DIR"
 
 # Мониторим по этим шаблонам (живость)
-CMD_PATTERN="python -m rgym_exp.runner.swarm_launcher"
+CMD_PATTERN="python -m code_gen_exp.runner.swarm_launcher"
 SELF_PATTERN="$RUN_SCRIPT"
 
 CHECK_INTERVAL=60             # период проверки
