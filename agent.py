@@ -43,10 +43,12 @@ NODE_PROCESSES = {
     "Nous Bot": "nousbot",
     "OpenMind Bot": "openmindbot"
 }
+
 NODE_SCREENS = {
     "Dria": "dria_node",
     "Cysic_Prover": "prover"
 }
+
 NODE_DOCKER_CONTAINERS = {
     "Ritual": {"hello-world", "infernet-anvil", "infernet-fluentbit", "infernet-redis", "infernet-node"},
     "Biconomy": {"mee-node-deployment-node-1", "mee-node-deployment-redis-1"},
@@ -67,7 +69,8 @@ NODE_DOCKER_CONTAINERS = {
     "Cysic_Mult": {"verifier_1", "verifier_2"},
     "Multiple_Mult": {"multiple-node-1", "multiple-node-2"},
     "Dria_Mult": {"dria_node_1", "dria_node_2"},
-    "Titan_Mult": {"titan-node-1", "titan-node-2", "titan-node-3", "titan-node-4", "titan-node-5"}
+    "Titan_Mult": {"titan-node-1", "titan-node-2", "titan-node-3", "titan-node-4", "titan-node-5"},
+    "Blockcast": {"beacond","control_proxy","blockcastd"}
 }
 
 NODE_DOCKER_IMAGES = {
