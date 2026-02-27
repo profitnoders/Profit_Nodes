@@ -43,17 +43,21 @@ def send_prompt(prompt: str, api_key: str) -> str:
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.7,
         "max_tokens": 512,
-        "max_completion_tokens": 512,
     }
 
     try:
         r = requests.post(api_url, headers=headers, json=payload, timeout=60)
-        r.raise_for_status()
+
+        if not r.ok:
+            # покажем, что именно вернул сервер
+            return f"[❌ {provider}/{model}] HTTP {r.status_code} | {r.text[:500]}"
+
         data = r.json()
         answer = data["choices"][0]["message"]["content"]
         return f"[{provider}/{model}] {answer}"
+
     except Exception as e:
-        return f"[❌ {provider}/{model}] {e}"
+        return f"[❌ {provider}/{model}] {type(e).__name__}: {e}"
         
 def worker_loop(api_key: str, index: int):
     prompt_id = 1
