@@ -1,0 +1,13 @@
+services:
+  titan-fil-agent:
+    build: .
+    container_name: titan-fil-agent
+    restart: always
+    env_file:
+      - .env
+    environment:
+ 
+      SERVER_URL: "https://fil-agent-server-api.titannet.io"
+      WORKDIR: "/data"
+    volumes:
+      - ./data:/data
