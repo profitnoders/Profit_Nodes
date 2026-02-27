@@ -27,6 +27,25 @@ def log(text, prefix=""):
     now = datetime.now(MSK).strftime('%Y-%m-%d %H:%M:%S')
     print(f"[{now}] {prefix}{text}")
 
+def build_payload(provider: str, model: str, prompt: str) -> dict:
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+    }
+
+    # По умолчанию (большинство моделей)
+    payload["max_tokens"] = 512
+    payload["temperature"] = 0.7
+
+    # Особые правила для openai/gpt-5-mini (и часто для всей линейки gpt-5*)
+    if provider == "openai" and model.startswith("gpt-5"):
+        payload.pop("max_tokens", None)
+        payload["max_completion_tokens"] = 512
+        payload.pop("temperature", None)  # temperature не поддерживается -> убрать
+
+    return payload
+
+
 def send_prompt(prompt: str, api_key: str) -> str:
     model_config = random.choice(MODELS)
     provider = model_config["provider"]
@@ -38,24 +57,14 @@ def send_prompt(prompt: str, api_key: str) -> str:
         "Content-Type": "application/json",
     }
 
-    payload = {
-        "model": model,
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.7,
-        "max_tokens": 512,
-    }
+    payload = build_payload(provider, model, prompt)
 
     try:
         r = requests.post(api_url, headers=headers, json=payload, timeout=60)
-
         if not r.ok:
-            # покажем, что именно вернул сервер
             return f"[❌ {provider}/{model}] HTTP {r.status_code} | {r.text[:500]}"
-
         data = r.json()
-        answer = data["choices"][0]["message"]["content"]
-        return f"[{provider}/{model}] {answer}"
-
+        return f"[{provider}/{model}] {data['choices'][0]['message']['content']}"
     except Exception as e:
         return f"[❌ {provider}/{model}] {type(e).__name__}: {e}"
         
