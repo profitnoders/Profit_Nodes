@@ -28,31 +28,33 @@ def log(text, prefix=""):
     print(f"[{now}] {prefix}{text}")
 
 def send_prompt(prompt: str, api_key: str) -> str:
-    # Выбираем случайную модель для каждого запроса
     model_config = random.choice(MODELS)
     provider = model_config["provider"]
     model = model_config["model"]
     api_url = f"https://api.openmind.org/api/core/{provider}/chat/completions"
-    
+
     headers = {
-        "x-api-key": api_key,
-        "Content-Type": "application/json"
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
     }
+
     payload = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.7,
-        "max_tokens": 512
+        "max_tokens": 512,
+        "max_completion_tokens": 512,
     }
 
     try:
-        response = requests.post(api_url, headers=headers, json=payload, timeout=60)
-        response.raise_for_status()
-        answer = response.json()['choices'][0]['message']['content']
+        r = requests.post(api_url, headers=headers, json=payload, timeout=60)
+        r.raise_for_status()
+        data = r.json()
+        answer = data["choices"][0]["message"]["content"]
         return f"[{provider}/{model}] {answer}"
     except Exception as e:
         return f"[❌ {provider}/{model}] {e}"
-
+        
 def worker_loop(api_key: str, index: int):
     prompt_id = 1
     prefix = f"🔑 Ключ №{index + 1} | "
