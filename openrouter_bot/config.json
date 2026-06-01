@@ -1,16 +1,15 @@
 {
   "_comment_models": "Список проверенных рабочих моделей на OpenRouter",
   "models": [
-    "openai/gpt-3.5-turbo",
-    "openai/gpt-4o",
-    "openai/gpt-4o-mini",
-    "openai/gpt-oss-120b",
-    "openai/gpt-5-chat",
-    "meta-llama/llama-3-70b-instruct",
-    "google/gemini-pro-1.5",
-    "google/gemini-flash-1.5",
-    "mistralai/mistral-7b-instruct",
-    "mistralai/mistral-nemo"
+      "openai/gpt-4o",
+      "openai/gpt-4o-mini",
+      "openai/gpt-oss-120b",
+      "openai/gpt-5.3-chat",
+      "meta-llama/llama-3.3-70b-instruct",
+      "google/gemini-2.5-flash",
+      "google/gemini-2.5-pro",
+      "mistralai/mistral-7b-instruct-v0.3",
+      "mistralai/mistral-nemo"
   ],
 
   "_comment_min_delay": "Минимальная задержка между промтами (в секундах)",
